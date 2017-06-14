@@ -27,7 +27,7 @@ exports.ChatzError = function(status, key, message, cause) {
 };
 util.inherits(this.ChatzError, Error);
 
-exports.serviceError = function(key, message, cause) {
+exports.chatzError = function(key, message, cause) {
   return new this.ChatzError(400, key, message, cause);
 };
 

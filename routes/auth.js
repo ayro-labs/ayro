@@ -34,10 +34,14 @@ module.exports = function(router, app) {
   };
 
   let authenticateCustomer = function(req, res, next) {
-    projectService.getProjectByToken(req.body.project_token).then(function(project) {
-      return customerService.saveCustomer(project, req.body.user, req.body.device);
+    projectService.getProjectByToken(req.body.project_token).bind({}).then(function(project) {
+      customerService.assignCustomerUid(req.body.user, req.body.device);
+      return customerService.saveCustomer(project, req.body.user);
     }).then(function(customer) {
-      return createSession(req, {customer: customer.toJSON()});
+      this.customer = customer;
+      return customerService.saveDevice(customer, req.body.device);
+    }).then(function(device) {
+      return createSession(req, {customer: this.customer.toJSON()});
     }).then(function(token) {
       res.json(token);
     }).catch(function(err) {

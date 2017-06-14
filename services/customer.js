@@ -1,46 +1,70 @@
 'use strict';
 
 let Customer = require('../models').Customer,
+    Device   = require('../models').Device,
+    errors   = require('../utils/errors'),
     Promise  = require('bluebird'),
     _        = require('lodash'),
     $        = this;
 
-exports.getCustomer = function(project, user, device) {
-  return Promise.resolve().then(function() {
-    return Customer.findOne({uid: user.uid || device.uid, project: project._id}).exec();
-  });
+exports.assignCustomerUid = function(userData, deviceData) {
+  userData.identified = userData.uid ? true : false;
+  userData.uid = userData.uid || deviceData.uid;
 };
 
-exports.createCustomer = function(project, user, device) {
+exports.createCustomer = function(project, data) {
   return Promise.resolve().then(function() {
-    let customer = new Customer(user);
-    customer.set('project', project._id);
-    customer.set('uid', user.uid || device.uid);
-    customer.set('identified', user.uid ? true : false);
+    if (!data.uid) {
+      throw errors.chatzError('customer.uid.required', 'Customer unique id is required');
+    }
+    let customer = new Customer(data);
+    customer.set('project', project);
     customer.set('registration_date', new Date());
-    device.registration_date = new Date();
-    customer.devices.push(device);
     return customer.save();
   });
 };
 
-exports.updateCustomer = function(customer, user, device) {
-  return Promise.resolve().then(function() {
-    _.forIn(user, function(value, key) {
-      customer.set(key, value);
-    });
-    customer.set('uid', user.uid || device.uid);
-    customer.set('identified', user.uid ? true : false);
-    return customer.save();
-  });
+exports.updateCustomer = function(customer, data) {
+  return Customer.findByIdAndUpdate(customer._id, data, {new: true});
 };
 
-exports.saveCustomer = function(project, user, device) {
-  return $.getCustomer(project, user, device).then(function(customer) {
+exports.saveCustomer = function(project, data) {
+  return $.getCustomer(project, data).then(function(customer) {
     if (!customer) {
-      return $.createCustomer(project, user, device);
+      return $.createCustomer(project, data);
     } else {
-      return $.updateCustomer(customer, user, device);
+      return $.updateCustomer(customer, data);
     }
   });
+};
+
+exports.getCustomer = function(project, uid) {
+  return Customer.findOne({project: project._id, uid: uid}).exec();
+};
+
+exports.createDevice = function(customer, data) {
+  return Promise.resolve().then(function() {
+    let device = new Device(data);
+    device.set('customer', customer);
+    device.set('registration_date', new Date());
+    return device.save();
+  });
+};
+
+exports.updateDevice = function(device, data) {
+  return Device.findByIdAndUpdate(device._id, data, {new: true});
+};
+
+exports.saveDevice = function(customer, data) {
+  return $.getDevice(customer, data).then(function(customer) {
+    if (!device) {
+      return $.createDevice(customer, data);
+    } else {
+      return $.updateDevice(device, data);
+    }
+  });
+};
+
+exports.getDevice = function(customer, uid) {
+  return Device.findOne({customer: customer._id, uid: uid}).exec();
 };
