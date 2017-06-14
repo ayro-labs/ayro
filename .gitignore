@@ -1,8 +1,5 @@
-/npm-debug.log
-/newrelic_agent.log
-/closic.log
-/config.properties
+npm-debug.log
+newrelic_agent.log
+chatz.log
+config.properties
 node_modules
-public/media
-public/logs
-services/emails/templates/inline
