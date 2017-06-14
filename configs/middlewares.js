@@ -1,8 +1,8 @@
 'use strict';
 
-let Account  = require('../models').Account,
-    Customer = require('../models').Customer,
-    logger   = require('../utils/logger');
+let Account = require('../models').Account,
+    User    = require('../models').User,
+    logger  = require('../utils/logger');
 
 exports.configure = function(app) {
 
@@ -17,11 +17,11 @@ exports.configure = function(app) {
     next();
   });
 
-  // Sets the session customer as a request attribute
+  // Sets the session user as a request attribute
   app.use(function(req, res, next) {
-    if (req.session.customer) {
-      req.customer = new Customer(req.session.customer);
-      logger.debug('%s %s User %s', req.method, req.path, req.customer._id);
+    if (req.session.user) {
+      req.user = new User(req.session.user);
+      logger.debug('%s %s User %s', req.method, req.path, req.user._id);
     }
     next();
   });

@@ -1,7 +1,7 @@
 'use strict';
 
-exports.isCustomerAuthenticated = function(req, res, next) {
-  if (req.session.customer) {
+exports.isUserAuthenticated = function(req, res, next) {
+  if (req.session.user) {
     next();
   } else {
     res.sendStatus(401);

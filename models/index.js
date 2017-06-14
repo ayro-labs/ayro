@@ -54,7 +54,7 @@ let DeviceInfo = new Schema({
 });
 
 let Device = new Schema({
-  customer: {type: ObjectId, ref: 'Customer'},
+  user: {type: ObjectId, ref: 'User'},
   uid: String,
   platform: String,
   app_id: String,
@@ -64,7 +64,7 @@ let Device = new Schema({
   registration_date: Date
 });
 
-let Customer = new Schema({
+let User = new Schema({
   project: {type: ObjectId, ref: 'Project'},
   uid: String,
   first_name: String,
@@ -75,10 +75,10 @@ let Customer = new Schema({
   sign_up_date: Date,
   registration_date: Date
 });
-Customer.virtual('devices', {
+User.virtual('devices', {
   ref: 'Device',
   localField: '_id',
-  foreignField: 'customer'
+  foreignField: 'user'
 });
 
 exports.Account = mongoose.model('Account', Account);
@@ -87,4 +87,4 @@ exports.Project = mongoose.model('Project', Project);
 exports.ProjectSecretKey = mongoose.model('ProjectSecretKey', ProjectSecretKey);
 exports.Integration = mongoose.model('Integration', Integration);
 exports.Device = mongoose.model('Device', Device);
-exports.Customer = mongoose.model('Customer', Customer);
+exports.User = mongoose.model('User', User);

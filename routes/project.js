@@ -1,6 +1,6 @@
 'use strict';
 
-let isAccountAuthenticated = require('./utils').isAccountAuthenticated,
+let isAccountAuthenticated = require('../utils/middlewares').isAccountAuthenticated,
     projectService         = require('../services/project'),
     logger                 = require('../utils/logger');
 

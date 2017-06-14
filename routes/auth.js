@@ -1,11 +1,11 @@
 'use strict';
 
-let accountService  = require('../services/account'),
-    projectService  = require('../services/project'),
-    customerService = require('../services/customer'),
-    logger          = require('../utils/logger'),
-    errors          = require('../utils/errors'),
-    _               = require('lodash');
+let accountService = require('../services/account'),
+    projectService = require('../services/project'),
+    userService    = require('../services/user'),
+    logger         = require('../utils/logger'),
+    errors         = require('../utils/errors'),
+    _              = require('lodash');
 
 module.exports = function(router, app) {
 
@@ -33,15 +33,15 @@ module.exports = function(router, app) {
     });
   };
 
-  let authenticateCustomer = function(req, res, next) {
+  let authenticateUser = function(req, res, next) {
     projectService.getProjectByToken(req.body.project_token).bind({}).then(function(project) {
-      customerService.assignCustomerUid(req.body.user, req.body.device);
-      return customerService.saveCustomer(project, req.body.user);
-    }).then(function(customer) {
-      this.customer = customer;
-      return customerService.saveDevice(customer, req.body.device);
+      userService.assignUserUid(req.body.user, req.body.device);
+      return userService.saveUser(project, req.body.user);
+    }).then(function(user) {
+      this.user = user;
+      return userService.saveDevice(user, req.body.device);
     }).then(function(device) {
-      return createSession(req, {customer: this.customer.toJSON()});
+      return createSession(req, {user: this.user.toJSON()});
     }).then(function(token) {
       res.json(token);
     }).catch(function(err) {
@@ -51,7 +51,7 @@ module.exports = function(router, app) {
   };
 
   router.post('/accounts', authenticateAccount);
-  router.post('/customers', authenticateCustomer);
+  router.post('/users', authenticateUser);
 
   app.use('/auth', router);
 
