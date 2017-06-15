@@ -10,6 +10,7 @@ exports.configure = function(express, app) {
   require('../routes/account')(express.Router(), app);
   require('../routes/project')(express.Router(), app);
   require('../routes/integration')(express.Router(), app);
+  require('../routes/user')(express.Router(), app);
   require('../routes/chat')(express.Router(), app);
 
 };

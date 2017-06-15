@@ -13,6 +13,7 @@ exports.assignUserUid = function(userData, deviceData) {
 };
 
 exports.createUser = function(project, data) {
+  console.log(project, data)
   return Promise.resolve().then(function() {
     if (!data.uid) {
       throw errors.chatzError('user.uid.required', 'User unique id is required');
@@ -29,7 +30,7 @@ exports.updateUser = function(user, data) {
 };
 
 exports.saveUser = function(project, data) {
-  return $.getUser(project, data).then(function(user) {
+  return $.getUser(project, data.uid).then(function(user) {
     if (!user) {
       return $.createUser(project, data);
     } else {
@@ -56,7 +57,7 @@ exports.updateDevice = function(device, data) {
 };
 
 exports.saveDevice = function(user, data) {
-  return $.getDevice(user, data).then(function(user) {
+  return $.getDevice(user, data.uid).then(function(device) {
     if (!device) {
       return $.createDevice(user, data);
     } else {

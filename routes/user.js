@@ -15,8 +15,18 @@ module.exports = function(router, app) {
     });
   };
 
-  router.post('/', isUserAuthenticated, updateUser);
+  let updateDevice = function(req, res, next) {
+    userService.updateDevice(req.user, req.body).then(function() {
+      res.json();
+    }).catch(function(err) {
+      logger.error(err);
+      errors.respondWithError(res, err);
+    });
+  };
 
-  app.use('/projects', router);
+  router.put('/', isUserAuthenticated, updateUser);
+  router.put('/devices', isUserAuthenticated, updateDevice);
+
+  app.use('/users', router);
 
 };
