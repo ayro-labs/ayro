@@ -1,9 +1,9 @@
 'use strict';
 
 let settings = require('../configs/settings'),
-    util     = require('util');
+    util = require('util');
 
-exports.ChatzError = function(status, key, message, cause) {
+let ChatzError = function(status, key, message, cause) {
   if (!cause && ChatzError.super_.captureStackTrace) {
     ChatzError.super_.captureStackTrace(this, this.constructor);
   } else if (cause) {
@@ -25,22 +25,22 @@ exports.ChatzError = function(status, key, message, cause) {
     return this.message;
   };
 };
-util.inherits(this.ChatzError, Error);
+util.inherits(ChatzError, Error);
 
 exports.chatzError = function(key, message, cause) {
-  return new this.ChatzError(400, key, message, cause);
+  return new ChatzError(400, key, message, cause);
 };
 
 exports.notFoundError = function(key, message, cause) {
-  return new this.ChatzError(404, key, message, cause);
+  return new ChatzError(404, key, message, cause);
 };
 
 exports.internalError = function(message, cause) {
-  return new this.ChatzError(500, 'internalError', message, cause);
+  return new ChatzError(500, 'internalError', message, cause);
 };
 
 exports.respondWithError = function(res, err) {
-  if (err instanceof this.ChatzError) {
+  if (err instanceof ChatzError) {
     res.status(err.status).json(err.json())
   } else {
     let internal = this.internalError(err.message, err);

@@ -1,17 +1,17 @@
 'use strict';
 
-let express      = require('express'),
-    morgan       = require('morgan'),
-    compression  = require('compression'),
+let express = require('express'),
+    morgan = require('morgan'),
+    compression = require('compression'),
     cookieParser = require('cookie-parser'),
-    bodyParser   = require('body-parser'),
-    redis        = require('redis'),
-    path         = require('path'),
-    session      = require('jwt-redis-session'),
-    routes       = require('./configs/routes'),
-    middlewares  = require('./configs/middlewares'),
-    settings     = require('./configs/settings'),
-    logger       = require('./utils/logger'),
+    bodyParser = require('body-parser'),
+    redis = require('redis'),
+    path = require('path'),
+    session = require('jwt-redis-session'),
+    routes = require('./configs/routes'),
+    middlewares = require('./configs/middlewares'),
+    settings = require('./configs/settings'),
+    logger = require('./utils/logger'),
     serverLogger = require('./utils/logger-server');
 
 // Parse string to date when call JSON.parse

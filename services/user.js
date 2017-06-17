@@ -1,11 +1,12 @@
 'use strict';
 
-let User    = require('../models').User,
-    Device  = require('../models').Device,
-    errors  = require('../utils/errors'),
+let User = require('../models').User,
+    Device = require('../models').Device,
+    errors = require('../utils/errors'),
+    modelUtils = require('../utils/model'),
     Promise = require('bluebird'),
-    _       = require('lodash'),
-    $       = this;
+    _ = require('lodash'),
+    $ = this;
 
 exports.assignUserUid = function(userData, deviceData) {
   userData.identified = userData.uid ? true : false;
@@ -13,20 +14,20 @@ exports.assignUserUid = function(userData, deviceData) {
 };
 
 exports.createUser = function(project, data) {
-  console.log(project, data)
   return Promise.resolve().then(function() {
     if (!data.uid) {
       throw errors.chatzError('user.uid.required', 'User unique id is required');
     }
+    delete data._id;
     let user = new User(data);
     user.set('project', project);
     user.set('registration_date', new Date());
-    return user.save();
+    return modelUtils.toObject(user.save());
   });
 };
 
 exports.updateUser = function(user, data) {
-  return User.findByIdAndUpdate(user._id, data, {new: true});
+  return User.findByIdAndUpdate(user._id, data, {new: true}).lean().exec();
 };
 
 exports.saveUser = function(project, data) {
@@ -40,20 +41,24 @@ exports.saveUser = function(project, data) {
 };
 
 exports.getUser = function(project, uid) {
-  return User.findOne({project: project._id, uid: uid}).exec();
+  return User.findOne({project: project._id, uid: uid}).lean().exec();
 };
 
 exports.createDevice = function(user, data) {
   return Promise.resolve().then(function() {
+    if (!data.uid) {
+      throw errors.chatzError('device.uid.required', 'Device unique id is required');
+    }
+    delete data._id;
     let device = new Device(data);
     device.set('user', user);
     device.set('registration_date', new Date());
-    return device.save();
+    return modelUtils.toObject(device.save());
   });
 };
 
 exports.updateDevice = function(device, data) {
-  return Device.findByIdAndUpdate(device._id, data, {new: true});
+  return Device.findByIdAndUpdate(device._id, data, {new: true}).lean().exec();
 };
 
 exports.saveDevice = function(user, data) {
@@ -67,5 +72,5 @@ exports.saveDevice = function(user, data) {
 };
 
 exports.getDevice = function(user, uid) {
-  return Device.findOne({user: user._id, uid: uid}).exec();
+  return Device.findOne({user: user._id, uid: uid}).lean().exec();
 };

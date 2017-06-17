@@ -1,8 +1,9 @@
 'use strict';
 
-let isUserAuthenticated = require('../utils/middlewares').isUserAuthenticated,
-    userService         = require('../services/user'),
-    logger              = require('../utils/logger');
+let userService = require('../services/user'),
+    isUserAuthenticated = require('../utils/middlewares').isUserAuthenticated,
+    logger = require('../utils/logger'),
+    errors = require('../utils/errors');
 
 module.exports = function(router, app) {
 
@@ -16,7 +17,10 @@ module.exports = function(router, app) {
   };
 
   let updateDevice = function(req, res, next) {
-    userService.updateDevice(req.user, req.body).then(function() {
+    let data = req.body;
+    userService.getDevice(req.user, data.uid).then(function(device) {
+      return userService.updateDevice(device, data);
+    }).then(function(device) {
       res.json();
     }).catch(function(err) {
       logger.error(err);

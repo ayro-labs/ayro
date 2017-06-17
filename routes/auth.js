@@ -2,10 +2,10 @@
 
 let accountService = require('../services/account'),
     projectService = require('../services/project'),
-    userService    = require('../services/user'),
-    logger         = require('../utils/logger'),
-    errors         = require('../utils/errors'),
-    _              = require('lodash');
+    userService = require('../services/user'),
+    logger = require('../utils/logger'),
+    errors = require('../utils/errors'),
+    _ = require('lodash');
 
 module.exports = function(router, app) {
 
@@ -24,7 +24,7 @@ module.exports = function(router, app) {
 
   let authenticateAccount = function(req, res, next) {
     accountService.authenticate(req.body.email, req.body.password).then(function(account) {
-      return createSession(req, {account: account.toJSON()});
+      return createSession(req, {account: account});
     }).then(function(token) {
       res.json(token);
     }).catch(function(err) {
@@ -41,7 +41,7 @@ module.exports = function(router, app) {
       this.user = user;
       return userService.saveDevice(user, req.body.device);
     }).then(function(device) {
-      return createSession(req, {user: this.user.toJSON()});
+      return createSession(req, {user: this.user});
     }).then(function(token) {
       res.json(token);
     }).catch(function(err) {

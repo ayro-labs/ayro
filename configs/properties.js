@@ -1,9 +1,9 @@
 'use strict';
 
 let properties = require('properties'),
-    path       = require('path'),
-    parse      = require('deasync')(properties.parse),
-    config     = parse(path.join(__dirname, '../config.properties'), {path: true, sections: true});
+    path = require('path'),
+    parse = require('deasync')(properties.parse),
+    config = parse(path.join(__dirname, '../config.properties'), {path: true, sections: true});
 
 exports.getValue = function(key, defaultValue) {
   let value = config;

@@ -1,9 +1,10 @@
 'use strict';
 
-let Project          = require('../models').Project,
+let Project = require('../models').Project,
     ProjectSecretKey = require('../models').ProjectSecretKey,
-    cryptography     = require('../utils/cryptography'),
-    Promise          = require('bluebird');
+    cryptography = require('../utils/cryptography'),
+    modelUtils = require('../utils/model'),
+    Promise = require('bluebird');
 
 exports.createProject = function(account, name) {
   return cryptography.generateId().then(function(token) {
@@ -13,29 +14,18 @@ exports.createProject = function(account, name) {
       token: token,
       registration_date: new Date()
     });
-    return project.save();
+    return modelUtils.toObject(project.save());
   });
 };
 
 exports.getProject = function(id) {
-  return Project.findById(id).exec();
+  return Project.findById(id).lean().exec();
 };
 
 exports.getProjectByToken = function(token) {
-  return Project.findOne({token: token}).exec();
+  return Project.findOne({token: token}).lean().exec();
 };
 
-exports.createSecretKey = function(account, project) {
-  return cryptography.generateId().then(function(secret) {
-    let secretKey = new ProjectSecretKey({
-      project: project._id,
-      secret: secret,
-      registration_date: new Date()
-    });
-    return secretKey.save();
-  });
-};
-
-exports.removeSecretKey = function(account, secretKey) {
-  return ProjectSecretKey.findByIdAndRemove(secretKey._id).exec();
+exports.listProjects = function(account) {
+  return Project.find({account: account._id}).lean().exec();
 };

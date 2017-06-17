@@ -1,7 +1,7 @@
 'use strict';
 
 let properties = require('../configs/properties'),
-    winston    = require('winston');
+    winston = require('winston');
 
 let level = properties.getValue('app.debug', false) === true ? 'debug' : 'info';
 let logger = new (winston.Logger)({

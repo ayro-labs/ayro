@@ -1,8 +1,8 @@
 'use strict';
 
 let properties = require('./properties'),
-    logger     = require('../utils/logger'),
-    path       = require('path');
+    logger = require('../utils/logger'),
+    path = require('path');
 
 exports.env = properties.getValue('app.env', 'development');
 

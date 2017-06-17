@@ -1,8 +1,8 @@
 'use strict';
 
 let accountService = require('../services/account'),
-    logger         = require('../utils/logger'),
-    errors         = require('../utils/errors');
+    logger = require('../utils/logger'),
+    errors = require('../utils/errors');
 
 module.exports = function(router, app) {
 

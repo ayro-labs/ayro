@@ -1,10 +1,10 @@
 'use strict';
 
 let settings = require('../configs/settings'),
-    Promise  = require('bluebird'),
-    bcrypt   = require('bcrypt'),
-    crypto   = require('crypto'),
-    $        = this;
+    Promise = require('bluebird'),
+    bcrypt = require('bcrypt'),
+    crypto = require('crypto'),
+    $ = this;
 
 const ALGORITHM = 'aes-256-ctr';
 

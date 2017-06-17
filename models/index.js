@@ -2,7 +2,8 @@
 
 let settings = require('../configs/settings'),
     mongoose = require('mongoose'),
-    Promise  = require('bluebird');
+    Promise  = require('bluebird'),
+    _        = require('lodash');
 
 let Schema = mongoose.Schema;
 let ObjectId = Schema.Types.ObjectId;
@@ -26,23 +27,35 @@ let AccountSecretKey = new Schema({
   registration_date: Date
 });
 
+let Integration = new Schema({
+  project: {type: ObjectId, ref: 'Project'},
+  type: String,
+  channel: String,
+  configuration: Object,
+  registration_date: Date
+});
+
 let Project = new Schema({
   account: {type: ObjectId, ref: 'Account'},
   name: String,
   token: String,
+  integrations: [Integration],
   registration_date: Date
 });
+Project.methods.getIntegrationOfType = function(type) {
+  return this.integrations.find(function(integration) {
+    return integration.type === type;
+  })
+};
+Project.methods.listIntegrationsOfChannel = function(channel) {
+  return this.integrations.filter(function(integration) {
+    return integration.channel === channel;
+  })
+};
 
 let ProjectSecretKey = new Schema({
   project: {type: ObjectId, ref: 'Project'},
   secret: String,
-  registration_date: Date
-});
-
-let Integration = new Schema({
-  project: {type: ObjectId, ref: 'Project'},
-  type: String,
-  configuration: Object,
   registration_date: Date
 });
 
@@ -80,11 +93,15 @@ User.virtual('devices', {
   localField: '_id',
   foreignField: 'user'
 });
+User.methods.getDevice = function(platform) {
+  return this.devices.find(function(device) {
+    return device.platform === platform;
+  })
+};
 
 exports.Account = mongoose.model('Account', Account);
 exports.AccountSecretKey = mongoose.model('AccountSecretKey', AccountSecretKey);
 exports.Project = mongoose.model('Project', Project);
 exports.ProjectSecretKey = mongoose.model('ProjectSecretKey', ProjectSecretKey);
-exports.Integration = mongoose.model('Integration', Integration);
 exports.Device = mongoose.model('Device', Device);
 exports.User = mongoose.model('User', User);

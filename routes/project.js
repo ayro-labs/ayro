@@ -1,8 +1,9 @@
 'use strict';
 
-let isAccountAuthenticated = require('../utils/middlewares').isAccountAuthenticated,
-    projectService         = require('../services/project'),
-    logger                 = require('../utils/logger');
+let projectService = require('../services/project'),
+    isAccountAuthenticated = require('../utils/middlewares').isAccountAuthenticated,
+    logger = require('../utils/logger'),
+    errors = require('../utils/errors');
 
 module.exports = function(router, app) {
 
@@ -15,7 +16,17 @@ module.exports = function(router, app) {
     });
   };
 
+  let listProjects = function(req, res, next) {
+    projectService.listProjects(req.account).then(function(projects) {
+      res.json(projects);
+    }).catch(function(err) {
+      logger.error(err);
+      errors.respondWithError(res, err);
+    });
+  };
+
   router.post('/', isAccountAuthenticated, createProject);
+  router.get('/', isAccountAuthenticated, listProjects);
 
   app.use('/projects', router);
 
