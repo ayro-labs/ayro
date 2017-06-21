@@ -1,16 +1,11 @@
 'use strict';
 
 let User = require('../models').User,
-    android = require('./internals/android'),
-    ios = require('./internals/ios'),
-    slack = require('./internals/slack');
+    constants = require('../utils/constants'),
+    androidIntegration = require('./integrations/android'),
+    iosIntegration = require('./integrations/ios'),
+    slackIntegration = require('./integrations/slack');
 
-const INTEGRATION_ANDROID = 'android';
-const INTEGRATION_IOS = 'ios';
-const INTEGRATION_SLACK = 'slack';
-
-const PLATFORM_ANDROID = 'android';
-const PLATFORM_IOS = 'ios';
 const EVENT_CHAT_MESSAGE = 'chat_message';
 
 exports.postMessage = function(user, message) {
@@ -18,7 +13,7 @@ exports.postMessage = function(user, message) {
     if (user) {
       user.project.listIntegrationsOfChannel('business').forEach(function(integration) {
         switch (integration.type) {
-          case INTEGRATION_SLACK:
+          case constants.integrationTypes.SLACK:
             break;
         }
       });
@@ -31,18 +26,16 @@ exports.pushMessage = function(user, message) {
     if (user) {
       user.project.listIntegrationsOfChannel('user').forEach(function(integration) {
         switch (integration.type) {
-          case INTEGRATION_ANDROID:
-            let androidDevice = user.getDevice(PLATFORM_ANDROID);
-            if (androidDevice && androidDevice.push_token) {
-              let serverKey = integration.configuration.fcm.server_key;
-              return android.push(serverKey, androidDevice.push_token, EVENT_CHAT_MESSAGE, message);
+          case constants.integrationTypes.ANDROID:
+            let androidDevice = user.getDevice(constants.devicePlatforms.ANDROID);
+            if (androidDevice) {
+              androidIntegration.push(integration, androidDevice, EVENT_CHAT_MESSAGE, message);
             }
             break;
-          case INTEGRATION_IOS:
-            let iosDevice = user.getDevice(PLATFORM_IOS);
-            if (iosDevice && iosDevice.push_token) {
-              let serverKey = integration.configuration.fcm.server_key;
-              return ios.push(serverKey, iosDevice.push_token, EVENT_CHAT_MESSAGE, message);
+          case constants.integrationTypes.IOS:
+            let iosDevice = user.getDevice(constants.devicePlatforms.IOS);
+            if (iosDevice) {
+              iosIntegration.push(integration, androidDevice, EVENT_CHAT_MESSAGE, message);
             }
             break;
         }

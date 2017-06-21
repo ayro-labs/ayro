@@ -11,6 +11,7 @@
     "mocha": "3.4.2"
   },
   "dependencies": {
+    "@slack/client": "3.10.0",
     "bcrypt": "1.0.2",
     "bluebird": "3.5.0",
     "body-parser": "1.17.2",
@@ -22,11 +23,11 @@
     "json.date-extensions": "1.2.2",
     "jwt-redis-session": "1.0.5",
     "lodash": "4.17.4",
-    "mongoose": "4.10.5",
+    "mongoose": "4.10.7",
     "morgan": "1.8.2",
     "properties": "1.2.1",
     "redis": "2.7.1",
-    "slack-node": "0.1.8",
+    "restify": "4.3.0",
     "winston": "2.3.1"
   }
 }

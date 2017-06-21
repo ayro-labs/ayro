@@ -28,7 +28,6 @@ let AccountSecretKey = new Schema({
 });
 
 let Integration = new Schema({
-  project: {type: ObjectId, ref: 'Project'},
   type: String,
   channel: String,
   configuration: Object,

@@ -1,7 +1,6 @@
 'use strict';
 
 let projectService = require('../services/project'),
-    integrationService = require('../services/integration'),
     isAccountAuthenticated = require('../utils/middlewares').isAccountAuthenticated,
     logger = require('../utils/logger'),
     errors = require('../utils/errors');
@@ -28,7 +27,7 @@ module.exports = function(router, app) {
 
   let addWebsite = function(req, res, next) {
     let project = {_id: req.params.project};
-    integrationService.addWebsite(project, req.body).then(function(project) {
+    projectService.addWebsite(project, req.body).then(function(project) {
       res.json(project);
     }).catch(function(err) {
       logger.error(err);
@@ -38,7 +37,7 @@ module.exports = function(router, app) {
 
   let updateWebsite = function(req, res, next) {
     let project = {_id: req.params.project};
-    integrationService.updateWebsite(project, req.body).then(function(project) {
+    projectService.updateWebsite(project, req.body).then(function(project) {
       res.json(project);
     }).catch(function(err) {
       logger.error(err);
@@ -48,7 +47,7 @@ module.exports = function(router, app) {
 
   let removeWebsite = function(req, res, next) {
     let project = {_id: req.params.project};
-    integrationService.removeWebsite(project).then(function(project) {
+    projectService.removeWebsite(project).then(function(project) {
       res.json(project);
     }).catch(function(err) {
       logger.error(err);
@@ -58,7 +57,7 @@ module.exports = function(router, app) {
 
   let addAndroid = function(req, res, next) {
     let project = {_id: req.params.project};
-    integrationService.addAndroid(project, req.body).then(function(project) {
+    projectService.addAndroid(project, req.body).then(function(project) {
       res.json(project);
     }).catch(function(err) {
       logger.error(err);
@@ -68,7 +67,7 @@ module.exports = function(router, app) {
 
   let updateAndroid = function(req, res, next) {
     let project = {_id: req.params.project};
-    integrationService.updateAndroid(project, req.body).then(function(project) {
+    projectService.updateAndroid(project, req.body).then(function(project) {
       res.json(project);
     }).catch(function(err) {
       logger.error(err);
@@ -78,7 +77,7 @@ module.exports = function(router, app) {
 
   let removeAndroid = function(req, res, next) {
     let project = {_id: req.params.project};
-    integrationService.removeAndroid(project).then(function(project) {
+    projectService.removeAndroid(project).then(function(project) {
       res.json(project);
     }).catch(function(err) {
       logger.error(err);
@@ -88,7 +87,7 @@ module.exports = function(router, app) {
 
   let addIOS = function(req, res, next) {
     let project = {_id: req.params.project};
-    integrationService.addIOS(project, req.body).then(function(project) {
+    projectService.addIOS(project, req.body).then(function(project) {
       res.json(project);
     }).catch(function(err) {
       logger.error(err);
@@ -98,7 +97,7 @@ module.exports = function(router, app) {
 
   let updateIOS = function(req, res, next) {
     let project = {_id: req.params.project};
-    integrationService.updateIOS(project, req.body).then(function(project) {
+    projectService.updateIOS(project, req.body).then(function(project) {
       res.json(project);
     }).catch(function(err) {
       logger.error(err);
@@ -108,7 +107,7 @@ module.exports = function(router, app) {
 
   let removeIOS = function(req, res, next) {
     let project = {_id: req.params.project};
-    integrationService.removeIOS(project).then(function(project) {
+    projectService.removeIOS(project).then(function(project) {
       res.json(project);
     }).catch(function(err) {
       logger.error(err);
@@ -118,7 +117,7 @@ module.exports = function(router, app) {
 
   let addSlack = function(req, res, next) {
     let project = {_id: req.params.project};
-    integrationService.addSlack(project, req.body).then(function(project) {
+    projectService.addSlack(project, req.body.api_token).then(function(project) {
       res.json(project);
     }).catch(function(err) {
       logger.error(err);
@@ -128,7 +127,7 @@ module.exports = function(router, app) {
 
   let updateSlack = function(req, res, next) {
     let project = {_id: req.params.project};
-    integrationService.updateSlack(project, req.body).then(function(project) {
+    projectService.updateSlack(project, req.body).then(function(project) {
       res.json(project);
     }).catch(function(err) {
       logger.error(err);
@@ -138,7 +137,27 @@ module.exports = function(router, app) {
 
   let removeSlack = function(req, res, next) {
     let project = {_id: req.params.project};
-    integrationService.removeSlack(project).then(function(project) {
+    projectService.removeSlack(project).then(function(project) {
+      res.json(project);
+    }).catch(function(err) {
+      logger.error(err);
+      errors.respondWithError(res, err);
+    });
+  };
+
+  let listSlackChannels = function(req, res, next) {
+    let project = {_id: req.params.project};
+    projectService.listSlackChannels(project).then(function(project) {
+      res.json(project);
+    }).catch(function(err) {
+      logger.error(err);
+      errors.respondWithError(res, err);
+    });
+  };
+
+  let createSlackChannel = function(req, res, next) {
+    let project = {_id: req.params.project};
+    projectService.createSlackChannel(project, req.body.channel).then(function(project) {
       res.json(project);
     }).catch(function(err) {
       logger.error(err);
@@ -152,15 +171,20 @@ module.exports = function(router, app) {
   router.post('/:project/integrations/website', isAccountAuthenticated, addWebsite);
   router.put('/:project/integrations/website', isAccountAuthenticated, updateWebsite);
   router.delete('/:project/integrations/website', isAccountAuthenticated, removeWebsite);
+
   router.post('/:project/integrations/android', isAccountAuthenticated, addAndroid);
   router.put('/:project/integrations/android', isAccountAuthenticated, updateAndroid);
   router.delete('/:project/integrations/android', isAccountAuthenticated, removeAndroid);
+
   router.post('/:project/integrations/ios', isAccountAuthenticated, addIOS);
   router.put('/:project/integrations/ios', isAccountAuthenticated, updateIOS);
   router.delete('/:project/integrations/ios', isAccountAuthenticated, removeIOS);
+
   router.post('/:project/integrations/slack', isAccountAuthenticated, addSlack);
   router.put('/:project/integrations/slack', isAccountAuthenticated, updateSlack);
   router.delete('/:project/integrations/slack', isAccountAuthenticated, removeSlack);
+  router.get('/:project/integrations/slack/channels', isAccountAuthenticated, listSlackChannels);
+  router.post('/:project/integrations/slack/channels', isAccountAuthenticated, createSlackChannel);
 
   app.use('/projects', router);
 
