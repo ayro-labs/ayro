@@ -30,5 +30,11 @@ exports.redis = {
   password: properties.getValue('redis.password')
 };
 
+exports.slack = {
+  client_id: '4332799729.201066840038',
+  client_secret: '1d8e1127054e9577da4cc6e25b83e74e',
+  verification_token: 'tHYsNNTDP00nL2HlqhAdEraQ'
+};
+
 logger.info('Using %s environment settings', this.env);
 logger.info('Debug mode is %s', this.debug ? 'ON' : 'OFF');

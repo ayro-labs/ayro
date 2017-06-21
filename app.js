@@ -12,7 +12,7 @@ let express = require('express'),
     middlewares = require('./configs/middlewares'),
     settings = require('./configs/settings'),
     logger = require('./utils/logger'),
-    serverLogger = require('./utils/logger-server');
+    loggerServer = require('./utils/logger-server');
 
 // Parse string to date when call JSON.parse
 require('json.date-extensions');
@@ -28,7 +28,7 @@ app.use(compression());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
-app.use(morgan('tiny', {stream: serverLogger.stream}));
+app.use(morgan('tiny', {stream: loggerServer.stream}));
 app.use(express.static(app.get('public')));
 
 let redisClient = redis.createClient(settings.redis.port, settings.redis.host);

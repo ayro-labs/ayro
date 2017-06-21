@@ -3,7 +3,6 @@
 let _ = require('lodash');
 
 exports.toObject = function(object) {
-  console.log(typeof object);
   return object.then(function(model) {
     return model.toObject();
   });
