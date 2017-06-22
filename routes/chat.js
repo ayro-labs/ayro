@@ -1,6 +1,7 @@
 'use strict';
 
 let chatService = require('../services/chat'),
+    isUserAuthenticated = require('../utils/middlewares').isUserAuthenticated,
     logger = require('../utils/logger'),
     errors = require('../utils/errors');
 
@@ -25,7 +26,7 @@ module.exports = function(router, app) {
     });
   };
 
-  router.post('/', postMessage);
+  router.post('/', isUserAuthenticated, postMessage);
   router.post('/push', pushMessage);
 
   app.use('/chat', router);

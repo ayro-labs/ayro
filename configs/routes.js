@@ -6,12 +6,10 @@ exports.configure = function(express, app) {
 
   logger.info('Configuring routes');
 
-  let router = express.Router();
-
-  require('../routes/auth')(router, app);
-  require('../routes/account')(router, app);
-  require('../routes/project')(router, app);
-  require('../routes/user')(router, app);
-  require('../routes/chat')(router, app);
+  require('../routes/auth')(express.Router(), app);
+  require('../routes/account')(express.Router(), app);
+  require('../routes/project')(express.Router(), app);
+  require('../routes/user')(express.Router(), app);
+  require('../routes/chat')(express.Router(), app);
 
 };

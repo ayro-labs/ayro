@@ -1,14 +1,20 @@
 'use strict';
 
-let Project = require('../../models').Project,
+let projectCommons = require('../commons/project'),
     modelUtils = require('../../utils/model'),
-    errors = require('../../utils/errors');
+    errors = require('../../utils/errors'),
+    Project = require('../../models').Project;
+
+let getIntegration = function(project, type) {
+  let integration = project.getIntegrationOfType(type);
+  if (!integration) {
+    throw errors.notFoundError('integration.doesNotExist', 'Integration does not exist');
+  }
+  return integration;
+};
 
 exports.add = function(project, type, channel, configuration) {
-  return Project.findById(project._id).exec().then(function(project) {
-    if (!project) {
-      throw errors.notFoundError('project.doesNotExist', 'Project does not exist');
-    }
+  return projectCommons.getProject(project._id).then(function(project) {
     if (project.getIntegrationOfType(type)) {
       throw errors.chatzError('integration.alreadyExists', 'Integration already exists');
     }
@@ -23,29 +29,24 @@ exports.add = function(project, type, channel, configuration) {
 };
 
 exports.update = function(project, type, configuration) {
-  return Project.findById(project._id).exec().then(function(project) {
-    if (!project) {
-      throw errors.notFoundError('project.doesNotExist', 'Project does not exist');
-    }
-    let integration = project.getIntegrationOfType(type);
-    if (!integration) {
-      throw errors.notFoundError('integration.doesNotExist', 'Integration does not exist');
-    }
+  return projectCommons.getProject(project._id).then(function(project) {
+    let integration = getIntegration(project, type);
     integration.configuration = configuration;
     return modelUtils.toObject(project.save());
   });
 };
 
 exports.remove = function(project, type) {
-  return Project.findById(project._id).exec().then(function(project) {
-    if (!project) {
-      throw errors.notFoundError('project.doesNotExist', 'Project does not exist');
-    }
-    let integration = project.getIntegrationOfType(type);
-    if (!integration) {
-      throw errors.notFoundError('integration.doesNotExist', 'Integration does not exist');
-    }
+  return projectCommons.getProject(project._id).then(function(project) {
+    let integration = getIntegration(project, type);
     project.integrations.pull(integration._id);
     return modelUtils.toObject(project.save());
+  });
+};
+
+exports.getConfiguration = function(project, type) {
+  return projectCommons.getProject(project._id).then(function(project) {
+    let integration = getIntegration(project, type);
+    return integration.configuration;
   });
 };

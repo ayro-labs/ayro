@@ -20,8 +20,8 @@ exports.createUser = function(project, data) {
     }
     delete data._id;
     let user = new User(data);
-    user.set('project', project);
-    user.set('registration_date', new Date());
+    user.project = project._id;
+    user.registration_date = new Date();
     return modelUtils.toObject(user.save());
   });
 };
@@ -51,8 +51,8 @@ exports.createDevice = function(user, data) {
     }
     delete data._id;
     let device = new Device(data);
-    device.set('user', user);
-    device.set('registration_date', new Date());
+    device.user = user_.id;
+    device.registration_date = new Date();
     return modelUtils.toObject(device.save());
   });
 };

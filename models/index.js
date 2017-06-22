@@ -87,6 +87,9 @@ let User = new Schema({
   sign_up_date: Date,
   registration_date: Date
 });
+User.virtual('full_name').get(function () {
+  return this.first_nme + (this.last_name ? ' ' + this.last_name : '');
+});
 User.virtual('devices', {
   ref: 'Device',
   localField: '_id',

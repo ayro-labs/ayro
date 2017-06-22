@@ -1,8 +1,8 @@
 'use strict';
 
 let integrations = require('.'),
+    userCommons = require('../commons/user'),
     constants = require('../../utils/constants'),
-    Project = require('../../models').Project,
     Promise = require('bluebird'),
     _ = require('lodash');
 
@@ -18,29 +18,23 @@ let checkAuthentication = function(apiToken) {
   });
 };
 
-let getApiToken = function(project) {
-  return Project.findById(project._id).exec().then(function(project) {
-    if (!project) {
-      return null;
-    }
-    let integration = project.getIntegrationOfType(constants.integrationTypes.SLACK);
-    if (!integration) {
-      return null;
-    }
-    return integration.configuration.api_token;
-  });
-};
-
 exports.add = function(project, apiToken) {
-  return checkAuthentication(apiToken).then(function(authentication) {
-    let configuration = {
+  return checkAuthentication(apiToken).bind({}).then(function(authentication) {
+    this.configuration = {
       api_token: apiToken,
-      team: authentication.team,
-      team_id: authentication.team_id,
-      team_url: authentication.url,
-      user: authentication.user,
-      user_id: authentication.user_id
+      team: {id: authentication.team_id, name: authentication.team, url: authentication.url},
+      user: {id: authentication.user_id, name: authentication.user}
     };
+    var slackClient = new SlackClient(apiToken);
+    return slackClient.channels.list({exclude_archived: true, exclude_members: true});
+  }).then(function(result) {
+    let configuration = this.configuration;
+    let channels = [];
+    _.each(result.channels, function(channel) {
+      if (channel.is_general) {
+        configuration.channel = {id: channel.id, name: channel.name};
+      }
+    });
     return integrations.add(project, constants.integrationTypes.SLACK, constants.channels.BUSINESS, _.pick(configuration, CONFIG_SLACK));
   })
 };
@@ -54,21 +48,35 @@ exports.remove = function(project)   {
 };
 
 exports.listChannels = function(project) {
-  return getApiToken(project).then(function(apiToken) {
-    if (!apiToken) {
-      return [];
-    }
-    var slackClient = new SlackClient(apiToken);
+  return integrations.getConfiguration(project, constants.integrationTypes.SLACK).then(function(configuration) {
+    var slackClient = new SlackClient(configuration.api_token);
     return slackClient.channels.list({exclude_archived: true, exclude_members: true});
+  }).then(function(result) {
+    let channels = [];
+    _.each(result.channels, function(channel) {
+      channels.push({id: channel.id, name: channel.name});
+    });
+    return channels;
   });
 };
 
 exports.createChannel = function(project, channel) {
-  return getApiToken(project).then(function(apiToken) {
-    if (!apiToken) {
-      return [];
-    }
-    var slackClient = new SlackClient(apiToken);
+  return integrations.getConfiguration(project, constants.integrationTypes.SLACK).then(function(configuration) {
+    var slackClient = new SlackClient(configuration.api_token);
     return slackClient.channels.create({name: channel});
+  });
+};
+
+exports.postMessage = function(user, message) {
+  return userCommons.getUser(user._id, 'project').then(function(user) {
+    return integrations.getConfiguration(user.project, constants.integrationTypes.SLACK).then(function(configuration) {
+      var slackClient = new SlackClient(configuration.api_token);
+      return slackClient.chat.postMessage({
+        channel: configuration.channel.id,
+        username: user.full_name,
+        text, message,
+        as_user: false
+      });
+    });
   });
 };

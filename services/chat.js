@@ -1,45 +1,41 @@
 'use strict';
 
-let User = require('../models').User,
-    constants = require('../utils/constants'),
+let userCommons = require('./commons/user'),
     androidIntegration = require('./integrations/android'),
     iosIntegration = require('./integrations/ios'),
-    slackIntegration = require('./integrations/slack');
+    slackIntegration = require('./integrations/slack'),
+    constants = require('../utils/constants');
 
 const EVENT_CHAT_MESSAGE = 'chat_message';
 
 exports.postMessage = function(user, message) {
-  return User.findById(user._id).populate('project').exec().then(function(user) {
-    if (user) {
-      user.project.listIntegrationsOfChannel('business').forEach(function(integration) {
-        switch (integration.type) {
-          case constants.integrationTypes.SLACK:
-            break;
-        }
-      });
-    }
+  return userCommons.getUser(user._id, 'project').then(function(user) {
+    user.project.listIntegrationsOfChannel(constants.channels.BUSINESS).forEach(function(integration) {
+      switch (integration.type) {
+        case constants.integrationTypes.SLACK:
+          return slackIntegration.postMessage(user, message);
+      }
+    });
   });
 };
 
 exports.pushMessage = function(user, message) {
-  return User.findById(user._id).populate('project devices').exec().then(function(user) {
-    if (user) {
-      user.project.listIntegrationsOfChannel('user').forEach(function(integration) {
-        switch (integration.type) {
-          case constants.integrationTypes.ANDROID:
-            let androidDevice = user.getDevice(constants.devicePlatforms.ANDROID);
-            if (androidDevice) {
-              androidIntegration.push(integration, androidDevice, EVENT_CHAT_MESSAGE, message);
-            }
-            break;
-          case constants.integrationTypes.IOS:
-            let iosDevice = user.getDevice(constants.devicePlatforms.IOS);
-            if (iosDevice) {
-              iosIntegration.push(integration, androidDevice, EVENT_CHAT_MESSAGE, message);
-            }
-            break;
-        }
-      });
-    }
+  return userCommons.getUser(user._id, 'project devices').then(function(user) {
+    user.project.listIntegrationsOfChannel(constants.channels.USER).forEach(function(integration) {
+      switch (integration.type) {
+        case constants.integrationTypes.ANDROID:
+          let androidDevice = user.getDevice(constants.devicePlatforms.ANDROID);
+          if (androidDevice) {
+            return androidIntegration.push(integration, androidDevice, EVENT_CHAT_MESSAGE, message);
+          }
+          break;
+        case constants.integrationTypes.IOS:
+          let iosDevice = user.getDevice(constants.devicePlatforms.IOS);
+          if (iosDevice) {
+            return iosIntegration.push(integration, androidDevice, EVENT_CHAT_MESSAGE, message);
+          }
+          break;
+      }
+    });
   });
 };
