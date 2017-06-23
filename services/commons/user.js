@@ -1,10 +1,17 @@
 'use strict';
 
 let User = require('../../models').User,
-    errors = require('../../utils/errors');
+    errors = require('../../utils/errors'),
+    Promise = require('bluebird');
 
 exports.getUser = function(id, populate) {
-  return User.findById(id).populate(populate).exec().then(function(user) {
+  return Promise.resolve().then(function() {
+    let promise = User.findById(id);
+    if (populate) {
+      promise.populate(populate);
+    }
+    return promise.exec();
+  }).then(function(user) {
     if (!user) {
       throw errors.notFoundError('user.doesNotExist', 'User does not exist');
     }

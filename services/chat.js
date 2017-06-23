@@ -13,7 +13,7 @@ exports.postMessage = function(user, message) {
     user.project.listIntegrationsOfChannel(constants.channels.BUSINESS).forEach(function(integration) {
       switch (integration.type) {
         case constants.integrationTypes.SLACK:
-          return slackIntegration.postMessage(user, message);
+          return slackIntegration.postMessage(user, message.text);
       }
     });
   });

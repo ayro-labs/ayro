@@ -3,7 +3,8 @@
 let projectCommons = require('../commons/project'),
     modelUtils = require('../../utils/model'),
     errors = require('../../utils/errors'),
-    Project = require('../../models').Project;
+    Project = require('../../models').Project,
+    _ = require('lodash');
 
 let getIntegration = function(project, type) {
   let integration = project.getIntegrationOfType(type);
@@ -31,7 +32,7 @@ exports.add = function(project, type, channel, configuration) {
 exports.update = function(project, type, configuration) {
   return projectCommons.getProject(project._id).then(function(project) {
     let integration = getIntegration(project, type);
-    integration.configuration = configuration;
+    _.assign(integration.configuration, configuration);
     return modelUtils.toObject(project.save());
   });
 };

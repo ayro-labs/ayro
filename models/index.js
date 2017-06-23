@@ -84,11 +84,12 @@ let User = new Schema({
   email: String,
   identified: Boolean,
   properties: Object,
+  extra: Object,
   sign_up_date: Date,
   registration_date: Date
 });
 User.virtual('full_name').get(function () {
-  return this.first_nme + (this.last_name ? ' ' + this.last_name : '');
+  return this.first_name + (this.last_name ? ' ' + this.last_name : '');
 });
 User.virtual('devices', {
   ref: 'Device',

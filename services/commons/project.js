@@ -1,10 +1,17 @@
 'use strict';
 
 let Project = require('../../models').Project,
-    errors = require('../../utils/errors');
+    errors = require('../../utils/errors'),
+    Promise = require('bluebird');
 
 exports.getProject = function(id, populate) {
-  return Project.findById(id).populate(populate).exec().then(function(project) {
+  return Promise.resolve().then(function() {
+    let promise = Project.findById(id);
+    if (populate) {
+      promise.populate(populate);
+    }
+    return promise.exec();
+  }).then(function(project) {
     if (!project) {
       throw errors.notFoundError('project.doesNotExist', 'Project does not exist');
     }
