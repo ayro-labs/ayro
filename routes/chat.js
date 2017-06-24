@@ -8,7 +8,7 @@ let chatService = require('../services/chat'),
 module.exports = function(router, app) {
 
   let postMessage = function(req, res, next) {
-    chatService.postMessage(req.user, req.body).then(function() {
+    chatService.postMessage(req.user, req.params.platform, req.body).then(function() {
       res.json();
     }).catch(function(err) {
       logger.error(err);
@@ -26,7 +26,7 @@ module.exports = function(router, app) {
     });
   };
 
-  router.post('/', isUserAuthenticated, postMessage);
+  router.post('/:platform', isUserAuthenticated, postMessage);
   router.post('/push', pushMessage);
 
   app.use('/chat', router);

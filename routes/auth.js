@@ -1,7 +1,7 @@
 'use strict';
 
 let accountService = require('../services/account'),
-    projectService = require('../services/project'),
+    appService = require('../services/app'),
     userService = require('../services/user'),
     logger = require('../utils/logger'),
     errors = require('../utils/errors'),
@@ -34,9 +34,9 @@ module.exports = function(router, app) {
   };
 
   let authenticateUser = function(req, res, next) {
-    projectService.getProjectByToken(req.body.project_token).bind({}).then(function(project) {
+    appService.getAppByToken(req.body.app_token).bind({}).then(function(app) {
       userService.assignUserUid(req.body.user, req.body.device);
-      return userService.saveUser(project, req.body.user);
+      return userService.saveUser(app, req.body.user);
     }).then(function(user) {
       this.user = user;
       return userService.saveDevice(user, req.body.device);

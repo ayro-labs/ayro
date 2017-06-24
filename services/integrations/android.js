@@ -10,21 +10,21 @@ const ORIGIN_CHATZ = 'chatz';
 
 let fcmClient = restify.createJsonClient('https://fcm.googleapis.com/fcm/send');
 
-exports.add = function(project, configuration) {
-  return integrations.add(project, constants.integrationTypes.ANDROID, constants.channels.USER, _.pick(configuration, CONFIG_ANDROID));
+exports.add = function(app, configuration) {
+  return integrations.add(app, constants.integration.types.ANDROID, constants.integration.channels.USER, _.pick(configuration, CONFIG_ANDROID));
 };
 
-exports.update = function(project, configuration)   {
-  return integrations.update(project, constants.integrationTypes.ANDROID, _.pick(configuration, CONFIG_ANDROID));
+exports.update = function(app, configuration)   {
+  return integrations.update(app, constants.integration.types.ANDROID, _.pick(configuration, CONFIG_ANDROID));
 };
 
-exports.remove = function(project)   {
-  return integrations.remove(project, constants.integrationTypes.ANDROID);
+exports.remove = function(app)   {
+  return integrations.remove(app, constants.integration.types.ANDROID);
 };
 
 exports.push = function(integration, device, event, message) {
   return new Promise(function(resolve, reject) {
-    if (integration.type !== constants.integrationTypes.ANDROID || !device.push_token) {
+    if (integration.type !== constants.integration.types.ANDROID || !device.push_token) {
       resolve();
       return;
     }

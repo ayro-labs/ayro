@@ -1,7 +1,6 @@
 'use strict';
 
 let integrations = require('.'),
-    userCommons = require('../commons/user'),
     constants = require('../../utils/constants'),
     User = require('../../models').User,
     SlackClient = require('@slack/client').WebClient,
@@ -19,10 +18,73 @@ let checkAuthentication = function(apiToken) {
   });
 };
 
-let createChannelAdvertisingUser = function(slackClient, user, message, supportChannel) {
+let getFallbackText = function(text) {
+  let fallback = _.replace(text, /\*/g, '');
+  fallback = _.replace(fallback, /\<\#(\w|\d)+\|((\w|\d)+)\>/g, '#$2');
+  return fallback;
+};
+
+let getUserInformationAttachment = function(user) {
+  let information = [];
+  let fields = [];
+  information.push('App: ' + user.app.name);
+  if (user.identified) {
+    information.push('ID: ' + user.uid);
+  }
+  if (!user.name_generated) {
+    information.push('Name: ' + user.getFullName());
+  }
+  if (user.email) {
+    information.push('Email: ' + user.email);
+  }
+  if (user.sign_up_date) {
+    information.push('Signed up at: ' + user.sign_up_date);
+  }
+  if (user.properties) {
+    _.each(user.properties, function(value, key) {
+      fields.push({title: key, value: value, short: true});
+    });
+  }
+  return {
+    fallback: 'User information',
+    title: 'User information',
+    text: information.join('\n'),
+    color: 'good',
+    fields: fields
+  };
+};
+
+let getUserDeviceAttachment = function(user, platform) {
+  let information = [];
+  let fields = [];
+  let device = user.getDevice(platform);
+  let deviceInfo = device.info;
+  information.push('Platform: ' + device.getPlatformName());
+  information.push('App version: ' + device.app_version + ' (' + device.app_id + ')');
+  if (deviceInfo) {
+    if (device.isSmartphone() && deviceInfo.manufacturer && deviceInfo.model) {
+      information.push('Smartphone: ' + _.capitalize(deviceInfo.manufacturer) + ' ' + deviceInfo.model);
+    }
+    if (device.isSmartphone() && deviceInfo.os_name && deviceInfo.os_version) {
+      information.push('OS: ' + deviceInfo.os_name + ' ' + deviceInfo.os_version);
+    }
+    if (deviceInfo.carrier) {
+      information.push('Carrier: ' + deviceInfo.carrier);
+    }
+  }
+  return {
+    fallback: 'Device information',
+    title: 'Device information',
+    text: information.join('\n'),
+    color: 'warning',
+    fields: fields
+  };
+};
+
+let createChannelAdvertisingUser = function(slackClient, user, platform, message, supportChannel) {
   return createChannel(slackClient, user).bind({}).tap(function(userChannel) {
     this.userChannel = userChannel;
-    return advertiseUser(slackClient, user, message, supportChannel, userChannel);
+    return advertiseUser(slackClient, user, platform, message, supportChannel, userChannel);
   }).tap(function() {
     return User.update({_id: user._id}, {extra: _.assign(user.extra || {}, {slack_channel: this.userChannel})}).exec();
   });
@@ -30,7 +92,7 @@ let createChannelAdvertisingUser = function(slackClient, user, message, supportC
 
 let createChannel = function(slackClient, user) {
   return Promise.resolve().then(function() {
-    let channel = _.kebabCase('ch-' + user.full_name);
+    let channel = _.kebabCase('ch-' + user.getFullName());
     channel = _.truncate(channel, {length: 21});
     channel = _.lowerCase(channel);
     channel = _.deburr(channel);
@@ -46,51 +108,62 @@ let createChannel = function(slackClient, user) {
   });
 };
 
-let advertiseUser = function(slackClient, user, message, supportChannel, userChannel) {
+let advertiseUser = function(slackClient, user, platform, message, supportChannel, userChannel) {
   return Promise.resolve().then(function() {
-    let advertiseMessage = '*' + user.full_name + '* wants to talk with your team in <#' + userChannel.id + '|' + userChannel.name + '>';
+    let advertiseMessage = '*' + user.getFullName() + '* wants to talk with your team in <#' + userChannel.id + '|' + userChannel.name + '>';
     return slackClient.chat.postMessage(supportChannel.id, advertiseMessage, {
       username: CHATZ_BOT_USERNAME,
       as_user: false,
       attachments: [{
-        fallback: advertiseMessage,
+        fallback: getFallbackText(advertiseMessage),
         text: message,
         color: 'good'
       }]
+    });
+  }).then(function() {
+    let advertiseMessage = 'These are all the information we have so far about *' + user.getFullName() + '*';
+    return slackClient.chat.postMessage(userChannel.id, advertiseMessage, {
+      username: CHATZ_BOT_USERNAME,
+      as_user: false,
+      attachments: [
+        getUserInformationAttachment(user),
+        getUserDeviceAttachment(user, platform)
+      ]
     });
   });
 };
 
 let getChannel = function(slackClient, user) {
   return slackClient.channels.info(user.extra.slack_channel.id).then(function(result) {
-    let channel = {id: result.channel.id, name: result.channel.name};
-    return !result.channel.is_archived ? channel : unarchiveChannel(slackClient, channel);
+    return {
+      id: result.channel.id,
+      name: result.channel.name,
+      archived: result.channel.is_archived
+    };
   }).catch(function(err) {
-    console.log("C")
     if (err.message === 'channel_not_found') {
       return null;
     } else {
       throw err;
     }
-  }).catch(function(err) {
-    console.log(typeof err)
-    console.log("D")
   });
 };
 
-let unarchiveChannel = function(slackClient, channel) {
-  return slackClient.channels.unarchive(channel.id).then(function(result) {
-    return channel;
+let unarchiveChannelAdvertisingUser = function(slackClient, userChannel, user, platform, message, supportChannel) {
+  return slackClient.channels.unarchive(userChannel.id).then(function(result) {
+    return advertiseUser(slackClient, user, platform, message, supportChannel, userChannel);
+  }).then(function() {
+    return userChannel;
   }).catch(function(err) {
     if (err.message === 'not_archived') {
-      return channel;
+      return userChannel;
     } else {
       throw err;
     }
   });
 };
 
-exports.add = function(project, apiToken) {
+exports.add = function(app, apiToken) {
   return checkAuthentication(apiToken).bind({}).then(function(authentication) {
     this.configuration = {
       api_token: apiToken,
@@ -107,20 +180,20 @@ exports.add = function(project, apiToken) {
         configuration.channel = {id: channel.id, name: channel.name};
       }
     });
-    return integrations.add(project, constants.integrationTypes.SLACK, constants.channels.BUSINESS, _.pick(configuration, CONFIG_SLACK));
+    return integrations.add(app, constants.integration.types.SLACK, constants.integration.channels.BUSINESS, _.pick(configuration, CONFIG_SLACK));
   })
 };
 
-exports.update = function(project, configuration)   {
-  return integrations.update(project, constants.integrationTypes.SLACK, _.pick(configuration, CONFIG_SLACK_UPDATE));
+exports.update = function(app, configuration)   {
+  return integrations.update(app, constants.integration.types.SLACK, _.pick(configuration, CONFIG_SLACK_UPDATE));
 };
 
-exports.remove = function(project)   {
-  return integrations.remove(project, constants.integrationTypes.SLACK);
+exports.remove = function(app)   {
+  return integrations.remove(app, constants.integration.types.SLACK);
 };
 
-exports.listChannels = function(project) {
-  return integrations.getConfiguration(project, constants.integrationTypes.SLACK).then(function(configuration) {
+exports.listChannels = function(app) {
+  return integrations.getConfiguration(app, constants.integration.types.SLACK).then(function(configuration) {
     var slackClient = new SlackClient(configuration.api_token);
     return slackClient.channels.list({exclude_archived: true, exclude_members: true});
   }).then(function(result) {
@@ -132,32 +205,32 @@ exports.listChannels = function(project) {
   });
 };
 
-exports.createChannel = function(project, channel) {
-  return integrations.getConfiguration(project, constants.integrationTypes.SLACK).then(function(configuration) {
+exports.createChannel = function(app, channel) {
+  return integrations.getConfiguration(app, constants.integration.types.SLACK).then(function(configuration) {
     var slackClient = new SlackClient(configuration.api_token);
     return slackClient.channels.create({name: channel});
   });
 };
 
-exports.postMessage = function(user, message) {
-  return userCommons.getUser(user._id, 'project').bind({}).then(function(user) {
-    this.user = user;
-    return integrations.getConfiguration(user.project, constants.integrationTypes.SLACK);
-  }).then(function(configuration) {
+exports.postMessage = function(user, platform, message) {
+  return integrations.getConfiguration(user.app, constants.integration.types.SLACK).bind({}).then(function(configuration) {
     this.slackClient = new SlackClient(configuration.api_token);
-    if (this.user.extra && this.user.extra.slack_channel) {
-      console.log("A")
-      return getChannel(this.slackClient, this.user).bind(this).then(function(channel) {
-        console.log("B")
-        console.log(channel)
-        return channel || createChannelAdvertisingUser(this.slackClient, this.user, message, configuration.channel);
+    if (user.extra && user.extra.slack_channel) {
+      return getChannel(this.slackClient, user).bind(this).then(function(channel) {
+        if (!channel) {
+          return createChannelAdvertisingUser(this.slackClient, user, platform, message, configuration.channel);
+        } else if (channel.archived) {
+          return unarchiveChannelAdvertisingUser(this.slackClient, channel, user, platform, message, configuration.channel);
+        } else {
+          return channel;
+        }
       });
     } else {
-      return createChannelAdvertisingUser(this.slackClient, this.user, message, configuration.channel);
+      return createChannelAdvertisingUser(this.slackClient, user, platform, message, configuration.channel);
     }
   }).then(function(channel) {
     return this.slackClient.chat.postMessage(channel.id, message, {
-      username: this.user.full_name,
+      username: user.getFullName() + (user.name_generated ? ' (Generated name)' : ''),
       as_user: false
     });
   });

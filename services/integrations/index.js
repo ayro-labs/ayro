@@ -1,53 +1,53 @@
 'use strict';
 
-let projectCommons = require('../commons/project'),
+let appCommons = require('../commons/app'),
     modelUtils = require('../../utils/model'),
     errors = require('../../utils/errors'),
-    Project = require('../../models').Project,
+    App = require('../../models').App,
     _ = require('lodash');
 
-let getIntegration = function(project, type) {
-  let integration = project.getIntegrationOfType(type);
+let getIntegration = function(app, type) {
+  let integration = app.getIntegrationOfType(type);
   if (!integration) {
     throw errors.notFoundError('integration.doesNotExist', 'Integration does not exist');
   }
   return integration;
 };
 
-exports.add = function(project, type, channel, configuration) {
-  return projectCommons.getProject(project._id).then(function(project) {
-    if (project.getIntegrationOfType(type)) {
+exports.add = function(app, type, channel, configuration) {
+  return appCommons.getApp(app._id).then(function(app) {
+    if (app.getIntegrationOfType(type)) {
       throw errors.chatzError('integration.alreadyExists', 'Integration already exists');
     }
-    project.integrations.push({
+    app.integrations.push({
       type: type,
       channel: channel,
       configuration: configuration,
       registration_date: new Date()
     });
-    return modelUtils.toObject(project.save());
+    return modelUtils.toObject(app.save());
   });
 };
 
-exports.update = function(project, type, configuration) {
-  return projectCommons.getProject(project._id).then(function(project) {
-    let integration = getIntegration(project, type);
+exports.update = function(app, type, configuration) {
+  return appCommons.getApp(app._id).then(function(app) {
+    let integration = getIntegration(app, type);
     _.assign(integration.configuration, configuration);
-    return modelUtils.toObject(project.save());
+    return modelUtils.toObject(app.save());
   });
 };
 
-exports.remove = function(project, type) {
-  return projectCommons.getProject(project._id).then(function(project) {
-    let integration = getIntegration(project, type);
-    project.integrations.pull(integration._id);
-    return modelUtils.toObject(project.save());
+exports.remove = function(app, type) {
+  return appCommons.getApp(app._id).then(function(app) {
+    let integration = getIntegration(app, type);
+    app.integrations.pull(integration._id);
+    return modelUtils.toObject(app.save());
   });
 };
 
-exports.getConfiguration = function(project, type) {
-  return projectCommons.getProject(project._id).then(function(project) {
-    let integration = getIntegration(project, type);
+exports.getConfiguration = function(app, type) {
+  return appCommons.getApp(app._id).then(function(app) {
+    let integration = getIntegration(app, type);
     return integration.configuration;
   });
 };

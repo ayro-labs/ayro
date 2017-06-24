@@ -4,6 +4,7 @@ let User = require('../models').User,
     Device = require('../models').Device,
     errors = require('../utils/errors'),
     modelUtils = require('../utils/model'),
+    randomName = require('node-random-name'),
     Promise = require('bluebird'),
     _ = require('lodash'),
     $ = this;
@@ -13,35 +14,47 @@ exports.assignUserUid = function(userData, deviceData) {
   userData.uid = userData.uid || deviceData.uid;
 };
 
-exports.createUser = function(project, data) {
+exports.createUser = function(app, data) {
   return Promise.resolve().then(function() {
     if (!data.uid) {
       throw errors.chatzError('user.uid.required', 'User unique id is required');
     }
     delete data._id;
     let user = new User(data);
-    user.project = project._id;
+    user.app = app._id;
     user.registration_date = new Date();
+    user.name_generated = false;
+    if (!user.first_name && !user.last_name) {
+      let names = _.split(randomName(), '');
+      user.first_name = names[0];
+      user.last_name = names[1];
+      user.name_generated = true;
+    }
     return modelUtils.toObject(user.save());
   });
 };
 
 exports.updateUser = function(user, data) {
-  return User.findByIdAndUpdate(user._id, data, {new: true}).lean().exec();
+  return Promise.resolve().then(function() {
+    if (data.first_name || data.last_name) {
+      data.name_generated = false;
+    }
+    return User.findByIdAndUpdate(user._id, data, {new: true, runValidators: true}).lean().exec();
+  });
 };
 
-exports.saveUser = function(project, data) {
-  return $.getUser(project, data.uid).then(function(user) {
+exports.saveUser = function(app, data) {
+  return $.getUser(app, data.uid).then(function(user) {
     if (!user) {
-      return $.createUser(project, data);
+      return $.createUser(app, data);
     } else {
       return $.updateUser(user, data);
     }
   });
 };
 
-exports.getUser = function(project, uid) {
-  return User.findOne({project: project._id, uid: uid}).lean().exec();
+exports.getUser = function(app, uid) {
+  return User.findOne({app: app._id, uid: uid}).lean().exec();
 };
 
 exports.createDevice = function(user, data) {
@@ -51,14 +64,17 @@ exports.createDevice = function(user, data) {
     }
     delete data._id;
     let device = new Device(data);
-    device.user = user_.id;
+    device.user = user._id;
     device.registration_date = new Date();
     return modelUtils.toObject(device.save());
   });
 };
 
 exports.updateDevice = function(device, data) {
-  return Device.findByIdAndUpdate(device._id, data, {new: true}).lean().exec();
+  return Promise.resolve().then(function() {
+    delete data.uid;
+    return Device.findByIdAndUpdate(device._id, data, {new: true}).lean().exec();
+  });
 };
 
 exports.saveDevice = function(user, data) {

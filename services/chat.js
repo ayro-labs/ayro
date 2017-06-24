@@ -8,29 +8,29 @@ let userCommons = require('./commons/user'),
 
 const EVENT_CHAT_MESSAGE = 'chat_message';
 
-exports.postMessage = function(user, message) {
-  return userCommons.getUser(user._id, 'project').then(function(user) {
-    user.project.listIntegrationsOfChannel(constants.channels.BUSINESS).forEach(function(integration) {
+exports.postMessage = function(user, platform, message) {
+  return userCommons.getUser(user._id, 'app devices').then(function(user) {
+    user.app.listIntegrationsOfChannel(constants.integration.channels.BUSINESS).forEach(function(integration) {
       switch (integration.type) {
-        case constants.integrationTypes.SLACK:
-          return slackIntegration.postMessage(user, message.text);
+        case constants.integration.types.SLACK:
+          return slackIntegration.postMessage(user, platform, message.text);
       }
     });
   });
 };
 
 exports.pushMessage = function(user, message) {
-  return userCommons.getUser(user._id, 'project devices').then(function(user) {
-    user.project.listIntegrationsOfChannel(constants.channels.USER).forEach(function(integration) {
+  return userCommons.getUser(user._id, 'app devices').then(function(user) {
+    user.app.listIntegrationsOfChannel(constants.integration.channels.USER).forEach(function(integration) {
       switch (integration.type) {
-        case constants.integrationTypes.ANDROID:
-          let androidDevice = user.getDevice(constants.devicePlatforms.ANDROID);
+        case constants.integration.types.ANDROID:
+          let androidDevice = user.getDevice(constants.device.platforms.ANDROID);
           if (androidDevice) {
             return androidIntegration.push(integration, androidDevice, EVENT_CHAT_MESSAGE, message);
           }
           break;
-        case constants.integrationTypes.IOS:
-          let iosDevice = user.getDevice(constants.devicePlatforms.IOS);
+        case constants.integration.types.IOS:
+          let iosDevice = user.getDevice(constants.device.platforms.IOS);
           if (iosDevice) {
             return iosIntegration.push(integration, androidDevice, EVENT_CHAT_MESSAGE, message);
           }

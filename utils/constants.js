@@ -1,19 +1,22 @@
 'use strict';
 
-exports.channels = {
-  USER: 'user',
-  BUSINESS: 'business'
+exports.integration = {
+  channels: {
+    USER: 'user',
+    BUSINESS: 'business'
+  },
+  types: {
+    WEBSITE: 'website',
+    ANDROID: 'android',
+    IOS: 'ios',
+    SLACK: 'slack',
+  }
 };
 
-exports.integrationTypes = {
-  WEBSITE: 'website',
-  ANDROID: 'android',
-  IOS: 'ios',
-  SLACK: 'slack',
-};
-
-exports.devicePlatforms = {
-  WEBSITE: 'website',
-  ANDROID: 'android',
-  IOS: 'ios'
+exports.device = {
+  platforms: {
+    WEB: 'web',
+    ANDROID: 'android',
+    IOS: 'ios'
+  }
 };
