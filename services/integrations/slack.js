@@ -90,18 +90,26 @@ let createChannelAdvertisingUser = function(slackClient, user, platform, message
   });
 };
 
-let createChannel = function(slackClient, user) {
+let createChannel = function(slackClient, user, conflict) {
   return Promise.resolve().then(function() {
-    let channel = _.kebabCase('ch-' + user.getFullName());
-    channel = _.truncate(channel, {length: 21});
-    channel = _.lowerCase(channel);
+    let channel;
+    if (!conflict) {
+      channel = user.getFullName();
+    } else if (conflict === 1) {
+      channel = _.truncate(user.getFullName(), {length: 14, omission: ''});
+      channel = channel + '-' + user.uid;
+    } else {
+      channel = user._id;
+    }
+    channel = _.replace('ch-' + channel, /\s+/g);
+    channel = _.truncate(channel, {length: 21, omission: ''});
     channel = _.deburr(channel);
     return slackClient.channels.create(channel);
   }).then(function(result) {
     return {id: result.channel.id, name: result.channel.name};
   }).catch(function(err) {
     if (err.message === 'name_taken') {
-      return null;
+      return createChannel(slackClient, user, !conflict ? 1 : ++conflict);
     } else {
       throw err;
     }
