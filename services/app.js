@@ -2,13 +2,16 @@
 
 let App = require('../models').App,
     AppSecretKey = require('../models').AppSecretKey,
-    cryptography = require('../utils/cryptography'),
+    constants = require('../utils/constants'),
     modelUtils = require('../utils/model'),
-    websiteIntegration = require('./integrations/website'),
-    androidIntegration = require('./integrations/android'),
-    iosIntegration = require('./integrations/ios'),
+    cryptography = require('../utils/cryptography'),
+    integrations = require('./integrations'),
     slackIntegration = require('./integrations/slack'),
     Promise = require('bluebird');
+
+const CONFIG_WEBSITE = [];
+const CONFIG_ANDROID = ['fcm.server_key', 'fcm.sender_id'];
+const CONFIG_IOS = [];
 
 exports.createApp = function(account, name) {
   return cryptography.generateId().then(function(token) {
@@ -35,51 +38,51 @@ exports.listApps = function(account) {
 };
 
 exports.addWebsite = function(app, configuration) {
-  return websiteIntegration.add(app, configuration);
+  return integrations.add(app, constants.integration.types.WEBSITE, constants.integration.channels.USER, _.pick(configuration, CONFIG_WEBSITE));
 };
 
 exports.updateWebsite = function(app, configuration) {
-  return websiteIntegration.update(app, configuration);
+  return integrations.update(app, constants.integration.types.WEBSITE, _.pick(configuration, CONFIG_WEBSITE));
 };
 
 exports.removeWebsite = function(app) {
-  return websiteIntegration.remove(app);
+  return integrations.remove(app, constants.integration.types.WEBSITE);
 };
 
 exports.addAndroid = function(app, configuration) {
-  return androidIntegration.add(app, configuration);
+  return integrations.add(app, constants.integration.types.ANDROID, constants.integration.channels.USER, _.pick(configuration, CONFIG_ANDROID));
 };
 
 exports.updateAndroid = function(app, configuration) {
-  return androidIntegration.update(app, configuration);
+  return integrations.update(app, constants.integration.types.ANDROID, _.pick(configuration, CONFIG_ANDROID));
 };
 
 exports.removeAndroid = function(app) {
-  return androidIntegration.remove(app);
+  return integrations.remove(app, constants.integration.types.ANDROID);
 };
 
 exports.addIOS = function(app, configuration) {
-  return iosIntegration.add(app, configuration);
+  return integrations.add(app, constants.integration.types.IOS, constants.integration.channels.USER, _.pick(configuration, CONFIG_IOS));
 };
 
 exports.updateIOS = function(app, configuration) {
-  return iosIntegration.update(app, configuration);
+  return integrations.update(app, constants.integration.types.IOS, _.pick(configuration, CONFIG_IOS));
 };
 
 exports.removeIOS = function(app) {
-  return iosIntegration.remove(app);
+  return integrations.remove(app, constants.integration.types.IOS);
 };
 
-exports.addSlack = function(app, configuration) {
-  return slackIntegration.add(app, configuration);
+exports.addSlack = function(app, apiToken) {
+  return slackIntegration.add(app, apiToken);
 };
 
 exports.updateSlack = function(app, configuration) {
-  return slackIntegration.update(app, configuration);
+  return integrations.update(app, constants.integration.types.SLACK, _.pick(configuration, CONFIG_SLACK_UPDATE));
 };
 
 exports.removeSlack = function(app) {
-  return slackIntegration.remove(app);
+  return integrations.remove(app, constants.integration.types.SLACK);
 };
 
 exports.listSlackChannels = function(app) {

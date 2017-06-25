@@ -3,9 +3,13 @@
 let integrations = require('.'),
     constants = require('../../utils/constants'),
     User = require('../../models').User,
+    userCommons = require('../commons/user'),
+    androidPush = require('./push/android'),
     SlackClient = require('@slack/client').WebClient,
     Promise = require('bluebird'),
     _ = require('lodash');
+
+const EVENT_CHAT_MESSAGE = 'chat_message';
 
 const CHATZ_BOT_USERNAME = 'Chatz Bot'
 const CONFIG_SLACK = ['api_token', 'team', 'team_id', 'team_url', 'user', 'user_id', 'channel', 'channel_id'];
@@ -192,14 +196,6 @@ exports.add = function(app, apiToken) {
   })
 };
 
-exports.update = function(app, configuration)   {
-  return integrations.update(app, constants.integration.types.SLACK, _.pick(configuration, CONFIG_SLACK_UPDATE));
-};
-
-exports.remove = function(app)   {
-  return integrations.remove(app, constants.integration.types.SLACK);
-};
-
 exports.listChannels = function(app) {
   return integrations.getConfiguration(app, constants.integration.types.SLACK).then(function(configuration) {
     var slackClient = new SlackClient(configuration.api_token);
@@ -220,8 +216,8 @@ exports.createChannel = function(app, channel) {
   });
 };
 
-exports.postMessage = function(user, platform, message) {
-  return integrations.getConfiguration(user.app, constants.integration.types.SLACK).bind({}).then(function(configuration) {
+exports.postMessage = function(user, configuration, platform, message) {
+  return Promise.resolve().bind({}).then(function() {
     this.slackClient = new SlackClient(configuration.api_token);
     if (user.extra && user.extra.slack_channel) {
       return getChannel(this.slackClient, user).bind(this).then(function(channel) {
@@ -244,6 +240,23 @@ exports.postMessage = function(user, platform, message) {
   });
 };
 
-exports.pushMessage = function(message) {
-  return true;
+exports.pushMessage = function(data) {
+  return userCommons.findUser({'extra.slack_channel.id': data.channel_id}, {populate: 'app devices'}).bind({}).then(function(user) {
+    this.user = user;
+    this.message = {
+      user_name: data.user_name,
+      text: data.text
+    };
+    return androidPush.push(user, EVENT_CHAT_MESSAGE, this.message);
+  }).then(function() {
+    let integration = this.user.app.getIntegration(constants.integration.types.SLACK);
+    if (!integration) {
+      return;
+    }
+    let slackClient = new SlackClient(integration.configuration.api_token);
+    return slackClient.chat.postMessage(data.channel_id, this.message.text, {
+      username: this.message.user_name,
+      as_user: false
+    });
+  });
 };

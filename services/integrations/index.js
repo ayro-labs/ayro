@@ -7,7 +7,7 @@ let appCommons = require('../commons/app'),
     _ = require('lodash');
 
 let getIntegration = function(app, type) {
-  let integration = app.getIntegrationOfType(type);
+  let integration = app.getIntegration(type);
   if (!integration) {
     throw errors.notFoundError('integration.doesNotExist', 'Integration does not exist');
   }
@@ -16,7 +16,7 @@ let getIntegration = function(app, type) {
 
 exports.add = function(app, type, channel, configuration) {
   return appCommons.getApp(app._id).then(function(app) {
-    if (app.getIntegrationOfType(type)) {
+    if (app.getIntegration(type)) {
       throw errors.chatzError('integration.alreadyExists', 'Integration already exists');
     }
     app.integrations.push({

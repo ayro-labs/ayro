@@ -4,6 +4,7 @@ let User = require('../models').User,
     Device = require('../models').Device,
     errors = require('../utils/errors'),
     modelUtils = require('../utils/model'),
+    userCommons = require('./commons/user'),
     randomName = require('node-random-name'),
     Promise = require('bluebird'),
     _ = require('lodash'),
@@ -54,7 +55,7 @@ exports.saveUser = function(app, data) {
 };
 
 exports.getUser = function(app, uid) {
-  return User.findOne({app: app._id, uid: uid}).lean().exec();
+  return userCommons.find({app: app._id, uid: uid}, {lean: true});
 };
 
 exports.createDevice = function(user, data) {

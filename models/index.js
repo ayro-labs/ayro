@@ -42,7 +42,7 @@ let App = new Schema({
   integrations: {type: [Integration], required: false},
   registration_date: {type: Date, required: true}
 });
-App.methods.getIntegrationOfType = function(type) {
+App.methods.getIntegration = function(type) {
   return this.integrations.find(function(integration) {
     return integration.type === type;
   })
