@@ -17,8 +17,7 @@ module.exports = function(router, app) {
   };
 
   let pushMessage = function(req, res, next) {
-    let user = {_id: req.body.user};
-    chatService.pushMessage(user, req.body.message).then(function() {
+    chatService.pushMessage(req.params.channel, req.body).then(function() {
       res.json();
     }).catch(function(err) {
       logger.error(err);
@@ -27,7 +26,7 @@ module.exports = function(router, app) {
   };
 
   router.post('/:platform', isUserAuthenticated, postMessage);
-  router.post('/push', pushMessage);
+  router.post('/:channel/push', pushMessage);
 
   app.use('/chat', router);
 

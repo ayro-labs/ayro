@@ -243,3 +243,7 @@ exports.postMessage = function(user, platform, message) {
     });
   });
 };
+
+exports.pushMessage = function(message) {
+  return true;
+};
