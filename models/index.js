@@ -90,7 +90,7 @@ Device.methods.isSmartphone = function() {
 
 let User = new Schema({
   app: {type: ObjectId, ref: 'App'},
-  uid: {type: String, required: true},
+  uid: {type: String, required: true, index: true},
   first_name: {type: String, required: false, trim: true},
   last_name: {type: String, required: false, trim: true},
   email: {type: String, required: false, trim: true},
@@ -101,13 +101,13 @@ let User = new Schema({
   sign_up_date: {type: Date, required: false},
   registration_date: {type: Date, required: true}
 });
+User.index({'extra.slack_channel.id': 1});
 User.virtual('devices', {
   ref: 'Device',
   localField: '_id',
   foreignField: 'user'
 });
 User.methods.getFullName = function() {
-  let fullName = '';
   if (this.first_name) {
     return this.first_name + (this.last_name ? ' ' + this.last_name : '');
   } else if (this.last_name) {

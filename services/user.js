@@ -45,17 +45,13 @@ exports.updateUser = function(user, data) {
 };
 
 exports.saveUser = function(app, data) {
-  return $.getUser(app, data.uid).then(function(user) {
+  return userCommons.findUser({app: app._id, uid: data.uid}, {require: false}).then(function(user) {
     if (!user) {
       return $.createUser(app, data);
     } else {
       return $.updateUser(user, data);
     }
   });
-};
-
-exports.getUser = function(app, uid) {
-  return userCommons.find({app: app._id, uid: uid}, {lean: true});
 };
 
 exports.createDevice = function(user, data) {
@@ -74,7 +70,7 @@ exports.createDevice = function(user, data) {
 exports.updateDevice = function(device, data) {
   return Promise.resolve().then(function() {
     delete data.uid;
-    return Device.findByIdAndUpdate(device._id, data, {new: true}).lean().exec();
+    return Device.findByIdAndUpdate(device._id, data, {new: true, runValidators: true}).lean().exec();
   });
 };
 

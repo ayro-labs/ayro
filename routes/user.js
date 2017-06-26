@@ -17,9 +17,8 @@ module.exports = function(router, app) {
   };
 
   let updateDevice = function(req, res, next) {
-    let data = req.body;
     userService.getDevice(req.user, data.uid).then(function(device) {
-      return userService.updateDevice(device, data);
+      return userService.updateDevice(req.user, data);
     }).then(function(device) {
       res.json();
     }).catch(function(err) {

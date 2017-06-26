@@ -242,21 +242,28 @@ exports.postMessage = function(user, configuration, platform, message) {
 
 exports.pushMessage = function(data) {
   return userCommons.findUser({'extra.slack_channel.id': data.channel_id}, {populate: 'app devices'}).bind({}).then(function(user) {
-    this.user = user;
-    this.message = {
-      user_name: data.user_name,
-      text: data.text
-    };
-    return androidPush.push(user, EVENT_CHAT_MESSAGE, this.message);
-  }).then(function() {
-    let integration = this.user.app.getIntegration(constants.integration.types.SLACK);
+    let integration = user.app.getIntegration(constants.integration.types.SLACK);
     if (!integration) {
       return;
     }
-    let slackClient = new SlackClient(integration.configuration.api_token);
-    return slackClient.chat.postMessage(data.channel_id, this.message.text, {
-      username: this.message.user_name,
-      as_user: false
+    this.user = user;
+    this.slackClient = new SlackClient(integration.configuration.api_token);
+    return this.slackClient.users.info(data.user_id).bind(this).then(function(result) {
+      this.message = {
+        author: {
+          id: data.user_id,
+          name: result.user.profile.real_name,
+          photo: result.user.profile.image_24
+        },
+        text: data.text,
+        date: new Date()
+      };
+      return androidPush.push(this.user, EVENT_CHAT_MESSAGE, this.message);
+    }).then(function() {
+      return this.slackClient.chat.postMessage(data.channel_id, this.message.text, {
+        username: this.message.author.name,
+        as_user: false
+      });
     });
   });
 };
