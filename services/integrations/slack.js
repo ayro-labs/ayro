@@ -253,7 +253,7 @@ exports.pushMessage = function(data) {
         author: {
           id: data.user_id,
           name: result.user.profile.real_name,
-          photo: result.user.profile.image_24
+          photo: result.user.profile.image_192
         },
         text: data.text,
         date: new Date()

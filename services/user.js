@@ -26,7 +26,7 @@ exports.createUser = function(app, data) {
     user.registration_date = new Date();
     user.name_generated = false;
     if (!user.first_name && !user.last_name) {
-      let names = _.split(randomName(), '');
+      let names = _.split(randomName(), ' ');
       user.first_name = names[0];
       user.last_name = names[1];
       user.name_generated = true;
