@@ -94,6 +94,7 @@ let User = new Schema({
   first_name: {type: String, required: false, trim: true},
   last_name: {type: String, required: false, trim: true},
   email: {type: String, required: false, trim: true},
+  photo_url: {type: String, required: false},
   identified: {type: String, required: true},
   name_generated: {type: String, required: true},
   properties: {type: Object, required: false},
