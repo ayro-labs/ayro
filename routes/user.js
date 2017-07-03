@@ -9,7 +9,7 @@ module.exports = function(router, app) {
 
   let updateUser = function(req, res, next) {
     userService.updateUser(req.user, req.body).then(function() {
-      res.json();
+      res.json({});
     }).catch(function(err) {
       logger.error(err);
       errors.respondWithError(res, err);
@@ -20,7 +20,7 @@ module.exports = function(router, app) {
     userService.getDevice(req.user, req.body.uid).then(function(device) {
       return userService.updateDevice(device, req.body);
     }).then(function(device) {
-      res.json();
+      res.json({});
     }).catch(function(err) {
       logger.error(err);
       errors.respondWithError(res, err);

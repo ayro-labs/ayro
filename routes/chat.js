@@ -9,7 +9,7 @@ module.exports = function(router, app) {
 
   let postMessage = function(req, res, next) {
     chatService.postMessage(req.user, req.params.platform, req.body).then(function() {
-      res.json();
+      res.json({});
     }).catch(function(err) {
       logger.error(err);
       errors.respondWithError(res, err);
@@ -18,7 +18,7 @@ module.exports = function(router, app) {
 
   let pushMessage = function(req, res, next) {
     chatService.pushMessage(req.params.channel, req.body).then(function() {
-      res.json();
+      res.json({});
     }).catch(function(err) {
       logger.error(err);
       errors.respondWithError(res, err);
