@@ -1,6 +1,6 @@
 'use strict';
 
-let accountService = require('../services/account'),
+let accountService = require('../apis/account'),
     logger = require('../utils/logger'),
     errors = require('../utils/errors');
 

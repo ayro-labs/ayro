@@ -36,12 +36,7 @@ exports.createUser = function(app, data) {
 };
 
 exports.updateUser = function(user, data) {
-  return Promise.resolve().then(function() {
-    if (data.first_name || data.last_name) {
-      data.name_generated = false;
-    }
-    return User.findByIdAndUpdate(user._id, data, {new: true, runValidators: true}).lean().exec();
-  });
+  return modelUtils.toObject(userCommons.updateUser(user, data));
 };
 
 exports.saveUser = function(app, data) {
@@ -69,21 +64,16 @@ exports.createDevice = function(user, data) {
 
 exports.updateDevice = function(device, data) {
   return Promise.resolve().then(function() {
-    delete data.uid;
     return Device.findByIdAndUpdate(device._id, data, {new: true, runValidators: true}).lean().exec();
   });
 };
 
 exports.saveDevice = function(user, data) {
-  return $.getDevice(user, data.uid).then(function(device) {
+  return userCommons.findDevice({user: user._id, uid: data.uid}).then(function(device) {
     if (!device) {
       return $.createDevice(user, data);
     } else {
       return $.updateDevice(device, data);
     }
   });
-};
-
-exports.getDevice = function(user, uid) {
-  return Device.findOne({user: user._id, uid: uid}).lean().exec();
 };

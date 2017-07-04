@@ -28,21 +28,21 @@ let getFallbackText = function(text) {
   return fallback;
 };
 
-let getUserInformationAttachment = function(user) {
+let getUserAttachment = function(user) {
   let information = [];
   let fields = [];
-  information.push('App: ' + user.app.name);
+  information.push(`App: ${user.app.name}`);
   if (user.identified) {
-    information.push('ID: ' + user.uid);
+    information.push(`ID: ${user.uid}`);
   }
   if (!user.name_generated) {
-    information.push('Name: ' + user.getFullName());
+    information.push(`Name: ${user.getFullName()}`);
   }
   if (user.email) {
-    information.push('Email: ' + user.email);
+    information.push(`Email: ${user.email}`);
   }
   if (user.sign_up_date) {
-    information.push('Signed up at: ' + user.sign_up_date);
+    information.push(`Signed up at: ${user.sign_up_date}`);
   }
   if (user.properties) {
     _.each(user.properties, function(value, key) {
@@ -58,22 +58,30 @@ let getUserInformationAttachment = function(user) {
   };
 };
 
-let getUserDeviceAttachment = function(user, platform) {
+let getDeviceAttachment = function(device) {
   let information = [];
   let fields = [];
-  let device = user.getDevice(platform);
   let deviceInfo = device.info;
-  information.push('Platform: ' + device.getPlatformName());
-  information.push('App version: ' + device.app_version + ' (' + device.app_id + ')');
+  information.push(`Platform: ${device.getPlatformName()}`);
   if (deviceInfo) {
-    if (device.isSmartphone() && deviceInfo.manufacturer && deviceInfo.model) {
-      information.push('Smartphone: ' + _.capitalize(deviceInfo.manufacturer) + ' ' + deviceInfo.model);
+    if (device.isSmartphone()) {
+      if (deviceInfo.app_id && deviceInfo.app_version) {
+        information.push(`App version: ${deviceInfo.app_version} (${deviceInfo.app_id})`);
+      }
+      if (deviceInfo.os_name && deviceInfo.os_version) {
+        information.push(`OS: ${deviceInfo.os_name} ${deviceInfo.os_version}`);
+      }
+      if (deviceInfo.manufacturer && deviceInfo.model) {
+        information.push(`Smartphone: ${_.capitalize(deviceInfo.manufacturer)} ${deviceInfo.model}`);
+      }
+      if (deviceInfo.carrier) {
+        information.push(`Carrier: ${deviceInfo.carrier}`);
+      }
     }
-    if (device.isSmartphone() && deviceInfo.os_name && deviceInfo.os_version) {
-      information.push('OS: ' + deviceInfo.os_name + ' ' + deviceInfo.os_version);
-    }
-    if (deviceInfo.carrier) {
-      information.push('Carrier: ' + deviceInfo.carrier);
+    if (device.isWeb()) {
+      if (deviceInfo.browser_name && deviceInfo.browser_version) {
+        information.push(`Browser: ${deviceInfo.browser_name} ${deviceInfo.browser_version}`);
+      }
     }
   }
   return {
@@ -85,10 +93,10 @@ let getUserDeviceAttachment = function(user, platform) {
   };
 };
 
-let createChannelAdvertisingUser = function(slackClient, user, platform, message, supportChannel) {
+let createChannelAdvertisingUser = function(slackClient, user, device, message, supportChannel) {
   return createChannel(slackClient, user).bind({}).tap(function(userChannel) {
     this.userChannel = userChannel;
-    return advertiseUser(slackClient, user, platform, message, supportChannel, userChannel);
+    return advertiseUser(slackClient, user, device, message, supportChannel, userChannel);
   }).tap(function() {
     return User.update({_id: user._id}, {extra: _.assign(user.extra || {}, {slack_channel: this.userChannel})}).exec();
   });
@@ -120,7 +128,7 @@ let createChannel = function(slackClient, user, conflict) {
   });
 };
 
-let advertiseUser = function(slackClient, user, platform, message, supportChannel, userChannel) {
+let advertiseUser = function(slackClient, user, device, message, supportChannel, userChannel) {
   return Promise.resolve().then(function() {
     let advertiseMessage = '*' + user.getFullName() + '* wants to talk with your team in <#' + userChannel.id + '|' + userChannel.name + '>';
     return slackClient.chat.postMessage(supportChannel.id, advertiseMessage, {
@@ -137,10 +145,7 @@ let advertiseUser = function(slackClient, user, platform, message, supportChanne
     return slackClient.chat.postMessage(userChannel.id, advertiseMessage, {
       username: CHATZ_BOT_USERNAME,
       as_user: false,
-      attachments: [
-        getUserInformationAttachment(user),
-        getUserDeviceAttachment(user, platform)
-      ]
+      attachments: [getUserAttachment(user), getDeviceAttachment(device)]
     });
   });
 };
@@ -161,9 +166,9 @@ let getChannel = function(slackClient, user) {
   });
 };
 
-let unarchiveChannelAdvertisingUser = function(slackClient, userChannel, user, platform, message, supportChannel) {
+let unarchiveChannelAdvertisingUser = function(slackClient, userChannel, user, device, message, supportChannel) {
   return slackClient.channels.unarchive(userChannel.id).then(function(result) {
-    return advertiseUser(slackClient, user, platform, message, supportChannel, userChannel);
+    return advertiseUser(slackClient, user, device, message, supportChannel, userChannel);
   }).then(function() {
     return userChannel;
   }).catch(function(err) {
@@ -216,21 +221,21 @@ exports.createChannel = function(app, channel) {
   });
 };
 
-exports.postMessage = function(user, configuration, platform, message) {
+exports.postMessage = function(user, device, configuration, message) {
   return Promise.resolve().bind({}).then(function() {
     this.slackClient = new SlackClient(configuration.api_token);
     if (user.extra && user.extra.slack_channel) {
       return getChannel(this.slackClient, user).bind(this).then(function(channel) {
         if (!channel) {
-          return createChannelAdvertisingUser(this.slackClient, user, platform, message, configuration.channel);
+          return createChannelAdvertisingUser(this.slackClient, user, device, message, configuration.channel);
         } else if (channel.archived) {
-          return unarchiveChannelAdvertisingUser(this.slackClient, channel, user, platform, message, configuration.channel);
+          return unarchiveChannelAdvertisingUser(this.slackClient, channel, user, device, message, configuration.channel);
         } else {
           return channel;
         }
       });
     } else {
-      return createChannelAdvertisingUser(this.slackClient, user, platform, message, configuration.channel);
+      return createChannelAdvertisingUser(this.slackClient, user, device, message, configuration.channel);
     }
   }).then(function(channel) {
     return this.slackClient.chat.postMessage(channel.id, message, {
@@ -241,7 +246,7 @@ exports.postMessage = function(user, configuration, platform, message) {
 };
 
 exports.pushMessage = function(data) {
-  return userCommons.findUser({'extra.slack_channel.id': data.channel_id}, {populate: 'app devices'}).bind({}).then(function(user) {
+  return userCommons.findUser({'extra.slack_channel.id': data.channel_id}, {populate: 'app latest_device'}).bind({}).then(function(user) {
     let integration = user.app.getIntegration(constants.integration.types.SLACK);
     if (!integration) {
       return;
@@ -258,7 +263,7 @@ exports.pushMessage = function(data) {
         text: data.text,
         date: new Date()
       };
-      return androidPush.push(this.user, EVENT_CHAT_MESSAGE, this.message);
+      return androidPush.push(this.user, this.user.latest_device, EVENT_CHAT_MESSAGE, this.message);
     }).then(function() {
       return this.slackClient.chat.postMessage(data.channel_id, this.message.text, {
         username: this.message.author.name,

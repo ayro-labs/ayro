@@ -23,7 +23,7 @@ let Account = new Schema({
 });
 
 let AccountSecretKey = new Schema({
-  account: {type: ObjectId, ref: 'Account'},
+  account: {type: ObjectId, ref: 'Account', required: true},
   secret: {type: String, required: true},
   registration_date: {type: Date, required: true}
 });
@@ -36,7 +36,7 @@ let Integration = new Schema({
 });
 
 let App = new Schema({
-  account: {type: ObjectId, ref: 'Account'},
+  account: {type: ObjectId, ref: 'Account', required: true},
   name: {type: String, required: true, trim: true},
   token: {type: String, required: true},
   integrations: {type: [Integration], required: false},
@@ -54,25 +54,29 @@ App.methods.listIntegrationsOfChannel = function(channel) {
 };
 
 let AppSecretKey = new Schema({
-  app: {type: ObjectId, ref: 'App'},
+  app: {type: ObjectId, ref: 'App', required: true},
   secret: {type: String, required: true},
   registration_date: {type: Date, required: true}
 });
 
 let DeviceInfo = new Schema({
+  // Android & iOS
+  app_id: {type: String, required: false},
+  app_version: {type: String, required: false},
+  os_name: {type: String, required: false},
+  os_version: {type: String, required: false},
   manufacturer: {type: String, required: false},
   model: {type: String, required: false},
   carrier: {type: String, required: false},
-  os_name: {type: String, required: false},
-  os_version: {type: String, required: false}
+  // Web
+  browser_name: {type: String, required: false},
+  browser_version: {type: String, required: false}
 });
 
 let Device = new Schema({
-  user: {type: ObjectId, ref: 'User'},
+  user: {type: ObjectId, ref: 'User', required: true},
   uid: {type: String, required: true},
   platform: {type: String, required: true},
-  app_id: {type: String, required: false},
-  app_version: {type: String, required: false},
   push_token: {type: String, required: false},
   info: {type: DeviceInfo, required: false},
   registration_date: {type: Date, required: true}
@@ -87,9 +91,18 @@ Device.methods.getPlatformName = function() {
 Device.methods.isSmartphone = function() {
   return _.includes([constants.device.platforms.ANDROID, constants.device.platforms.IOS], this.platform);
 };
+Device.methods.isAndroid = function() {
+  return this.platform === constants.device.platforms.ANDROID;
+};
+Device.methods.isIOS = function() {
+  return this.platform === constants.device.platforms.IOS;
+};
+Device.methods.isWeb = function() {
+  return this.platform === constants.device.platforms.WEB;
+};
 
 let User = new Schema({
-  app: {type: ObjectId, ref: 'App'},
+  app: {type: ObjectId, ref: 'App', required: true},
   uid: {type: String, required: true, index: true},
   first_name: {type: String, required: false, trim: true},
   last_name: {type: String, required: false, trim: true},
@@ -100,6 +113,7 @@ let User = new Schema({
   properties: {type: Object, required: false},
   extra: {type: Object, required: false},
   sign_up_date: {type: Date, required: false},
+  latest_device: {type: ObjectId, ref: 'Device', required: false},
   registration_date: {type: Date, required: true}
 });
 User.index({'extra.slack_channel.id': 1});
@@ -116,11 +130,6 @@ User.methods.getFullName = function() {
   } else {
     return '';
   }
-};
-User.methods.getDevice = function(platform) {
-  return this.devices.find(function(device) {
-    return device.platform === platform;
-  })
 };
 
 exports.Account = mongoose.model('Account', Account);

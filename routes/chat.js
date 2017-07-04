@@ -1,6 +1,6 @@
 'use strict';
 
-let chatService = require('../services/chat'),
+let chatService = require('../apis/chat'),
     isUserAuthenticated = require('../utils/middlewares').isUserAuthenticated,
     logger = require('../utils/logger'),
     errors = require('../utils/errors');
@@ -8,7 +8,7 @@ let chatService = require('../services/chat'),
 module.exports = function(router, app) {
 
   let postMessage = function(req, res, next) {
-    chatService.postMessage(req.user, req.params.platform, req.body).then(function() {
+    chatService.postMessage(req.user, req.device, req.body).then(function() {
       res.json({});
     }).catch(function(err) {
       logger.error(err);

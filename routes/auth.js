@@ -1,8 +1,8 @@
 'use strict';
 
-let accountService = require('../services/account'),
-    appService = require('../services/app'),
-    userService = require('../services/user'),
+let accountService = require('../apis/account'),
+    appService = require('../apis/app'),
+    userService = require('../apis/user'),
     logger = require('../utils/logger'),
     errors = require('../utils/errors'),
     _ = require('lodash');
@@ -24,7 +24,7 @@ module.exports = function(router, app) {
 
   let authenticateAccount = function(req, res, next) {
     accountService.authenticate(req.body.email, req.body.password).then(function(account) {
-      return createSession(req, {account: account});
+      return createSession(req, {account: {_id: account._id}});
     }).then(function(token) {
       res.json(token);
     }).catch(function(err) {
@@ -41,9 +41,15 @@ module.exports = function(router, app) {
       this.user = user;
       return userService.saveDevice(user, req.body.device);
     }).then(function(device) {
-      return createSession(req, {user: this.user});
+      return createSession(req, {
+        user: {_id: this.user._id},
+        device: {_id: device._id}
+      });
     }).then(function(token) {
-      res.json(token);
+      res.json({
+        token: token,
+        user: this.user
+      });
     }).catch(function(err) {
       logger.error(err);
       errors.respondWithError(res, err);

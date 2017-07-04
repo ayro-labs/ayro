@@ -30,10 +30,19 @@ exports.redis = {
   password: properties.getValue('redis.password')
 };
 
+exports.notifier = {
+  host: properties.getValue('notifier.host', '0.0.0.0'),
+  port: properties.getValue('notifier.port', 3100),
+  pubSub: {
+    host: properties.getValue('notifier.pubSub.host', '0.0.0.0'),
+    port: properties.getValue('notifier.pubSub.port', 3102)
+  }
+};
+
 exports.slack = {
-  client_id: '4332799729.201066840038',
-  client_secret: '1d8e1127054e9577da4cc6e25b83e74e',
-  verification_token: 'tHYsNNTDP00nL2HlqhAdEraQ'
+  clientId: '4332799729.201066840038',
+  clientSecret: '1d8e1127054e9577da4cc6e25b83e74e',
+  verificationToken: 'tHYsNNTDP00nL2HlqhAdEraQ'
 };
 
 logger.info('Using %s environment settings', this.env);
