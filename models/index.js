@@ -66,7 +66,7 @@ let Author = new Schema({
 });
 
 let ChatMessage = new Schema({
-  user: {type: ObjectId, ref: 'User', required: true},
+  device: {type: ObjectId, ref: 'Device', required: true},
   author: {type: Author, required: false},
   text: {type: String, required: true},
   direction: {type: String, required: true, enum: _.values(constants.chatMessage.directions)},

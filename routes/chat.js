@@ -7,6 +7,15 @@ let chatService = require('../services/chat'),
 
 module.exports = function(router, app) {
 
+  let listMessages = function(req, res, next) {
+    chatService.listMessages(req.device).then(function(messages) {
+      res.json(messages);
+    }).catch(function(err) {
+      logger.error(err);
+      errors.respondWithError(res, err);
+    });
+  };
+
   let postMessage = function(req, res, next) {
     chatService.postMessage(req.user, req.device, req.body).then(function() {
       res.json({});
@@ -25,6 +34,7 @@ module.exports = function(router, app) {
     });
   };
 
+  router.get('/', isUserAuthenticated, listMessages);
   router.post('/:platform', isUserAuthenticated, postMessage);
   router.post('/:channel/push', pushMessage);
 

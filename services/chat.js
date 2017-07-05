@@ -11,8 +11,8 @@ let User = require('../models').User,
 
 const EVENT_CHAT_MESSAGE = 'chat_message';
 
-exports.listMessages = function(user) {
-  return ChatMessage.find({user: user._id}).sort({date: 'desc'}).exec();
+exports.listMessages = function(device) {
+  return ChatMessage.find({device: device._id}).sort({date: 'desc'}).exec();
 };
 
 exports.postMessage = function(user, device, message) {
@@ -32,7 +32,7 @@ exports.postMessage = function(user, device, message) {
   }).then(function(user) {
     this.user = user;
     let chatMessage = new ChatMessage({
-      user: this.user._id,
+      device: this.device._id,
       text: message.text,
       direction: constants.chatMessage.directions.OUTGOING,
       date: new Date()
@@ -62,7 +62,7 @@ let getIntegrationService = function(channel) {
 let pushMessageToUser = function(service, integration, user, data) {
   return Promise.all([service.extractAuthor(data, integration), service.extractText(data)]).bind({}).spread(function(author, text) {
     let chatMessage = new ChatMessage({
-      user: user._id,
+      device: user.last_device._id,
       author: author,
       text: text,
       direction: constants.chatMessage.directions.INCOMING,
