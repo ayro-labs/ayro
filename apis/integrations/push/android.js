@@ -7,9 +7,10 @@ const ORIGIN_CHATZ = 'chatz';
 
 let fcmClient = restify.createJsonClient('https://fcm.googleapis.com/fcm/send');
 
-exports.push = function(user, device, event, message) {
+exports.push = function(user, event, message) {
   return new Promise(function(resolve, reject) {
-    let integration = user.app.getIntegration(constants.integration.types.ANDROID)
+    let device = user.latest_device;
+    let integration = user.app.getIntegration(constants.integration.types.ANDROID);
     if (!integration || !device.isAndroid() || !device.push_token) {
       resolve();
       return;
@@ -30,7 +31,7 @@ exports.push = function(user, device, event, message) {
       data: {
         origin: ORIGIN_CHATZ,
         event: event,
-        message: JSON.stringify(message)
+        message: message
       }
     };
     fcmClient.post(options, data, function(err, obj) {

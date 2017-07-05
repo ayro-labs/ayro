@@ -4,7 +4,7 @@ let integrations = require('.'),
     constants = require('../../utils/constants'),
     User = require('../../models').User,
     userCommons = require('../commons/user'),
-    androidPush = require('./push/android'),
+    push = require('./push'),
     SlackClient = require('@slack/client').WebClient,
     Promise = require('bluebird'),
     _ = require('lodash');
@@ -14,13 +14,6 @@ const EVENT_CHAT_MESSAGE = 'chat_message';
 const CHATZ_BOT_USERNAME = 'Chatz Bot'
 const CONFIG_SLACK = ['api_token', 'team', 'team_id', 'team_url', 'user', 'user_id', 'channel', 'channel_id'];
 const CONFIG_SLACK_UPDATE = ['channel', 'channel_id'];
-
-let checkAuthentication = function(apiToken) {
-  return Promise.resolve().then(function() {
-    var slackClient = new SlackClient(apiToken);
-    return slackClient.auth.test();
-  });
-};
 
 let getFallbackText = function(text) {
   let fallback = _.replace(text, /\*/g, '');
@@ -181,14 +174,16 @@ let unarchiveChannelAdvertisingUser = function(slackClient, userChannel, user, d
 };
 
 exports.add = function(app, apiToken) {
-  return checkAuthentication(apiToken).bind({}).then(function(authentication) {
+  return Promise.resolve().bind({}).then(function() {
+    this.slackClient = new SlackClient(apiToken);
+    return this.slackClient.auth.test();
+  }).then(function(result) {
     this.configuration = {
       api_token: apiToken,
-      team: {id: authentication.team_id, name: authentication.team, url: authentication.url},
-      user: {id: authentication.user_id, name: authentication.user}
+      team: {id: result.team_id, name: result.team, url: result.url},
+      user: {id: result.user_id, name: result.user}
     };
-    var slackClient = new SlackClient(apiToken);
-    return slackClient.channels.list({exclude_archived: true, exclude_members: true});
+    return this.slackClient.channels.list({exclude_archived: true, exclude_members: true});
   }).then(function(result) {
     let configuration = this.configuration;
     let channels = [];
@@ -198,12 +193,12 @@ exports.add = function(app, apiToken) {
       }
     });
     return integrations.add(app, constants.integration.types.SLACK, constants.integration.channels.BUSINESS, _.pick(configuration, CONFIG_SLACK));
-  })
+  });
 };
 
 exports.listChannels = function(app) {
   return integrations.getConfiguration(app, constants.integration.types.SLACK).then(function(configuration) {
-    var slackClient = new SlackClient(configuration.api_token);
+    let slackClient = new SlackClient(configuration.api_token);
     return slackClient.channels.list({exclude_archived: true, exclude_members: true});
   }).then(function(result) {
     let channels = [];
@@ -216,7 +211,7 @@ exports.listChannels = function(app) {
 
 exports.createChannel = function(app, channel) {
   return integrations.getConfiguration(app, constants.integration.types.SLACK).then(function(configuration) {
-    var slackClient = new SlackClient(configuration.api_token);
+    let slackClient = new SlackClient(configuration.api_token);
     return slackClient.channels.create({name: channel});
   });
 };
@@ -253,22 +248,22 @@ exports.pushMessage = function(data) {
     }
     this.user = user;
     this.slackClient = new SlackClient(integration.configuration.api_token);
-    return this.slackClient.users.info(data.user_id).bind(this).then(function(result) {
-      this.message = {
-        author: {
-          id: data.user_id,
-          name: result.user.profile.real_name,
-          photo: result.user.profile.image_192
-        },
-        text: data.text,
-        date: new Date()
-      };
-      return androidPush.push(this.user, this.user.latest_device, EVENT_CHAT_MESSAGE, this.message);
-    }).then(function() {
-      return this.slackClient.chat.postMessage(data.channel_id, this.message.text, {
-        username: this.message.author.name,
-        as_user: false
-      });
+    return this.slackClient.users.info(data.user_id);
+  }).then(function(result) {
+    this.message = {
+      author: {
+        id: data.user_id,
+        name: result.user.profile.real_name,
+        photo: result.user.profile.image_192
+      },
+      text: data.text,
+      date: new Date()
+    };
+    return push.message(this.user, EVENT_CHAT_MESSAGE, this.message);
+  }).then(function() {
+    return this.slackClient.chat.postMessage(data.channel_id, this.message.text, {
+      username: this.message.author.name,
+      as_user: false
     });
   });
 };

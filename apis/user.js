@@ -3,7 +3,6 @@
 let User = require('../models').User,
     Device = require('../models').Device,
     errors = require('../utils/errors'),
-    modelUtils = require('../utils/model'),
     userCommons = require('./commons/user'),
     randomName = require('node-random-name'),
     Promise = require('bluebird'),
@@ -31,12 +30,12 @@ exports.createUser = function(app, data) {
       user.last_name = names[1];
       user.name_generated = true;
     }
-    return modelUtils.toObject(user.save());
+    return user.save();
   });
 };
 
 exports.updateUser = function(user, data) {
-  return modelUtils.toObject(userCommons.updateUser(user, data));
+  return userCommons.updateUser(user, data);
 };
 
 exports.saveUser = function(app, data) {
@@ -58,18 +57,16 @@ exports.createDevice = function(user, data) {
     let device = new Device(data);
     device.user = user._id;
     device.registration_date = new Date();
-    return modelUtils.toObject(device.save());
+    return device.save();
   });
 };
 
 exports.updateDevice = function(device, data) {
-  return Promise.resolve().then(function() {
-    return Device.findByIdAndUpdate(device._id, data, {new: true, runValidators: true}).lean().exec();
-  });
+  return Device.findByIdAndUpdate(device._id, data, {new: true, runValidators: true}).exec();
 };
 
 exports.saveDevice = function(user, data) {
-  return userCommons.findDevice({user: user._id, uid: data.uid}).then(function(device) {
+  return userCommons.findDevice({user: user._id, uid: data.uid}, {require: false}).then(function(device) {
     if (!device) {
       return $.createDevice(user, data);
     } else {

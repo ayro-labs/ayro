@@ -3,11 +3,11 @@
 let App = require('../models').App,
     AppSecretKey = require('../models').AppSecretKey,
     constants = require('../utils/constants'),
-    modelUtils = require('../utils/model'),
     cryptography = require('../utils/cryptography'),
     integrations = require('./integrations'),
     slackIntegration = require('./integrations/slack'),
-    Promise = require('bluebird');
+    Promise = require('bluebird'),
+    _ = require('lodash');
 
 const CONFIG_WEBSITE = [];
 const CONFIG_ANDROID = ['fcm.server_key', 'fcm.sender_id'];
@@ -21,20 +21,20 @@ exports.createApp = function(account, name) {
       token: token,
       registration_date: new Date()
     });
-    return modelUtils.toObject(app.save());
+    return app.save();
   });
 };
 
 exports.getApp = function(id) {
-  return App.findById(id).lean().exec();
+  return App.findById(id).exec();
 };
 
 exports.getAppByToken = function(token) {
-  return App.findOne({token: token}).lean().exec();
+  return App.findOne({token: token}).exec();
 };
 
 exports.listApps = function(account) {
-  return App.find({account: account._id}).lean().exec();
+  return App.find({account: account._id}).exec();
 };
 
 exports.addWebsite = function(app, configuration) {

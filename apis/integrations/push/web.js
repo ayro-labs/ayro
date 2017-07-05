@@ -1,22 +1,24 @@
 'use strict';
 
-let constants = require('../../../utils/constants'),
+let settings = require('../../../configs/settings'),
+    constants = require('../../../utils/constants'),
     restify = require('restify');
 
 let notifierClient = restify.createJsonClient('http://' + settings.notifier.host + ':' + settings.notifier.port);
 
-exports.push = function(user, device, event, message) {
+exports.push = function(user, event, message) {
   return new Promise(function(resolve, reject) {
-    let integration = user.app.getIntegration(constants.integration.types.WEB)
+    let device = user.latest_device;
+    let integration = user.app.getIntegration(constants.integration.types.WEBSITE);
     if (!integration || !device.isWeb()) {
       resolve();
       return;
     }
     let data = {
       event: event,
-      message: JSON.stringify(message)
-    }
-    notifierClient.post(options, data, function(err, obj) {
+      message: message
+    };
+    notifierClient.post(`/users/${user._id}`, data, function(err, obj) {
       if (err) {
         reject(err);
       } else {

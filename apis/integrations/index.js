@@ -1,7 +1,6 @@
 'use strict';
 
 let appCommons = require('../commons/app'),
-    modelUtils = require('../../utils/model'),
     errors = require('../../utils/errors'),
     App = require('../../models').App,
     _ = require('lodash');
@@ -25,7 +24,7 @@ exports.add = function(app, type, channel, configuration) {
       configuration: configuration,
       registration_date: new Date()
     });
-    return modelUtils.toObject(app.save());
+    return app.save();
   });
 };
 
@@ -33,7 +32,7 @@ exports.update = function(app, type, configuration) {
   return appCommons.getApp(app._id).then(function(app) {
     let integration = getIntegration(app, type);
     _.assign(integration.configuration, configuration);
-    return modelUtils.toObject(app.save());
+    return app.save();
   });
 };
 
@@ -41,7 +40,7 @@ exports.remove = function(app, type) {
   return appCommons.getApp(app._id).then(function(app) {
     let integration = getIntegration(app, type);
     app.integrations.pull(integration._id);
-    return modelUtils.toObject(app.save());
+    return app.save();
   });
 };
 
