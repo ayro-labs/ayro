@@ -12,27 +12,27 @@ let User = require('../models').User,
 const EVENT_CHAT_MESSAGE = 'chat_message';
 
 exports.listMessages = function(device) {
-  return ChatMessage.find({device: device._id}).sort({date: 'desc'}).exec();
+  return ChatMessage.find({device: device.id}).sort({date: 'desc'}).exec();
 };
 
 exports.postMessage = function(user, device, message) {
   return Promise.all([
-    userCommons.getUser(user._id, {populate: 'app latest_device'}),
-    userCommons.getDevice(device._id)
+    userCommons.getUser(user.id, {populate: 'app latest_device'}),
+    userCommons.getDevice(device.id)
   ]).bind({}).spread(function(user, device) {
-    if (String(user._id) !== String(device.user)) {
+    if (String(user.id) !== String(device.user)) {
       throw errors.chatzError('device.unknown', 'Unknown device');
     }
     this.device = device;
-    if (!user.latest_device || String(user.latest_device._id) !== String(device._id)) {
-      return userCommons.updateUser(user, {latest_device: device._id});
+    if (!user.latest_device || user.latest_device.id !== device.id) {
+      return userCommons.updateUser(user, {latest_device: device.id});
     } else {
       return user;
     }
   }).then(function(user) {
     this.user = user;
     let chatMessage = new ChatMessage({
-      device: this.device._id,
+      device: this.device.id,
       text: message.text,
       direction: constants.chatMessage.directions.OUTGOING,
       date: new Date()
@@ -62,7 +62,7 @@ let getIntegrationService = function(channel) {
 let pushMessageToUser = function(service, integration, user, data) {
   return Promise.all([service.extractAuthor(data, integration), service.extractText(data)]).bind({}).spread(function(author, text) {
     let chatMessage = new ChatMessage({
-      device: user.last_device._id,
+      device: user.latest_device.id,
       author: author,
       text: text,
       direction: constants.chatMessage.directions.INCOMING,

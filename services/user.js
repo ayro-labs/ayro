@@ -21,7 +21,7 @@ exports.createUser = function(app, data) {
     }
     delete data._id;
     let user = new User(data);
-    user.app = app._id;
+    user.app = app.id;
     user.registration_date = new Date();
     user.name_generated = false;
     if (!user.first_name && !user.last_name) {
@@ -39,7 +39,7 @@ exports.updateUser = function(user, data) {
 };
 
 exports.saveUser = function(app, data) {
-  return userCommons.findUser({app: app._id, uid: data.uid}, {require: false}).then(function(user) {
+  return userCommons.findUser({app: app.id, uid: data.uid}, {require: false}).then(function(user) {
     if (!user) {
       return $.createUser(app, data);
     } else {
@@ -55,18 +55,18 @@ exports.createDevice = function(user, data) {
     }
     delete data._id;
     let device = new Device(data);
-    device.user = user._id;
+    device.user = user.id;
     device.registration_date = new Date();
     return device.save();
   });
 };
 
 exports.updateDevice = function(device, data) {
-  return Device.findByIdAndUpdate(device._id, data, {new: true, runValidators: true}).exec();
+  return Device.findByIdAndUpdate(device.id, data, {new: true, runValidators: true}).exec();
 };
 
 exports.saveDevice = function(user, data) {
-  return userCommons.findDevice({user: user._id, uid: data.uid}, {require: false}).then(function(device) {
+  return userCommons.findDevice({user: user.id, uid: data.uid}, {require: false}).then(function(device) {
     if (!device) {
       return $.createDevice(user, data);
     } else {

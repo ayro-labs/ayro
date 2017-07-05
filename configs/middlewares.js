@@ -20,7 +20,7 @@ exports.configure = function(app) {
   app.use(function(req, res, next) {
     if (req.session.account) {
       req.account = new Account(req.session.account);
-      logger.debug('%s %s Account %s', req.method, req.path, req.account._id);
+      logger.debug('%s %s Account %s', req.method, req.path, req.account.id);
     }
     next();
   });
@@ -29,7 +29,7 @@ exports.configure = function(app) {
   app.use(function(req, res, next) {
     if (req.session.user) {
       req.user = new User(req.session.user);
-      logger.debug('%s %s User %s', req.method, req.path, req.user._id);
+      logger.debug('%s %s User %s', req.method, req.path, req.user.id);
     }
     if (req.session.device) {
       req.device = new Device(req.session.device);

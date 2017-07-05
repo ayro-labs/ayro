@@ -14,7 +14,7 @@ let getIntegration = function(app, type) {
 };
 
 exports.add = function(app, type, channel, configuration) {
-  return appCommons.getApp(app._id).then(function(app) {
+  return appCommons.getApp(app.id).then(function(app) {
     if (app.getIntegration(type)) {
       throw errors.chatzError('integration.alreadyExists', 'Integration already exists');
     }
@@ -29,7 +29,7 @@ exports.add = function(app, type, channel, configuration) {
 };
 
 exports.update = function(app, type, configuration) {
-  return appCommons.getApp(app._id).then(function(app) {
+  return appCommons.getApp(app.id).then(function(app) {
     let integration = getIntegration(app, type);
     _.assign(integration.configuration, configuration);
     return app.save();
@@ -37,15 +37,15 @@ exports.update = function(app, type, configuration) {
 };
 
 exports.remove = function(app, type) {
-  return appCommons.getApp(app._id).then(function(app) {
+  return appCommons.getApp(app.id).then(function(app) {
     let integration = getIntegration(app, type);
-    app.integrations.pull(integration._id);
+    app.integrations.pull(integration.id);
     return app.save();
   });
 };
 
 exports.getConfiguration = function(app, type) {
-  return appCommons.getApp(app._id).then(function(app) {
+  return appCommons.getApp(app.id).then(function(app) {
     let integration = getIntegration(app, type);
     return integration.configuration;
   });

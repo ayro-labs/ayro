@@ -18,7 +18,7 @@ exports.push = function(user, event, message) {
       event: event,
       message: message
     };
-    notifierClient.post(`/users/${user._id}`, data, function(err, obj) {
+    notifierClient.post(`/users/${user.id}`, data, function(err, obj) {
       if (err) {
         reject(err);
       } else {

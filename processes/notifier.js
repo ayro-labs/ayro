@@ -47,7 +47,7 @@ let authentication = {
         }
         try {
           session = JSON.parse(session);
-          if (util.format(SUBSCRIPTION_PATTERN, session.user._id) === message.subscription) {
+          if (util.format(SUBSCRIPTION_PATTERN, session.user.id) === message.subscription) {
             callback(message);
           } else {
             emitAuthError(message, callback);

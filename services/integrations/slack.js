@@ -88,7 +88,7 @@ let createChannelAdvertisingUser = function(slackClient, user, device, message, 
     this.userChannel = userChannel;
     return advertiseUser(slackClient, user, device, message, supportChannel, userChannel);
   }).tap(function() {
-    return User.update({_id: user._id}, {extra: _.assign(user.extra || {}, {slack_channel: this.userChannel})}).exec();
+    return User.update({_id: user.id}, {extra: _.assign(user.extra || {}, {slack_channel: this.userChannel})}).exec();
   });
 };
 
@@ -101,7 +101,7 @@ let createChannel = function(slackClient, user, conflict) {
       channel = _.truncate(user.getFullName(), {length: 14, omission: ''});
       channel = channel + '-' + user.uid;
     } else {
-      channel = user._id;
+      channel = user.id;
     }
     channel = _.replace('ch-' + channel, /\s+/g);
     channel = _.truncate(channel, {length: 21, omission: ''});

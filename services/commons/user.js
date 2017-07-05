@@ -59,7 +59,7 @@ exports.updateUser = function(user, data) {
     if (data.first_name || data.last_name) {
       data.name_generated = false;
     }
-    return User.findByIdAndUpdate(user._id, data, {new: true, runValidators: true}).exec();
+    return User.findByIdAndUpdate(user.id, data, {new: true, runValidators: true}).exec();
   });
 };
 

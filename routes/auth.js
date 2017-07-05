@@ -24,7 +24,7 @@ module.exports = function(router, app) {
 
   let authenticateAccount = function(req, res, next) {
     accountService.authenticate(req.body.email, req.body.password).then(function(account) {
-      return createSession(req, {account: {_id: account._id}});
+      return createSession(req, {account: {_id: account.id}});
     }).then(function(token) {
       res.json(token);
     }).catch(function(err) {
@@ -42,8 +42,8 @@ module.exports = function(router, app) {
       return userService.saveDevice(user, req.body.device);
     }).then(function(device) {
       return createSession(req, {
-        user: {_id: this.user._id},
-        device: {_id: device._id}
+        user: {_id: this.user.id},
+        device: {_id: device.id}
       });
     }).then(function(token) {
       res.json({

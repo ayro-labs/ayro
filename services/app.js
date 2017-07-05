@@ -16,7 +16,7 @@ const CONFIG_IOS = [];
 exports.createApp = function(account, name) {
   return cryptography.generateId().then(function(token) {
     let app = new App({
-      account: account._id,
+      account: account.id,
       name: name,
       token: token,
       registration_date: new Date()
@@ -34,7 +34,7 @@ exports.getAppByToken = function(token) {
 };
 
 exports.listApps = function(account) {
-  return App.find({account: account._id}).exec();
+  return App.find({account: account.id}).exec();
 };
 
 exports.addWebsite = function(app, configuration) {
