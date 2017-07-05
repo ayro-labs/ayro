@@ -40,10 +40,10 @@ redisClient.auth(settings.redis.password, function(err) {
 
 app.use(session({
   client: redisClient,
-  secret: 'chatz',
-  keyspace: 'session:',
-  requestArg: 'token',
-  maxAge: Number.MAX_SAFE_INTEGER
+  secret: settings.session.secret,
+  keyspace: settings.session.prefix,
+  requestArg: settings.session.requestHeader,
+  maxAge: settings.session.maxAge
 }));
 
 middlewares.configure(app);

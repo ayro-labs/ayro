@@ -18,6 +18,13 @@ exports.website = 'www.' + this.domain;
 
 exports.websiteHttps = 'https://' + this.website;
 
+exports.session = {
+  secret: 'chatz.io',
+  prefix: 'session:',
+  requestHeader: 'token',
+  maxAge: Number.MAX_SAFE_INTEGER
+};
+
 exports.database = {
   host: properties.getValue('database.host', 'localhost'),
   port: properties.getValue('database.port', 27017),
