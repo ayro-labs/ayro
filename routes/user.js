@@ -1,6 +1,6 @@
 'use strict';
 
-let userService = require('../apis/user'),
+let userService = require('../services/user'),
     isUserAuthenticated = require('../utils/middlewares').isUserAuthenticated,
     logger = require('../utils/logger'),
     errors = require('../utils/errors');

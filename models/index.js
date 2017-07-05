@@ -59,6 +59,20 @@ let AppSecretKey = new Schema({
   registration_date: {type: Date, required: true}
 });
 
+let Author = new Schema({
+  id: {type: String, required: false},
+  name: {type: String, required: false},
+  photo_url: {type: String, required: false}
+});
+
+let ChatMessage = new Schema({
+  user: {type: ObjectId, ref: 'User', required: true},
+  author: {type: Author, required: false},
+  text: {type: String, required: true},
+  direction: {type: String, required: true, enum: _.values(constants.chatMessage.directions)},
+  date: {type: Date, required: true}
+}, {collection: 'chat_messages'});
+
 let DeviceInfo = new Schema({
   // Android & iOS
   app_id: {type: String, required: false},
@@ -136,5 +150,6 @@ exports.Account = mongoose.model('Account', Account);
 exports.AccountSecretKey = mongoose.model('AccountSecretKey', AccountSecretKey);
 exports.App = mongoose.model('App', App);
 exports.AppSecretKey = mongoose.model('AppSecretKey', AppSecretKey);
+exports.ChatMessage = mongoose.model('ChatMessage', ChatMessage);
 exports.Device = mongoose.model('Device', Device);
 exports.User = mongoose.model('User', User);

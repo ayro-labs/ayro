@@ -20,10 +20,6 @@ redisClient.auth(settings.redis.password, function(err) {
   }
 });
 
-let server = restify.createServer({name: 'Notifier'});
-server.use(restify.queryParser());
-server.use(restify.bodyParser());
-
 let emitAuthError = function(message, callback) {
   message.error = AUTH_ERROR;
   callback(message);
@@ -63,6 +59,10 @@ let authentication = {
     });
   }
 };
+
+let server = restify.createServer({name: 'Notifier'});
+server.use(restify.queryParser());
+server.use(restify.bodyParser());
 
 let pubSubServer = http.createServer();
 let bayeux = new faye.NodeAdapter({mount: '/'});

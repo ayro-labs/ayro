@@ -1,6 +1,6 @@
 'use strict';
 
-let chatService = require('../apis/chat'),
+let chatService = require('../services/chat'),
     isUserAuthenticated = require('../utils/middlewares').isUserAuthenticated,
     logger = require('../utils/logger'),
     errors = require('../utils/errors');

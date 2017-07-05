@@ -1,10 +1,15 @@
 'use strict';
 
-let userCommons = require('./commons/user'),
-    slackIntegration = require('./integrations/slack'),
+let ChatMessage = require('../models').ChatMessage,
     constants = require('../utils/constants'),
     errors = require('../utils/errors'),
+    userCommons = require('./commons/user'),
+    slackIntegration = require('./integrations/slack'),
     Promise = require('bluebird');
+
+exports.listMessages = function(user) {
+  return ChatMessage.find({user: user._id}).sort({date: 'desc'}).exec();
+};
 
 exports.postMessage = function(user, device, message) {
   return Promise.all([
@@ -21,12 +26,21 @@ exports.postMessage = function(user, device, message) {
       return user;
     }
   }).then(function(user) {
+    this.user = user;
+    let chatMessage = new ChatMessage({
+      user: this.user._id,
+      text: message.text,
+      direction: constants.chatMessage.directions.OUTGOING,
+      date: new Date()
+    });
+    return chatMessage.save();
+  }).then(function(chatMessage) {
     let context = this;
-    let integrations = user.app.listIntegrationsOfChannel(constants.integration.channels.BUSINESS);
+    let integrations = this.user.app.listIntegrationsOfChannel(constants.integration.channels.BUSINESS);
     integrations.forEach(function(integration) {
       switch (integration.type) {
         case constants.integration.types.SLACK:
-          return slackIntegration.postMessage(user, context.device, integration.configuration, message.text);
+          return slackIntegration.postMessage(context.user, context.device, integration.configuration, chatMessage.text);
       }
     });
   });

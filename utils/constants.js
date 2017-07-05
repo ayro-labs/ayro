@@ -20,3 +20,10 @@ exports.device = Object.freeze({
     IOS: 'ios'
   })
 });
+
+exports.chatMessage = Object.freeze({
+  directions: Object.freeze({
+    INCOMING: 'incoming',
+    OUTGOING: 'outgoing'
+  })
+});

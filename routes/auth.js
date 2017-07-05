@@ -1,8 +1,8 @@
 'use strict';
 
-let accountService = require('../apis/account'),
-    appService = require('../apis/app'),
-    userService = require('../apis/user'),
+let accountService = require('../services/account'),
+    appService = require('../services/app'),
+    userService = require('../services/user'),
     logger = require('../utils/logger'),
     errors = require('../utils/errors'),
     _ = require('lodash');
