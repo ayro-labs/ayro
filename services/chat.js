@@ -7,12 +7,15 @@ let User = require('../models').User,
     userCommons = require('./commons/user'),
     slack = require('./integrations/slack'),
     push = require('./integrations/push'),
-    Promise = require('bluebird');
+    Promise = require('bluebird'),
+    _ = require('lodash');
 
 const EVENT_CHAT_MESSAGE = 'chat_message';
 
 exports.listMessages = function(device) {
-  return ChatMessage.find({device: device.id}).sort({date: 'desc'}).exec();
+  return ChatMessage.find({device: device.id}).sort({date: 'desc'}).exec().then(function(chatMessages) {
+    return _.reverse(chatMessages);
+  });
 };
 
 exports.postMessage = function(user, device, message) {

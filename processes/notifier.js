@@ -2,23 +2,15 @@
 
 let settings = require('../configs/settings'),
     logger = require('../utils/logger'),
+    sessions = require('../utils/sessions'),
     http = require('http'),
     restify = require('restify'),
     faye = require('faye'),
-    redis = require('redis'),
-    jwt = require('jsonwebtoken'),
     util = require('util');
 
 const SUBSCRIPTION_PATTERN = '/users/%s';
 const SUBSCRIBE_CHANNEL = '/meta/subscribe';
 const AUTH_ERROR = 'api.token.invalid';
-
-let redisClient = redis.createClient(settings.redis.port, settings.redis.host);
-redisClient.auth(settings.redis.password, function(err) {
-  if (err) {
-    throw new Error('Error authenticating Redis client');
-  }
-});
 
 let emitAuthError = function(message, callback) {
   message.error = AUTH_ERROR;
@@ -35,27 +27,12 @@ let authentication = {
       emitAuthError(message, callback);
       return;
     }
-    jwt.verify(message.ext.api_token, settings.session.secret, function(err, decoded) {
-      if (err || !decoded.jti) {
-        emitAuthError(message, callback);
-        return;
+    sessions.getUser(message.ext.api_token).then(function(user) {
+      if (util.format(SUBSCRIPTION_PATTERN, user.id) === message.subscription) {
+        callback(message);
       }
-      redisClient.get(settings.session.prefix + decoded.jti, function(err, session) {
-        if (err || !session) {
-          emitAuthError(message, callback);
-          return;
-        }
-        try {
-          session = JSON.parse(session);
-          if (util.format(SUBSCRIPTION_PATTERN, session.user.id) === message.subscription) {
-            callback(message);
-          } else {
-            emitAuthError(message, callback);
-          }
-        } catch(err) {
-          emitAuthError(message, callback);
-        }
-      });
+    }).catch(function(err) {
+      emitAuthError(message, callback);
     });
   }
 };
