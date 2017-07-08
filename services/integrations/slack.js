@@ -262,8 +262,8 @@ exports.confirmMessage = function(data, integration, chatMessage) {
   return Promise.resolve().then(function() {
     let slackClient = new SlackClient(integration.configuration.api_token);
     return slackClient.chat.postMessage(data.channel_id, chatMessage.text, {
-      username: this.message.author.name,
+      username: chatMessage.author.name,
       as_user: false
     });
   });
-}
+};

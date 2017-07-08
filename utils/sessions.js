@@ -14,32 +14,35 @@ redisClient.auth(settings.redis.password, function(err) {
   }
 });
 
-let throwErrorGettingUser = function(cause) {
-  throw errors.chatzError('session.user.errorGetting', 'Couldn\'t get session user', cause);
+let createErrorGettingUserError = function(cause) {
+  return errors.chatzError('session.user.errorGetting', 'Couldn\'t get session user', cause);
 };
 
-let throwUserNotFound = function() {
-  throw errors.chatzError('session.user.notFound', 'Session user not found');
+let createUserNotFoundError = function() {
+  return errors.chatzError('session.user.notFound', 'Session user not found');
 };
 
 exports.getUser = function(token) {
-  return Promise.resolve().then(function() {
-    jwt.verify(message.ext.api_token, settings.session.secret, function(err, decoded) {
+  return new Promise(function(resolve, reject) {
+    jwt.verify(token, settings.session.secret, function(err, decoded) {
       if (err || !decoded.jti) {
-        throwErrorGettingUser(err);
+        reject(createErrorGettingUserError(err));
+        return;
       }
       redisClient.get(settings.session.prefix + decoded.jti, function(err, session) {
         if (err) {
-          throwErrorGettingUser(err);
+          reject(createErrorGettingUserError(err));
+          return;
         }
         if (!session) {
-          throwUserNotFound();
+          reject(createUserNotFoundError());
+          return;
         }
         try {
           let sessionData = JSON.parse(session);
-          return new User(sessionData.user);
+          resolve(new User(sessionData.user));
         } catch(err) {
-          throwErrorGettingUser(err);
+          reject(createErrorGettingUserError(err));
         }
       });
     });

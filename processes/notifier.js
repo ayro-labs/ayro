@@ -29,6 +29,7 @@ let authentication = {
     }
     sessions.getUser(message.ext.api_token).then(function(user) {
       if (util.format(SUBSCRIPTION_PATTERN, user.id) === message.subscription) {
+        logger.info('Subscribing user %s', user.id);
         callback(message);
       }
     }).catch(function(err) {

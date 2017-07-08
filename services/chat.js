@@ -34,13 +34,13 @@ exports.postMessage = function(user, device, message) {
     }
   }).then(function(user) {
     this.user = user;
-    let chatMessage = new ChatMessage({
+    this.chatMessage = new ChatMessage({
       device: this.device.id,
       text: message.text,
       direction: constants.chatMessage.directions.OUTGOING,
       date: new Date()
     });
-    return chatMessage.save();
+    return this.chatMessage.save();
   }).then(function(chatMessage) {
     let context = this;
     let integrations = this.user.app.listIntegrationsOfChannel(constants.integration.channels.BUSINESS);
@@ -50,6 +50,8 @@ exports.postMessage = function(user, device, message) {
           return slack.postMessage(context.user, context.device, integration.configuration, chatMessage.text);
       }
     });
+  }).then(function() {
+    return this.chatMessage;
   });
 };
 

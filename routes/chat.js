@@ -17,8 +17,8 @@ module.exports = function(router, app) {
   };
 
   let postMessage = function(req, res, next) {
-    chatService.postMessage(req.user, req.device, req.body).then(function() {
-      res.json({});
+    chatService.postMessage(req.user, req.device, req.body).then(function(chatMessage) {
+      res.json(chatMessage);
     }).catch(function(err) {
       logger.error(err);
       errors.respondWithError(res, err);
