@@ -1,10 +1,9 @@
-'use strict';
+const App = require('../../models').App;
+const errors = require('../../utils/errors');
+const Promise = require('bluebird');
+const _ = require('lodash');
 
-let App = require('../../models').App,
-    errors = require('../../utils/errors'),
-    Promise = require('bluebird');
-
-let fillQuery = function(promise, options) {
+function fillQuery(promise, options) {
   if (options) {
     if (!_.has(options, 'require')) {
       options.require = true;
@@ -16,20 +15,20 @@ let fillQuery = function(promise, options) {
       promise.lean();
     }
   }
-};
+}
 
-let throwAppNotFoundIfNeeded = function(app, options) {
+function throwAppNotFoundIfNeeded(app, options) {
   if (!app && (!options || options.require === true)) {
     throw errors.notFoundError('app.doesNotExist', 'App does not exist');
   }
-};
+}
 
-exports.getApp = function(id, options) {
-  return Promise.resolve().then(function() {
-    let promise = App.findById(id);
+exports.getApp = (id, options) => {
+  return Promise.resolve().then(() => {
+    const promise = App.findById(id);
     fillQuery(promise, options);
     return promise.exec();
-  }).then(function(app) {
+  }).then((app) => {
     throwAppNotFoundIfNeeded(app, options);
     return app;
   });

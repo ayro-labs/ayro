@@ -1,18 +1,16 @@
-'use strict';
+const accountService = require('../services/account');
+const appService = require('../services/app');
+const userService = require('../services/user');
+const logger = require('../utils/logger');
+const errors = require('../utils/errors');
+const _ = require('lodash');
 
-let accountService = require('../services/account'),
-    appService = require('../services/app'),
-    userService = require('../services/user'),
-    logger = require('../utils/logger'),
-    errors = require('../utils/errors'),
-    _ = require('lodash');
+module.exports = (router, app) => {
 
-module.exports = function(router, app) {
-
-  let createSession = function(req, data) {
-    return new Promise(function(resolve, reject) {
+  const createSession = (req, data) => {
+    return new Promise((resolve, reject) => {
       _.assign(req.session, data);
-      req.session.create(null, function(err, token) {
+      req.session.create(null, (err, token) => {
         if (err) {
           reject(err);
         } else {
@@ -22,35 +20,35 @@ module.exports = function(router, app) {
     });
   };
 
-  let authenticateAccount = function(req, res, next) {
-    accountService.authenticate(req.body.email, req.body.password).then(function(account) {
+  const authenticateAccount = (req, res) => {
+    accountService.authenticate(req.body.email, req.body.password).then((account) => {
       return createSession(req, {account: {_id: account.id}});
-    }).then(function(token) {
+    }).then((token) => {
       res.json(token);
-    }).catch(function(err) {
+    }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
     });
   };
 
-  let authenticateUser = function(req, res, next) {
-    appService.getAppByToken(req.body.app_token).bind({}).then(function(app) {
+  const authenticateUser = (req, res) => {
+    appService.getAppByToken(req.body.app_token).bind({}).then((app) => {
       userService.assignUserUid(req.body.user, req.body.device);
       return userService.saveUser(app, req.body.user);
-    }).then(function(user) {
+    }).then((user) => {
       this.user = user;
       return userService.saveDevice(user, req.body.device);
-    }).then(function(device) {
+    }).then((device) => {
       return createSession(req, {
         user: {_id: this.user.id},
-        device: {_id: device.id}
+        device: {_id: device.id},
       });
-    }).then(function(token) {
+    }).then((token) => {
       res.json({
-        token: token,
-        user: this.user
+        token,
+        user: this.user,
       });
-    }).catch(function(err) {
+    }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
     });

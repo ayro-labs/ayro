@@ -1,24 +1,22 @@
-'use strict';
+const express = require('express');
+const morgan = require('morgan');
+const compression = require('compression');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
+const redis = require('redis');
+const session = require('jwt-redis-session');
+const routes = require('./configs/routes');
+const middlewares = require('./configs/middlewares');
+const settings = require('./configs/settings');
+const logger = require('./utils/logger');
+const loggerServer = require('./utils/logger-server');
 
-let express = require('express'),
-    morgan = require('morgan'),
-    compression = require('compression'),
-    cookieParser = require('cookie-parser'),
-    bodyParser = require('body-parser'),
-    redis = require('redis'),
-    path = require('path'),
-    session = require('jwt-redis-session'),
-    routes = require('./configs/routes'),
-    middlewares = require('./configs/middlewares'),
-    settings = require('./configs/settings'),
-    logger = require('./utils/logger'),
-    loggerServer = require('./utils/logger-server');
+require('json.date-extensions');
 
 // Parse string to date when call JSON.parse
-require('json.date-extensions');
 JSON.useDateParser();
 
-let app = express();
+const app = express();
 
 app.set('env', settings.env);
 app.set('port', settings.port);
@@ -31,24 +29,27 @@ app.use(cookieParser());
 app.use(morgan('tiny', {stream: loggerServer.stream}));
 app.use(express.static(app.get('public')));
 
-let redisClient = redis.createClient(settings.redis.port, settings.redis.host);
-redisClient.auth(settings.redis.password, function(err) {
-  if (err) {
-    throw new Error('Error authenticating Redis client');
-  }
-});
+const redisClient = redis.createClient(settings.redis.port, settings.redis.host);
+if (settings.redis.password) {
+  redisClient.auth(settings.redis.password, (err) => {
+    if (err) {
+      logger.error('Could not authenticate to redis.', err);
+      process.exit(1);
+    }
+  });
+}
 
 app.use(session({
   client: redisClient,
   secret: settings.session.secret,
   keyspace: settings.session.prefix,
   requestArg: settings.session.requestHeader,
-  maxAge: settings.session.maxAge
+  maxAge: settings.session.maxAge,
 }));
 
 middlewares.configure(app);
 routes.configure(express, app);
 
-let server = app.listen(app.get('port'), function() {
+const server = app.listen(app.get('port'), () => {
   logger.info('Chatz server is listening on port %s', server.address().port);
 });

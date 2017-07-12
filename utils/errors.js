@@ -1,9 +1,7 @@
-'use strict';
+const settings = require('../configs/settings');
+const util = require('util');
 
-let settings = require('../configs/settings'),
-    util = require('util');
-
-let ChatzError = function(status, key, message, cause) {
+function ChatzError(status, key, message, cause) {
   if (!cause && ChatzError.super_.captureStackTrace) {
     ChatzError.super_.captureStackTrace(this, this.constructor);
   } else if (cause) {
@@ -14,36 +12,34 @@ let ChatzError = function(status, key, message, cause) {
   this.key = key;
   this.message = message;
   this.cause = cause;
-  this.json = function() {
-    let json = {status: this.status, key: this.key, message: this.message};
+  this.json = () => {
+    const json = {status: this.status, key: this.key, message: this.message};
     if (settings.debug === true && cause) {
       json.cause = cause.message;
     }
     return json;
   };
-  this.toString = function() {
-    return this.message;
-  };
-};
+  this.toString = () => this.message;
+}
 util.inherits(ChatzError, Error);
 
-exports.chatzError = function(key, message, cause) {
+exports.chatzError = (key, message, cause) => {
   return new ChatzError(400, key, message, cause);
 };
 
-exports.notFoundError = function(key, message, cause) {
+exports.notFoundError = (key, message, cause) => {
   return new ChatzError(404, key, message, cause);
 };
 
-exports.internalError = function(message, cause) {
+exports.internalError = (message, cause) => {
   return new ChatzError(500, 'internalError', message, cause);
 };
 
-exports.respondWithError = function(res, err) {
+exports.respondWithError = (res, err) => {
   if (err instanceof ChatzError) {
-    res.status(err.status).json(err.json())
+    res.status(err.status).json(err.json());
   } else {
-    let internal = this.internalError(err.message, err);
+    const internal = this.internalError(err.message, err);
     res.status(internal.status).json(internal.json());
   }
 };

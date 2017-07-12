@@ -1,16 +1,15 @@
-'use strict';
+const properties = require('properties');
+const path = require('path');
+const parse = require('deasync')(properties.parse);
 
-let properties = require('properties'),
-    path = require('path'),
-    parse = require('deasync')(properties.parse),
-    config = parse(path.join(__dirname, '../config.properties'), {path: true, sections: true});
+const config = parse(path.join(__dirname, '../config.properties'), {path: true, sections: true});
 
-exports.getValue = function(key, defaultValue) {
+exports.getValue = (key, defaultValue) => {
   let value = config;
   let found = true;
-  let splits = key.split('.');
-  for (let index = 0; index < splits.length; index++) {
-    let split = splits[index];
+  const splits = key.split('.');
+  for (let index = 0; index < splits.length; index + 1) {
+    const split = splits[index];
     if (!value[split]) {
       found = false;
       break;

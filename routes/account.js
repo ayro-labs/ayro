@@ -1,15 +1,13 @@
-'use strict';
+const accountService = require('../services/account');
+const logger = require('../utils/logger');
+const errors = require('../utils/errors');
 
-let accountService = require('../services/account'),
-    logger = require('../utils/logger'),
-    errors = require('../utils/errors');
+module.exports = (router, app) => {
 
-module.exports = function(router, app) {
-
-  let createAccount = function(req, res, next) {
-    accountService.createAccount(req.body.first_name, req.body.last_name, req.body.email, req.body.password).then(function(account) {
+  const createAccount = (req, res) => {
+    accountService.createAccount(req.body.first_name, req.body.last_name, req.body.email, req.body.password).then((account) => {
       res.json(account);
-    }).catch(function(err) {
+    }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
     });

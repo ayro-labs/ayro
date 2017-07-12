@@ -1,61 +1,59 @@
-'use strict';
-
-let User = require('../models').User,
-    ChatMessage = require('../models').ChatMessage,
-    constants = require('../utils/constants'),
-    errors = require('../utils/errors'),
-    userCommons = require('./commons/user'),
-    slack = require('./integrations/slack'),
-    push = require('./integrations/push'),
-    Promise = require('bluebird'),
-    _ = require('lodash');
+const ChatMessage = require('../models').ChatMessage;
+const constants = require('../utils/constants');
+const errors = require('../utils/errors');
+const userCommons = require('./commons/user');
+const slack = require('./integrations/slack');
+const push = require('./integrations/push');
+const Promise = require('bluebird');
+const _ = require('lodash');
 
 const EVENT_CHAT_MESSAGE = 'chat_message';
 
-exports.listMessages = function(device) {
-  return ChatMessage.find({device: device.id}).sort({date: 'desc'}).exec().then(function(chatMessages) {
+exports.listMessages = (device) => {
+  return ChatMessage.find({device: device.id}).sort({date: 'desc'}).exec().then((chatMessages) => {
     return _.reverse(chatMessages);
   });
 };
 
-exports.postMessage = function(user, device, message) {
+exports.postMessage = (user, device, message) => {
   return Promise.all([
     userCommons.getUser(user.id, {populate: 'app latest_device'}),
-    userCommons.getDevice(device.id)
-  ]).bind({}).spread(function(user, device) {
+    userCommons.getDevice(device.id),
+  ]).bind({}).spread((user, device) => {
     if (String(user.id) !== String(device.user)) {
       throw errors.chatzError('device.unknown', 'Unknown device');
     }
     this.device = device;
     if (!user.latest_device || user.latest_device.id !== device.id) {
       return userCommons.updateUser(user, {latest_device: device.id});
-    } else {
-      return user;
     }
-  }).then(function(user) {
+    return user;
+  }).then((user) => {
     this.user = user;
     this.chatMessage = new ChatMessage({
       device: this.device.id,
       text: message.text,
       direction: constants.chatMessage.directions.OUTGOING,
-      date: new Date()
+      date: new Date(),
     });
     return this.chatMessage.save();
-  }).then(function(chatMessage) {
-    let context = this;
-    let integrations = this.user.app.listIntegrationsOfChannel(constants.integration.channels.BUSINESS);
-    integrations.forEach(function(integration) {
+  }).then((chatMessage) => {
+    const context = this;
+    const integrations = this.user.app.listIntegrationsOfChannel(constants.integration.channels.BUSINESS);
+    integrations.forEach((integration) => {
       switch (integration.type) {
         case constants.integration.types.SLACK:
           return slack.postMessage(context.user, context.device, integration.configuration, chatMessage.text);
+        default:
+          return null;
       }
     });
-  }).then(function() {
+  }).then(() => {
     return this.chatMessage;
   });
 };
 
-let getIntegrationService = function(channel) {
+const getIntegrationService = (channel) => {
   switch (channel) {
     case constants.integration.types.SLACK:
       return slack;
@@ -64,37 +62,38 @@ let getIntegrationService = function(channel) {
   }
 };
 
-let pushMessageToUser = function(service, integration, user, data) {
-  return Promise.all([service.extractAuthor(data, integration), service.extractText(data)]).bind({}).spread(function(author, text) {
-    let chatMessage = new ChatMessage({
+const pushMessageToUser = (service, integration, user, data) => {
+  return Promise.all([service.extractAuthor(data, integration), service.extractText(data)]).bind({}).spread((author, text) => {
+    const chatMessage = new ChatMessage({
       device: user.latest_device.id,
-      author: author,
-      text: text,
+      author,
+      text,
       direction: constants.chatMessage.directions.INCOMING,
-      date: new Date()
+      date: new Date(),
     });
     return chatMessage.save();
-  }).then(function(chatMessage) {
+  }).then((chatMessage) => {
     this.chatMessage = chatMessage;
     return push.message(user, EVENT_CHAT_MESSAGE, chatMessage);
-  }).then(function() {
+  }).then(() => {
     return service.confirmMessage(data, integration, this.chatMessage);
   });
 };
 
-exports.pushMessage = function(channel, data) {
-  return Promise.resolve().then(function() {
-    let service = getIntegrationService(channel);
+exports.pushMessage = (channel, data) => {
+  return Promise.resolve().then(() => {
+    const service = getIntegrationService(channel);
     if (!service) {
-      return;
+      return null;
     }
-    return service.extractUser(data).then(function(user) {
+    return service.extractUser(data).then((user) => {
       return user.populate('app latest_device').execPopulate();
-    }).then(function(user) {
-      let integration = user.app.getIntegration(channel);
+    }).then((user) => {
+      const integration = user.app.getIntegration(channel);
       if (integration) {
         return pushMessageToUser(service, integration, user, data);
       }
+      return null;
     });
   });
 };

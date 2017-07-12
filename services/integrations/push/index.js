@@ -1,20 +1,29 @@
-'use strict';
+const constants = require('../../../utils/constants');
+const webPush = require('./web');
+const androidPush = require('./android');
+const iosPush = require('./ios');
 
-let constants = require('../../../utils/constants'),
-    webPush = require('./web'),
-    androidPush = require('./android'),
-    iosPush = require('./ios');
-
-exports.message = function(user, event, message) {
-  return Promise.resolve().then(function() {
-    let device = user.latest_device;
+exports.message = (user, event, message) => {
+  return Promise.resolve().then(() => {
+    const device = user.latest_device;
+    let promise;
     switch (device.platform) {
       case constants.device.platforms.WEB:
-        return webPush.push(user, event, message);
+        promise = webPush.push;
+        break;
       case constants.device.platforms.ANDROID:
-        return androidPush.push(user, event, message);
+        promise = androidPush.push;
+        break;
       case constants.device.platforms.IOS:
-        return iosPush.push(user, event, message);
+        promise = iosPush.push;
+        break;
+      default:
+        // Do nothing
+        break;
     }
+    if (promise) {
+      return promise(user, event, message);
+    }
+    return null;
   });
 };

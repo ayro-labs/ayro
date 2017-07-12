@@ -1,165 +1,163 @@
-'use strict';
+const appService = require('../services/app');
+const isAccountAuthenticated = require('../utils/middlewares').isAccountAuthenticated;
+const logger = require('../utils/logger');
+const errors = require('../utils/errors');
 
-let appService = require('../services/app'),
-    isAccountAuthenticated = require('../utils/middlewares').isAccountAuthenticated,
-    logger = require('../utils/logger'),
-    errors = require('../utils/errors');
+module.exports = (router, app) => {
 
-module.exports = function(router, app) {
-
-  let createApp = function(req, res, next) {
-    appService.createApp(req.account, req.body.name).then(function(app) {
+  const createApp = (req, res) => {
+    appService.createApp(req.account, req.body.name).then((app) => {
       res.json(app);
-    }).catch(function(err) {
+    }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
     });
   };
 
-  let listApps = function(req, res, next) {
-    appService.listApps(req.account).then(function(apps) {
+  const listApps = (req, res) => {
+    appService.listApps(req.account).then((apps) => {
       res.json(apps);
-    }).catch(function(err) {
+    }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
     });
   };
 
-  let addWebsite = function(req, res, next) {
-    let app = {_id: req.params.app};
-    appService.addWebsite(app, req.body).then(function(app) {
+  const addWebsite = (req, res) => {
+    const app = {_id: req.params.app};
+    appService.addWebsite(app, req.body).then((app) => {
       res.json(app);
-    }).catch(function(err) {
+    }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
     });
   };
 
-  let updateWebsite = function(req, res, next) {
-    let app = {_id: req.params.app};
-    appService.updateWebsite(app, req.body).then(function(app) {
+  const updateWebsite = (req, res) => {
+    const app = {_id: req.params.app};
+    appService.updateWebsite(app, req.body).then((app) => {
       res.json(app);
-    }).catch(function(err) {
+    }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
     });
   };
 
-  let removeWebsite = function(req, res, next) {
-    let app = {_id: req.params.app};
-    appService.removeWebsite(app).then(function(app) {
+  const removeWebsite = (req, res) => {
+    const app = {_id: req.params.app};
+    appService.removeWebsite(app).then((app) => {
       res.json(app);
-    }).catch(function(err) {
+    }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
     });
   };
 
-  let addAndroid = function(req, res, next) {
-    let app = {_id: req.params.app};
-    appService.addAndroid(app, req.body).then(function(app) {
+  const addAndroid = (req, res) => {
+    const app = {_id: req.params.app};
+    appService.addAndroid(app, req.body).then((app) => {
       res.json(app);
-    }).catch(function(err) {
+    }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
     });
   };
 
-  let updateAndroid = function(req, res, next) {
-    let app = {_id: req.params.app};
-    appService.updateAndroid(app, req.body).then(function(app) {
+  const updateAndroid = (req, res) => {
+    const app = {_id: req.params.app};
+    appService.updateAndroid(app, req.body).then((app) => {
       res.json(app);
-    }).catch(function(err) {
+    }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
     });
   };
 
-  let removeAndroid = function(req, res, next) {
-    let app = {_id: req.params.app};
-    appService.removeAndroid(app).then(function(app) {
+  const removeAndroid = (req, res) => {
+    const app = {_id: req.params.app};
+    appService.removeAndroid(app).then((app) => {
       res.json(app);
-    }).catch(function(err) {
+    }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
     });
   };
 
-  let addIOS = function(req, res, next) {
-    let app = {_id: req.params.app};
-    appService.addIOS(app, req.body).then(function(app) {
+  const addIOS = (req, res) => {
+    const app = {_id: req.params.app};
+    appService.addIOS(app, req.body).then((app) => {
       res.json(app);
-    }).catch(function(err) {
+    }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
     });
   };
 
-  let updateIOS = function(req, res, next) {
-    let app = {_id: req.params.app};
-    appService.updateIOS(app, req.body).then(function(app) {
+  const updateIOS = (req, res) => {
+    const app = {_id: req.params.app};
+    appService.updateIOS(app, req.body).then((app) => {
       res.json(app);
-    }).catch(function(err) {
+    }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
     });
   };
 
-  let removeIOS = function(req, res, next) {
-    let app = {_id: req.params.app};
-    appService.removeIOS(app).then(function(app) {
+  const removeIOS = (req, res) => {
+    const app = {_id: req.params.app};
+    appService.removeIOS(app).then((app) => {
       res.json(app);
-    }).catch(function(err) {
+    }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
     });
   };
 
-  let addSlack = function(req, res, next) {
-    let app = {_id: req.params.app};
-    appService.addSlack(app, req.body.api_token).then(function(app) {
+  const addSlack = (req, res) => {
+    const app = {_id: req.params.app};
+    appService.addSlack(app, req.body.api_token).then((app) => {
       res.json(app);
-    }).catch(function(err) {
+    }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
     });
   };
 
-  let updateSlack = function(req, res, next) {
-    let app = {_id: req.params.app};
-    appService.updateSlack(app, req.body).then(function(app) {
+  const updateSlack = (req, res) => {
+    const app = {_id: req.params.app};
+    appService.updateSlack(app, req.body).then((app) => {
       res.json(app);
-    }).catch(function(err) {
+    }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
     });
   };
 
-  let removeSlack = function(req, res, next) {
-    let app = {_id: req.params.app};
-    appService.removeSlack(app).then(function(app) {
+  const removeSlack = (req, res) => {
+    const app = {_id: req.params.app};
+    appService.removeSlack(app).then((app) => {
       res.json(app);
-    }).catch(function(err) {
+    }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
     });
   };
 
-  let listSlackChannels = function(req, res, next) {
-    let app = {_id: req.params.app};
-    appService.listSlackChannels(app).then(function(app) {
+  const listSlackChannels = (req, res) => {
+    const app = {_id: req.params.app};
+    appService.listSlackChannels(app).then((app) => {
       res.json(app);
-    }).catch(function(err) {
+    }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
     });
   };
 
-  let createSlackChannel = function(req, res, next) {
-    let app = {_id: req.params.app};
-    appService.createSlackChannel(app, req.body.channel).then(function(app) {
+  const createSlackChannel = (req, res) => {
+    const app = {_id: req.params.app};
+    appService.createSlackChannel(app, req.body.channel).then((app) => {
       res.json(app);
-    }).catch(function(err) {
+    }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
     });

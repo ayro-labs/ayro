@@ -1,40 +1,35 @@
-'use strict';
-
-let constants = require('../../../utils/constants'),
-    restify = require('restify');
+const constants = require('../../../utils/constants');
+const restify = require('restify');
 
 const ORIGIN_CHATZ = 'chatz';
+const TIME_TO_LIVE = 600;
 
-let fcmClient = restify.createJsonClient('https://fcm.googleapis.com/fcm/send');
+const fcmClient = restify.createJsonClient('https://fcm.googleapis.com/fcm/send');
 
-exports.push = function(user, event, message) {
-  return new Promise(function(resolve, reject) {
-    let device = user.latest_device;
-    let integration = user.app.getIntegration(constants.integration.types.ANDROID);
+exports.push = (user, event, message) => {
+  return new Promise((resolve, reject) => {
+    const device = user.latest_device;
+    const integration = user.app.getIntegration(constants.integration.types.ANDROID);
     if (!integration || !device.isAndroid() || !device.push_token) {
       resolve();
       return;
     }
-    let configuration = integration.configuration
+    const configuration = integration.configuration;
     if (!configuration || !configuration.fcm || !configuration.fcm.server_key) {
       resolve();
       return;
     }
-    let options = {
+    const options = {
       headers: {
-        Authorization: `key=${configuration.fcm.server_key}`
-      }
+        Authorization: `key=${configuration.fcm.server_key}`,
+      },
     };
-    let data = {
+    const data = {
       registration_ids: [device.push_token],
-      time_to_live: 600,
-      data: {
-        origin: ORIGIN_CHATZ,
-        event: event,
-        message: message
-      }
+      time_to_live: TIME_TO_LIVE,
+      data: {origin: ORIGIN_CHATZ, event, message},
     };
-    fcmClient.post(options, data, function(err, obj) {
+    fcmClient.post(options, data, (err, obj) => {
       if (err) {
         reject(err);
       } else {

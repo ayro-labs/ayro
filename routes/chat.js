@@ -1,34 +1,32 @@
-'use strict';
+const chatService = require('../services/chat');
+const isUserAuthenticated = require('../utils/middlewares').isUserAuthenticated;
+const logger = require('../utils/logger');
+const errors = require('../utils/errors');
 
-let chatService = require('../services/chat'),
-    isUserAuthenticated = require('../utils/middlewares').isUserAuthenticated,
-    logger = require('../utils/logger'),
-    errors = require('../utils/errors');
+module.exports = (router, app) => {
 
-module.exports = function(router, app) {
-
-  let listMessages = function(req, res, next) {
-    chatService.listMessages(req.device).then(function(messages) {
+  const listMessages = (req, res) => {
+    chatService.listMessages(req.device).then((messages) => {
       res.json(messages);
-    }).catch(function(err) {
+    }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
     });
   };
 
-  let postMessage = function(req, res, next) {
-    chatService.postMessage(req.user, req.device, req.body).then(function(chatMessage) {
+  const postMessage = (req, res) => {
+    chatService.postMessage(req.user, req.device, req.body).then((chatMessage) => {
       res.json(chatMessage);
-    }).catch(function(err) {
+    }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
     });
   };
 
-  let pushMessage = function(req, res, next) {
-    chatService.pushMessage(req.params.channel, req.body).then(function() {
+  const pushMessage = (req, res) => {
+    chatService.pushMessage(req.params.channel, req.body).then(() => {
       res.json({});
-    }).catch(function(err) {
+    }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
     });

@@ -1,16 +1,17 @@
-'use strict';
+const settings = require('../configs/settings');
+const Promise = require('bluebird');
+const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 
-let settings = require('../configs/settings'),
-    Promise = require('bluebird'),
-    bcrypt = require('bcrypt'),
-    crypto = require('crypto'),
-    $ = this;
+const $ = this;
 
 const ALGORITHM = 'aes-256-ctr';
+const ENCODING_UTF8 = 'utf8';
+const ENCODING_HEX = 'hex';
 
-exports.hash = function(data) {
-  return new Promise(function(resolve, reject) {
-    bcrypt.hash(data, 10, function(err, hash) {
+exports.hash = (data) => {
+  return new Promise((resolve, reject) => {
+    bcrypt.hash(data, 10, (err, hash) => {
       if (err) {
         reject(err);
       } else {
@@ -20,9 +21,9 @@ exports.hash = function(data) {
   });
 };
 
-exports.compare = function(data, hash) {
-  return new Promise(function(resolve, reject) {
-    bcrypt.compare(data, hash, function(err, equals) {
+exports.compare = (data, hash) => {
+  return new Promise((resolve, reject) => {
+    bcrypt.compare(data, hash, (err, equals) => {
       if (err) {
         reject(err);
       } else {
@@ -32,35 +33,35 @@ exports.compare = function(data, hash) {
   });
 };
 
-exports.encryptSync = function(text) {
-  let cipher = crypto.createCipher(ALGORITHM, settings.domain);
-  let crypted = cipher.update(text, 'utf8', 'hex');
-  crypted += cipher.final('hex');
+exports.encryptSync = (text) => {
+  const cipher = crypto.createCipher(ALGORITHM, settings.domain);
+  let crypted = cipher.update(text, ENCODING_UTF8, ENCODING_HEX);
+  crypted += cipher.final(ENCODING_HEX);
   return crypted;
 };
 
-exports.encrypt = function(text) {
-  return new Promise(function(resolve, reject) {
+exports.encrypt = (text) => {
+  return new Promise((resolve) => {
     resolve($.encryptSync(text));
   });
 };
 
-exports.decrypt = function(text) {
-  return new Promise(function(resolve, reject) {
-    let decipher = crypto.createDecipher(ALGORITHM, settings.domain);
-    let decrypted = decipher.update(text, 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
+exports.decrypt = (text) => {
+  return new Promise((resolve) => {
+    const decipher = crypto.createDecipher(ALGORITHM, settings.domain);
+    let decrypted = decipher.update(text, ENCODING_HEX, ENCODING_UTF8);
+    decrypted += decipher.final(ENCODING_UTF8);
     resolve(decrypted);
   });
 };
 
-exports.generateId = function() {
-  return new Promise(function(resolve, reject) {
-    crypto.randomBytes(25, function(err, buffer) {
+exports.generateId = () => {
+  return new Promise((resolve, reject) => {
+    crypto.randomBytes(25, (err, buffer) => {
       if (err) {
         reject(err);
       } else {
-        resolve(buffer.toString('hex'));
+        resolve(buffer.toString(ENCODING_HEX));
       }
     });
   });

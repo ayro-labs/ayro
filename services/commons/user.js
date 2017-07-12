@@ -1,12 +1,10 @@
-'use strict';
+const User = require('../../models').User;
+const Device = require('../../models').Device;
+const errors = require('../../utils/errors');
+const Promise = require('bluebird');
+const _ = require('lodash');
 
-let User = require('../../models').User,
-    Device = require('../../models').Device,
-    errors = require('../../utils/errors'),
-    Promise = require('bluebird'),
-    _ = require('lodash');
-
-let fillQuery = function(promise, options) {
+function fillQuery(promise, options) {
   if (options) {
     if (!_.has(options, 'require')) {
       options.require = true;
@@ -18,44 +16,44 @@ let fillQuery = function(promise, options) {
       promise.lean();
     }
   }
-};
+}
 
-let throwUserNotFoundIfNeeded = function(user, options) {
+function throwUserNotFoundIfNeeded(user, options) {
   if (!user && (!options || options.require === true)) {
     throw errors.notFoundError('user.doesNotExist', 'User does not exist');
   }
-};
+}
 
-let throwDeviceNotFoundIfNeeded = function(device, options) {
+function throwDeviceNotFoundIfNeeded(device, options) {
   if (!device && (!options || options.require === true)) {
     throw errors.notFoundError('device.doesNotExist', 'Device does not exist');
   }
-};
+}
 
-exports.getUser = function(id, options) {
-  return Promise.resolve().then(function() {
-    let promise = User.findById(id);
+exports.getUser = (id, options) => {
+  return Promise.resolve().then(() => {
+    const promise = User.findById(id);
     fillQuery(promise, options);
     return promise.exec();
-  }).then(function(user) {
+  }).then((user) => {
     throwUserNotFoundIfNeeded(user, options);
     return user;
   });
 };
 
-exports.findUser = function(query, options) {
-  return Promise.resolve().then(function() {
-    let promise = User.findOne(query);
+exports.findUser = (query, options) => {
+  return Promise.resolve().then(() => {
+    const promise = User.findOne(query);
     fillQuery(promise, options);
     return promise.exec();
-  }).then(function(user) {
+  }).then((user) => {
     throwUserNotFoundIfNeeded(user, options);
     return user;
   });
 };
 
-exports.updateUser = function(user, data) {
-  return Promise.resolve().then(function() {
+exports.updateUser = (user, data) => {
+  return Promise.resolve().then(() => {
     if (data.first_name || data.last_name) {
       data.name_generated = false;
     }
@@ -63,23 +61,23 @@ exports.updateUser = function(user, data) {
   });
 };
 
-exports.getDevice = function(id, options) {
-  return Promise.resolve().then(function() {
-    let promise = Device.findById(id);
+exports.getDevice = (id, options) => {
+  return Promise.resolve().then(() => {
+    const promise = Device.findById(id);
     fillQuery(promise, options);
     return promise.exec();
-  }).then(function(device) {
+  }).then((device) => {
     throwDeviceNotFoundIfNeeded(device, options);
     return device;
   });
 };
 
-exports.findDevice = function(query, options) {
-  return Promise.resolve().then(function() {
-    let promise = Device.findOne(query);
+exports.findDevice = (query, options) => {
+  return Promise.resolve().then(() => {
+    const promise = Device.findOne(query);
     fillQuery(promise, options);
     return promise.exec();
-  }).then(function(device) {
+  }).then((device) => {
     throwDeviceNotFoundIfNeeded(device, options);
     return device;
   });

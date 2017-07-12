@@ -1,24 +1,19 @@
-'use strict';
+const settings = require('../../../configs/settings');
+const constants = require('../../../utils/constants');
+const restify = require('restify');
 
-let settings = require('../../../configs/settings'),
-    constants = require('../../../utils/constants'),
-    restify = require('restify');
+const webcmClient = restify.createJsonClient(`http://${settings.webcm.host}:${settings.webcm.port}`);
 
-let notifierClient = restify.createJsonClient('http://' + settings.notifier.host + ':' + settings.notifier.port);
-
-exports.push = function(user, event, message) {
-  return new Promise(function(resolve, reject) {
-    let device = user.latest_device;
-    let integration = user.app.getIntegration(constants.integration.types.WEBSITE);
+exports.push = (user, event, message) => {
+  return new Promise((resolve, reject) => {
+    const device = user.latest_device;
+    const integration = user.app.getIntegration(constants.integration.types.WEBSITE);
     if (!integration || !device.isWeb()) {
       resolve();
       return;
     }
-    let data = {
-      event: event,
-      message: message
-    };
-    notifierClient.post(`/users/${user.id}`, data, function(err, obj) {
+    const data = {event, message};
+    webcmClient.post(`/push/${user.id}`, data, (err, obj) => {
       if (err) {
         reject(err);
       } else {

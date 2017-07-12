@@ -1,20 +1,19 @@
-'use strict';
+const properties = require('../configs/properties');
+const winston = require('winston');
+const path = require('path');
 
-let properties = require('../configs/properties'),
-    winston = require('winston'),
-    path = require('path');
+const level = properties.getValue('app.debug', false) ? 'debug' : 'info';
 
-let level = properties.getValue('app.debug', false) === true ? 'debug' : 'info';
-let logger = new (winston.Logger)({
+const logger = new (winston.Logger)({
   transports: [
-    new (winston.transports.Console)({timestamp: true, colorize: true, level: level, debugStdout: level === 'debug' ? true : false}),
-    new (winston.transports.File)({filename: path.join(__dirname, '../chatz.log'), level: level})
-  ]
+    new (winston.transports.Console)({level, timestamp: true, colorize: true, debugStdout: level === 'debug'}),
+    new (winston.transports.File)({level, filename: path.join(__dirname, '../chatz.log')}),
+  ],
 });
 
 module.exports = logger;
 module.exports.stream = {
-  write: function(message, encoding) {
+  write: (message) => {
     logger.debug(message);
-  }
+  },
 };

@@ -1,15 +1,18 @@
-'use strict';
+const logger = require('../utils/logger');
+const authRoutes = require('../routes/auth');
+const accountRoutes = require('../routes/account');
+const appRoutes = require('../routes/app');
+const userRoutes = require('../routes/user');
+const chatRoutes = require('../routes/chat');
 
-let logger = require('../utils/logger');
-
-exports.configure = function(express, app) {
+exports.configure = (express, app) => {
 
   logger.info('Configuring routes');
 
-  require('../routes/auth')(express.Router(), app);
-  require('../routes/account')(express.Router(), app);
-  require('../routes/app')(express.Router(), app);
-  require('../routes/user')(express.Router(), app);
-  require('../routes/chat')(express.Router(), app);
+  authRoutes(express.Router(), app);
+  accountRoutes(express.Router(), app);
+  appRoutes(express.Router(), app);
+  userRoutes(express.Router(), app);
+  chatRoutes(express.Router(), app);
 
 };

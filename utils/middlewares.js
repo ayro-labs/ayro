@@ -1,6 +1,4 @@
-'use strict';
-
-exports.isUserAuthenticated = function(req, res, next) {
+exports.isUserAuthenticated = (req, res, next) => {
   if (req.session.user) {
     next();
   } else {
@@ -8,7 +6,7 @@ exports.isUserAuthenticated = function(req, res, next) {
   }
 };
 
-exports.isAccountAuthenticated = function(req, res, next) {
+exports.isAccountAuthenticated = (req, res, next) => {
   if (req.session.account) {
     next();
   } else {
