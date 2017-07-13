@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node app.js",
-    "lint": "eslint '**/*.js'",
+    "lint": "eslint -c './eslint.json' '**/*.js'",
     "webcm": "node processes/webcm.js",
     "test": "mocha --timeout 20000"
   },
