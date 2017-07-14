@@ -7,7 +7,7 @@ const _ = require('lodash');
 
 module.exports = (router, app) => {
 
-  const createSession = (req, data) => {
+  function createSession(req, data) {
     return new Promise((resolve, reject) => {
       _.assign(req.session, data);
       req.session.create(null, (err, token) => {
@@ -18,20 +18,24 @@ module.exports = (router, app) => {
         }
       });
     });
-  };
+  }
 
-  const authenticateAccount = (req, res) => {
-    accountService.authenticate(req.body.email, req.body.password).then((account) => {
+  function authenticateAccount(req, res) {
+    accountService.authenticate(req.body.email, req.body.password).bind({}).then((account) => {
+      this.account = account;
       return createSession(req, {account: {_id: account.id}});
     }).then((token) => {
-      res.json(token);
+      res.json({
+        token,
+        account: this.account,
+      });
     }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
     });
-  };
+  }
 
-  const authenticateUser = (req, res) => {
+  function authenticateUser(req, res) {
     appService.getAppByToken(req.body.app_token).bind({}).then((app) => {
       userService.assignUserUid(req.body.user, req.body.device);
       return userService.saveUser(app, req.body.user);
@@ -52,7 +56,7 @@ module.exports = (router, app) => {
       logger.error(err);
       errors.respondWithError(res, err);
     });
-  };
+  }
 
   router.post('/accounts', authenticateAccount);
   router.post('/users', authenticateUser);

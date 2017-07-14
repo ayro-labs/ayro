@@ -12,10 +12,6 @@ exports.publicPath = properties.getValue('app.publicPath', path.join(__dirname, 
 
 exports.domain = 'chatz.io';
 
-exports.website = `www.${this.domain}`;
-
-exports.websiteHttps = `https://${this.website}`;
-
 exports.session = {
   secret: 'chatz.io',
   prefix: 'session:',
@@ -27,6 +23,7 @@ exports.database = {
   host: properties.getValue('database.host', 'localhost'),
   port: properties.getValue('database.port', 27017),
   schema: properties.getValue('database.schema', 'chatz'),
+  debug: properties.getValue('database.debug', false),
 };
 
 exports.redis = {

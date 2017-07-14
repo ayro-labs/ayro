@@ -5,23 +5,23 @@ const errors = require('../utils/errors');
 
 module.exports = (router, app) => {
 
-  const updateUser = (req, res) => {
+  function updateUser(req, res) {
     userService.updateUser(req.user, req.body).then(() => {
       res.json({});
     }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
     });
-  };
+  }
 
-  const updateDevice = (req, res) => {
+  function updateDevice(req, res) {
     userService.updateDevice(req.device, req.body).then(() => {
       res.json({});
     }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
     });
-  };
+  }
 
   router.put('/', isUserAuthenticated, updateUser);
   router.put('/devices', isUserAuthenticated, updateDevice);

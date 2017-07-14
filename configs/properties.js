@@ -8,7 +8,7 @@ exports.getValue = (key, defaultValue) => {
   let value = config;
   let found = true;
   const splits = key.split('.');
-  for (let index = 0; index < splits.length; index + 1) {
+  for (let index = 0; index < splits.length; index += 1) {
     const split = splits[index];
     if (!value[split]) {
       found = false;
@@ -16,5 +16,5 @@ exports.getValue = (key, defaultValue) => {
     }
     value = value[split];
   }
-  return found === true ? value : defaultValue;
+  return found ? value : defaultValue;
 };

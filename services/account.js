@@ -1,5 +1,6 @@
 const Account = require('../models').Account;
 const cryptography = require('../utils/cryptography');
+const errors = require('../utils/errors');
 
 exports.createAccount = (firstName, lastName, email, password) => {
   return cryptography.hash(password).then((hash) => {
@@ -16,9 +17,15 @@ exports.createAccount = (firstName, lastName, email, password) => {
 
 exports.authenticate = (email, password) => {
   return Account.findOne({email}).exec().bind({}).then((account) => {
+    if (!account) {
+      throw errors.chatzError('account.doesNotExist', 'Account does not exist');
+    }
     this.account = account;
     return account ? cryptography.compare(password, account.password) : false;
   }).then((equals) => {
-    return equals ? this.account : null;
+    if (!equals) {
+      throw errors.chatzError('account.auth.wrongPassword', 'Wrong account password');
+    }
+    return this.account;
   });
 };

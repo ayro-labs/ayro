@@ -9,13 +9,40 @@ const Schema = mongoose.Schema;
 const ObjectId = Schema.Types.ObjectId;
 
 mongoose.Promise = Promise;
-mongoose.set('debug', settings.debug);
+mongoose.set('debug', settings.database.debug);
 mongoose.connect(`mongodb://${settings.database.host}:${settings.database.port}/${settings.database.schema}`, {
   useMongoClient: true,
 }).catch((err) => {
   logger.error('Could not connect to mongodb.', err);
   process.exit(1);
 });
+
+function transform(ret, excludes) {
+  ret.id = ret._id;
+  _.forEach(excludes, (exclude) => {
+    delete ret[exclude];
+  });
+  delete ret._id;
+  delete ret.__v;
+  return ret;
+}
+
+function customize(schema, excludes) {
+  schema.virtual('id').set(function(id) {
+    this.set('_id', id);
+  });
+  schema.set('toJSON', {
+    transform: (doc, ret) => {
+      return transform(ret, excludes);
+    },
+  });
+  schema.set('toObject', {
+    transform: (doc, ret) => {
+      return transform(ret, excludes);
+    },
+  });
+  return schema;
+}
 
 const Account = new Schema({
   first_name: {type: String, required: true, trim: true},
@@ -149,10 +176,10 @@ User.methods.getFullName = function() {
   return fullName;
 };
 
-exports.Account = mongoose.model('Account', Account);
-exports.AccountSecretKey = mongoose.model('AccountSecretKey', AccountSecretKey);
-exports.App = mongoose.model('App', App);
-exports.AppSecretKey = mongoose.model('AppSecretKey', AppSecretKey);
-exports.ChatMessage = mongoose.model('ChatMessage', ChatMessage);
-exports.Device = mongoose.model('Device', Device);
-exports.User = mongoose.model('User', User);
+exports.Account = mongoose.model('Account', customize(Account, ['password']));
+exports.AccountSecretKey = mongoose.model('AccountSecretKey', customize(AccountSecretKey));
+exports.App = mongoose.model('App', customize(App));
+exports.AppSecretKey = mongoose.model('AppSecretKey', customize(AppSecretKey));
+exports.ChatMessage = mongoose.model('ChatMessage', customize(ChatMessage));
+exports.Device = mongoose.model('Device', customize(Device));
+exports.User = mongoose.model('User', customize(User));
