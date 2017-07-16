@@ -119,7 +119,7 @@ const DeviceInfo = new Schema({
 
 const Device = new Schema({
   user: {type: ObjectId, ref: 'User', required: true},
-  uid: {type: String, required: true},
+  uid: {type: String, required: true, index: {unique: true}},
   platform: {type: String, required: true},
   push_token: {type: String, required: false},
   info: {type: DeviceInfo, required: false},
@@ -146,7 +146,7 @@ Device.methods.isWeb = function() {
 
 const User = new Schema({
   app: {type: ObjectId, ref: 'App', required: true},
-  uid: {type: String, required: true, index: true},
+  uid: {type: String, required: true, index: {unique: true}},
   first_name: {type: String, required: false, trim: true},
   last_name: {type: String, required: false, trim: true},
   email: {type: String, required: false, trim: true},
