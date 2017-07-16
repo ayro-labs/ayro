@@ -19,13 +19,13 @@ function fillQuery(promise, options) {
 }
 
 function throwUserNotFoundIfNeeded(user, options) {
-  if (!user && (!options || options.require === true)) {
+  if (!user && (!options || options.require)) {
     throw errors.notFoundError('user.doesNotExist', 'User does not exist');
   }
 }
 
 function throwDeviceNotFoundIfNeeded(device, options) {
-  if (!device && (!options || options.require === true)) {
+  if (!device && (!options || options.require)) {
     throw errors.notFoundError('device.doesNotExist', 'Device does not exist');
   }
 }

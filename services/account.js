@@ -1,6 +1,7 @@
 const Account = require('../models').Account;
 const cryptography = require('../utils/cryptography');
 const errors = require('../utils/errors');
+const accountCommons = require('./commons/account');
 
 exports.createAccount = (name, email, password) => {
   return cryptography.hash(password).then((hash) => {
@@ -27,4 +28,8 @@ exports.authenticate = (email, password) => {
     }
     return this.account;
   });
+};
+
+exports.getAccount = (id) => {
+  return accountCommons.getAccount(id);
 };

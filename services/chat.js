@@ -76,7 +76,7 @@ const pushMessageToUser = (service, integration, user, data) => {
     this.chatMessage = chatMessage;
     return push.message(user, EVENT_CHAT_MESSAGE, chatMessage);
   }).then(() => {
-    return service.confirmMessage(data, integration, this.chatMessage);
+    return service.confirmMessage(data, integration, user, this.chatMessage);
   });
 };
 

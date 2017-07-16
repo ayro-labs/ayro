@@ -225,6 +225,7 @@ exports.postMessage = (user, device, configuration, message) => {
     return this.slackClient.chat.postMessage(channel.id, message, {
       username: user.getFullName() + (user.name_generated ? ' (Generated name)' : ''),
       as_user: false,
+      icon_url: user.photo_url,
     });
   });
 };
@@ -250,12 +251,13 @@ exports.extractText = (data) => {
   return Promise.resolve(data.text);
 };
 
-exports.confirmMessage = (data, integration, chatMessage) => {
+exports.confirmMessage = (data, integration, user, chatMessage) => {
   return Promise.resolve().then(() => {
     const slackClient = new SlackClient(integration.configuration.api_token);
     return slackClient.chat.postMessage(data.channel_id, chatMessage.text, {
-      username: chatMessage.author.name,
+      username: `${chatMessage.author.name} to ${user.getFullName()}`,
       as_user: false,
+      icon_url: chatMessage.author.photo_url,
     });
   });
 };
