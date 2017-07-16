@@ -1,3 +1,4 @@
+const App = require('../models').App;
 const appService = require('../services/app');
 const isAccountAuthenticated = require('../utils/middlewares').isAccountAuthenticated;
 const logger = require('../utils/logger');
@@ -23,8 +24,18 @@ module.exports = (router, app) => {
     });
   }
 
+  function deleteApp(req, res) {
+    const app = new App({id: req.params.app});
+    appService.deleteApp(req.account, app).then((app) => {
+      res.json(app);
+    }).catch((err) => {
+      logger.error(err);
+      errors.respondWithError(res, err);
+    });
+  }
+
   function addWebsite(req, res) {
-    const app = {_id: req.params.app};
+    const app = new App({id: req.params.app});
     appService.addWebsite(app, req.body).then((app) => {
       res.json(app);
     }).catch((err) => {
@@ -34,7 +45,7 @@ module.exports = (router, app) => {
   }
 
   function updateWebsite(req, res) {
-    const app = {_id: req.params.app};
+    const app = new App({id: req.params.app});
     appService.updateWebsite(app, req.body).then((app) => {
       res.json(app);
     }).catch((err) => {
@@ -44,7 +55,7 @@ module.exports = (router, app) => {
   }
 
   function removeWebsite(req, res) {
-    const app = {_id: req.params.app};
+    const app = new App({id: req.params.app});
     appService.removeWebsite(app).then((app) => {
       res.json(app);
     }).catch((err) => {
@@ -54,7 +65,7 @@ module.exports = (router, app) => {
   }
 
   function addAndroid(req, res) {
-    const app = {_id: req.params.app};
+    const app = new App({id: req.params.app});
     appService.addAndroid(app, req.body).then((app) => {
       res.json(app);
     }).catch((err) => {
@@ -64,7 +75,7 @@ module.exports = (router, app) => {
   }
 
   function updateAndroid(req, res) {
-    const app = {_id: req.params.app};
+    const app = new App({id: req.params.app});
     appService.updateAndroid(app, req.body).then((app) => {
       res.json(app);
     }).catch((err) => {
@@ -74,7 +85,7 @@ module.exports = (router, app) => {
   }
 
   function removeAndroid(req, res) {
-    const app = {_id: req.params.app};
+    const app = new App({id: req.params.app});
     appService.removeAndroid(app).then((app) => {
       res.json(app);
     }).catch((err) => {
@@ -84,7 +95,7 @@ module.exports = (router, app) => {
   }
 
   function addIOS(req, res) {
-    const app = {_id: req.params.app};
+    const app = new App({id: req.params.app});
     appService.addIOS(app, req.body).then((app) => {
       res.json(app);
     }).catch((err) => {
@@ -94,7 +105,7 @@ module.exports = (router, app) => {
   }
 
   function updateIOS(req, res) {
-    const app = {_id: req.params.app};
+    const app = new App({id: req.params.app});
     appService.updateIOS(app, req.body).then((app) => {
       res.json(app);
     }).catch((err) => {
@@ -104,7 +115,7 @@ module.exports = (router, app) => {
   }
 
   function removeIOS(req, res) {
-    const app = {_id: req.params.app};
+    const app = new App({id: req.params.app});
     appService.removeIOS(app).then((app) => {
       res.json(app);
     }).catch((err) => {
@@ -114,7 +125,7 @@ module.exports = (router, app) => {
   }
 
   function addSlack(req, res) {
-    const app = {_id: req.params.app};
+    const app = new App({id: req.params.app});
     appService.addSlack(app, req.body.api_token).then((app) => {
       res.json(app);
     }).catch((err) => {
@@ -124,7 +135,7 @@ module.exports = (router, app) => {
   }
 
   function updateSlack(req, res) {
-    const app = {_id: req.params.app};
+    const app = new App({id: req.params.app});
     appService.updateSlack(app, req.body).then((app) => {
       res.json(app);
     }).catch((err) => {
@@ -134,7 +145,7 @@ module.exports = (router, app) => {
   }
 
   function removeSlack(req, res) {
-    const app = {_id: req.params.app};
+    const app = new App({id: req.params.app});
     appService.removeSlack(app).then((app) => {
       res.json(app);
     }).catch((err) => {
@@ -144,7 +155,7 @@ module.exports = (router, app) => {
   }
 
   function listSlackChannels(req, res) {
-    const app = {_id: req.params.app};
+    const app = new App({id: req.params.app});
     appService.listSlackChannels(app).then((app) => {
       res.json(app);
     }).catch((err) => {
@@ -154,7 +165,7 @@ module.exports = (router, app) => {
   }
 
   function createSlackChannel(req, res) {
-    const app = {_id: req.params.app};
+    const app = new App({id: req.params.app});
     appService.createSlackChannel(app, req.body.channel).then((app) => {
       res.json(app);
     }).catch((err) => {
@@ -165,6 +176,7 @@ module.exports = (router, app) => {
 
   router.post('/', isAccountAuthenticated, createApp);
   router.get('/', isAccountAuthenticated, listApps);
+  router.delete('/:app', isAccountAuthenticated, deleteApp);
 
   router.post('/:app/integrations/website', isAccountAuthenticated, addWebsite);
   router.put('/:app/integrations/website', isAccountAuthenticated, updateWebsite);

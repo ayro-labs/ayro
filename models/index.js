@@ -45,9 +45,8 @@ function customize(schema, excludes) {
 }
 
 const Account = new Schema({
-  first_name: {type: String, required: true, trim: true},
-  last_name: {type: String, required: false, trim: true},
-  email: {type: String, required: true, trim: true},
+  name: {type: String, required: true, trim: true},
+  email: {type: String, required: true, trim: true, index: {unique: true}},
   password: {type: String, required: true},
   picture: {type: String, required: false},
   registration_date: {type: Date, required: true},
@@ -105,7 +104,7 @@ const ChatMessage = new Schema({
 }, {collection: 'chat_messages'});
 
 const DeviceInfo = new Schema({
-  // Android & iOS
+  // Android and iOS
   app_id: {type: String, required: false},
   app_version: {type: String, required: false},
   os_name: {type: String, required: false},

@@ -3,6 +3,7 @@ const constants = require('../utils/constants');
 const cryptography = require('../utils/cryptography');
 const integrations = require('./integrations');
 const slackIntegration = require('./integrations/slack');
+const appCommons = require('./commons/app');
 const _ = require('lodash');
 
 const CONFIG_WEBSITE = [];
@@ -19,6 +20,15 @@ exports.createApp = (account, name) => {
       registration_date: new Date(),
     });
     return app.save();
+  });
+};
+
+exports.deleteApp = (account, app) => {
+  return appCommons.getApp(app.id).then((app) => {
+    if (account.id !== app.account.id) {
+      throw errors.chatzError('app.delete.noPermission', 'Account do not have permission to delete this app');
+    }
+    return App.remove({_id: app.id});
   });
 };
 

@@ -5,7 +5,7 @@ const errors = require('../utils/errors');
 module.exports = (router, app) => {
 
   function createAccount(req, res) {
-    accountService.createAccount(req.body.first_name, req.body.last_name, req.body.email, req.body.password).then((account) => {
+    accountService.createAccount(req.body.name, req.body.email, req.body.password).then((account) => {
       res.json(account);
     }).catch((err) => {
       logger.error(err);

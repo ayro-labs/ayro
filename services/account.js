@@ -2,11 +2,10 @@ const Account = require('../models').Account;
 const cryptography = require('../utils/cryptography');
 const errors = require('../utils/errors');
 
-exports.createAccount = (firstName, lastName, email, password) => {
+exports.createAccount = (name, email, password) => {
   return cryptography.hash(password).then((hash) => {
     const account = new Account({
-      first_name: firstName,
-      last_name: lastName,
+      name,
       email,
       password: hash,
       registration_date: new Date(),

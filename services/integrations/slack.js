@@ -86,12 +86,12 @@ function createChannel(slackClient, user, conflict) {
     if (!conflict) {
       channel = user.getFullName();
     } else if (conflict === 1) {
-      channel = _.truncate(user.getFullName(), {length: 14, omission: ''});
-      channel = `${channel}-${user.uid}`;
+      channel = _.truncate(user.getFullName(), {length: 13, omission: ''});
+      channel += `-${user.uid}`;
     } else {
       channel = user.id;
     }
-    channel = _.replace(`ch-${channel}`, /\s+/g);
+    channel = _.replace(`chz-${channel}`, /\s+/g);
     channel = _.truncate(channel, {length: 21, omission: ''});
     channel = _.deburr(channel);
     return slackClient.channels.create(channel);
