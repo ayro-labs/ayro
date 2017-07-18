@@ -33,3 +33,14 @@ exports.getAccount = (id, options) => {
     return account;
   });
 };
+
+exports.findAccount = (query, options) => {
+  return Promise.resolve().then(() => {
+    const promise = Account.findOne(query);
+    fillQuery(promise, options);
+    return promise.exec();
+  }).then((account) => {
+    throwAccountNotFoundIfNeeded(account, options);
+    return account;
+  });
+};

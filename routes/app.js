@@ -24,6 +24,15 @@ module.exports = (router, app) => {
     });
   }
 
+  function getApp(req, res) {
+    appService.getApp(req.params.app).then((app) => {
+      res.json(app);
+    }).catch((err) => {
+      logger.error(err);
+      errors.respondWithError(res, err);
+    });
+  }
+
   function deleteApp(req, res) {
     const app = new App({id: req.params.app});
     appService.deleteApp(req.account, app).then((app) => {
@@ -176,6 +185,7 @@ module.exports = (router, app) => {
 
   router.post('/', isAccountAuthenticated, createApp);
   router.get('/', isAccountAuthenticated, listApps);
+  router.get('/:app', isAccountAuthenticated, getApp);
   router.delete('/:app', isAccountAuthenticated, deleteApp);
 
   router.post('/:app/integrations/website', isAccountAuthenticated, addWebsite);

@@ -16,10 +16,7 @@ exports.createAccount = (name, email, password) => {
 };
 
 exports.authenticate = (email, password) => {
-  return Account.findOne({email}).exec().bind({}).then((account) => {
-    if (!account) {
-      throw errors.chatzError('account.doesNotExist', 'Account does not exist');
-    }
+  return accountCommons.findAccount({email}).bind({}).then((account) => {
     this.account = account;
     return account ? cryptography.compare(password, account.password) : false;
   }).then((equals) => {
