@@ -9,7 +9,7 @@ const fcmClient = restify.createJsonClient('https://fcm.googleapis.com/fcm/send'
 exports.push = (user, event, message) => {
   return new Promise((resolve, reject) => {
     const device = user.latest_device;
-    const integration = user.app.getIntegration(constants.integration.types.ANDROID);
+    const integration = user.app.getIntegration(constants.integration.channels.ANDROID);
     if (!integration || !device.isAndroid() || !device.push_token) {
       resolve();
       return;

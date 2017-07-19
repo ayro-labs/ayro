@@ -183,12 +183,12 @@ exports.add = (app, apiToken) => {
         configuration.channel = {id: channel.id, name: channel.name};
       }
     });
-    return integrations.add(app, constants.integration.types.SLACK, constants.integration.channels.BUSINESS, _.pick(configuration, CONFIG_SLACK));
+    return integrations.add(app, constants.integration.channels.SLACK, constants.integration.types.BUSINESS, _.pick(configuration, CONFIG_SLACK));
   });
 };
 
 exports.listChannels = (app) => {
-  return integrations.getConfiguration(app, constants.integration.types.SLACK).then((configuration) => {
+  return integrations.getConfiguration(app, constants.integration.channels.SLACK).then((configuration) => {
     const slackClient = new SlackClient(configuration.api_token);
     return slackClient.channels.list({exclude_archived: true, exclude_members: true});
   }).then((result) => {
@@ -201,7 +201,7 @@ exports.listChannels = (app) => {
 };
 
 exports.createChannel = (app, channel) => {
-  return integrations.getConfiguration(app, constants.integration.types.SLACK).then((configuration) => {
+  return integrations.getConfiguration(app, constants.integration.channels.SLACK).then((configuration) => {
     const slackClient = new SlackClient(configuration.api_token);
     return slackClient.channels.create({name: channel});
   });

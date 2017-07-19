@@ -39,10 +39,10 @@ exports.postMessage = (user, device, message) => {
     return this.chatMessage.save();
   }).then((chatMessage) => {
     const context = this;
-    const integrations = this.user.app.listIntegrationsOfChannel(constants.integration.channels.BUSINESS);
+    const integrations = this.user.app.listIntegrations(constants.integration.types.BUSINESS);
     integrations.forEach((integration) => {
-      switch (integration.type) {
-        case constants.integration.types.SLACK:
+      switch (integration.channel) {
+        case constants.integration.channels.SLACK:
           return slack.postMessage(context.user, context.device, integration.configuration, chatMessage.text);
         default:
           return null;
@@ -55,7 +55,7 @@ exports.postMessage = (user, device, message) => {
 
 const getIntegrationService = (channel) => {
   switch (channel) {
-    case constants.integration.types.SLACK:
+    case constants.integration.channels.SLACK:
       return slack;
     default:
       return null;

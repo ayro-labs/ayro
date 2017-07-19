@@ -72,14 +72,14 @@ const App = new Schema({
   integrations: {type: [Integration], required: false},
   registration_date: {type: Date, required: true},
 });
-App.methods.getIntegration = function(type) {
+App.methods.getIntegration = function(channel) {
   return this.integrations.find(function(integration) {
-    return integration.type === type;
+    return integration.channel === channel;
   });
 };
-App.methods.listIntegrationsOfChannel = function(channel) {
+App.methods.listIntegrations = function(type) {
   return this.integrations.filter(function(integration) {
-    return integration.channel === channel;
+    return integration.type === type;
   });
 };
 

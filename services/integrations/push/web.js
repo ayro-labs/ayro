@@ -7,7 +7,7 @@ const webcmClient = restify.createJsonClient(`http://${settings.webcm.host}:${se
 exports.push = (user, event, message) => {
   return new Promise((resolve, reject) => {
     const device = user.latest_device;
-    const integration = user.app.getIntegration(constants.integration.types.WEBSITE);
+    const integration = user.app.getIntegration(constants.integration.channels.WEBSITE);
     if (!integration || !device.isWeb()) {
       resolve();
       return;

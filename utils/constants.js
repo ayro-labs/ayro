@@ -1,9 +1,9 @@
 exports.integration = Object.freeze({
-  channels: Object.freeze({
-    USER: 'user',
+  types: Object.freeze({
+    CUSTOMER: 'customer',
     BUSINESS: 'business',
   }),
-  types: Object.freeze({
+  channels: Object.freeze({
     WEBSITE: 'website',
     ANDROID: 'android',
     IOS: 'ios',

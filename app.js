@@ -20,14 +20,13 @@ const app = express();
 
 app.set('env', settings.env);
 app.set('port', settings.port);
-app.set('public', settings.publicPath);
 
 app.use(compression());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 app.use(morgan('tiny', {stream: loggerServer.stream}));
-app.use(express.static(app.get('public')));
+app.use(express.static(settings.publicPath));
 
 const redisClient = redis.createClient(settings.redis.port, settings.redis.host);
 if (settings.redis.password) {
@@ -50,6 +49,6 @@ app.use(session({
 middlewares.configure(app);
 routes.configure(express, app);
 
-const server = app.listen(app.get('port'), () => {
-  logger.info('Chatz server is listening on port %s', server.address().port);
+app.listen(app.get('port'), () => {
+  logger.info('Chatz server is listening on port %s', app.get('port'));
 });

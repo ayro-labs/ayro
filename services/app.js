@@ -45,39 +45,39 @@ exports.listApps = (account) => {
 };
 
 exports.addWebsite = (app, configuration) => {
-  return integrations.add(app, constants.integration.types.WEBSITE, constants.integration.channels.USER, _.pick(configuration, CONFIG_WEBSITE));
+  return integrations.add(app, constants.integration.channels.WEBSITE, constants.integration.types.CUSTOMER, _.pick(configuration, CONFIG_WEBSITE));
 };
 
 exports.updateWebsite = (app, configuration) => {
-  return integrations.update(app, constants.integration.types.WEBSITE, _.pick(configuration, CONFIG_WEBSITE));
+  return integrations.update(app, constants.integration.channels.WEBSITE, _.pick(configuration, CONFIG_WEBSITE));
 };
 
 exports.removeWebsite = (app) => {
-  return integrations.remove(app, constants.integration.types.WEBSITE);
+  return integrations.remove(app, constants.integration.channels.WEBSITE);
 };
 
 exports.addAndroid = (app, configuration) => {
-  return integrations.add(app, constants.integration.types.ANDROID, constants.integration.channels.USER, _.pick(configuration, CONFIG_ANDROID));
+  return integrations.add(app, constants.integration.channels.ANDROID, constants.integration.types.CUSTOMER, _.pick(configuration, CONFIG_ANDROID));
 };
 
 exports.updateAndroid = (app, configuration) => {
-  return integrations.update(app, constants.integration.types.ANDROID, _.pick(configuration, CONFIG_ANDROID));
+  return integrations.update(app, constants.integration.channels.ANDROID, _.pick(configuration, CONFIG_ANDROID));
 };
 
 exports.removeAndroid = (app) => {
-  return integrations.remove(app, constants.integration.types.ANDROID);
+  return integrations.remove(app, constants.integration.channels.ANDROID);
 };
 
 exports.addIOS = (app, configuration) => {
-  return integrations.add(app, constants.integration.types.IOS, constants.integration.channels.USER, _.pick(configuration, CONFIG_IOS));
+  return integrations.add(app, constants.integration.channels.IOS, constants.integration.types.CUSTOMER, _.pick(configuration, CONFIG_IOS));
 };
 
 exports.updateIOS = (app, configuration) => {
-  return integrations.update(app, constants.integration.types.IOS, _.pick(configuration, CONFIG_IOS));
+  return integrations.update(app, constants.integration.channels.IOS, _.pick(configuration, CONFIG_IOS));
 };
 
 exports.removeIOS = (app) => {
-  return integrations.remove(app, constants.integration.types.IOS);
+  return integrations.remove(app, constants.integration.channels.IOS);
 };
 
 exports.addSlack = (app, apiToken) => {
@@ -85,11 +85,11 @@ exports.addSlack = (app, apiToken) => {
 };
 
 exports.updateSlack = (app, configuration) => {
-  return integrations.update(app, constants.integration.types.SLACK, _.pick(configuration, CONFIG_SLACK_UPDATE));
+  return integrations.update(app, constants.integration.channels.SLACK, _.pick(configuration, CONFIG_SLACK_UPDATE));
 };
 
 exports.removeSlack = (app) => {
-  return integrations.remove(app, constants.integration.types.SLACK);
+  return integrations.remove(app, constants.integration.channels.SLACK);
 };
 
 exports.listSlackChannels = (app) => {
