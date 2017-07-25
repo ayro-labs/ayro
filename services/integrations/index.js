@@ -19,7 +19,7 @@ exports.add = (app, channel, type, configuration) => {
       channel,
       type,
       configuration,
-      registration_date: new Date()
+      registration_date: new Date(),
     });
     return app.save();
   });

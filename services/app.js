@@ -1,12 +1,13 @@
 const App = require('../models').App;
 const constants = require('../utils/constants');
 const cryptography = require('../utils/cryptography');
+const errors = require('../utils/errors');
 const integrations = require('./integrations');
 const slackIntegration = require('./integrations/slack');
 const appCommons = require('./commons/app');
 const _ = require('lodash');
 
-const CONFIG_WEBSITE = [];
+const CONFIG_WEB = [];
 const CONFIG_ANDROID = ['fcm.server_key', 'fcm.sender_id'];
 const CONFIG_IOS = [];
 const CONFIG_SLACK_UPDATE = ['channel', 'channel_id'];
@@ -44,51 +45,51 @@ exports.listApps = (account) => {
   return App.find({account: account.id}).exec();
 };
 
-exports.addWebsite = (app, configuration) => {
-  return integrations.add(app, constants.integration.channels.WEBSITE, constants.integration.types.CUSTOMER, _.pick(configuration, CONFIG_WEBSITE));
+exports.addWebIntegration = (app, configuration) => {
+  return integrations.add(app, constants.integration.channels.WEB, constants.integration.types.CUSTOMER, _.pick(configuration, CONFIG_WEB));
 };
 
-exports.updateWebsite = (app, configuration) => {
-  return integrations.update(app, constants.integration.channels.WEBSITE, _.pick(configuration, CONFIG_WEBSITE));
+exports.updateWebIntegration = (app, configuration) => {
+  return integrations.update(app, constants.integration.channels.WEB, _.pick(configuration, CONFIG_WEB));
 };
 
-exports.removeWebsite = (app) => {
-  return integrations.remove(app, constants.integration.channels.WEBSITE);
+exports.removeWebIntegration = (app) => {
+  return integrations.remove(app, constants.integration.channels.WEB);
 };
 
-exports.addAndroid = (app, configuration) => {
+exports.addAndroidIntegration = (app, configuration) => {
   return integrations.add(app, constants.integration.channels.ANDROID, constants.integration.types.CUSTOMER, _.pick(configuration, CONFIG_ANDROID));
 };
 
-exports.updateAndroid = (app, configuration) => {
+exports.updateAndroidIntegration = (app, configuration) => {
   return integrations.update(app, constants.integration.channels.ANDROID, _.pick(configuration, CONFIG_ANDROID));
 };
 
-exports.removeAndroid = (app) => {
+exports.removeAndroidIntegration = (app) => {
   return integrations.remove(app, constants.integration.channels.ANDROID);
 };
 
-exports.addIOS = (app, configuration) => {
+exports.addIOSIntegration = (app, configuration) => {
   return integrations.add(app, constants.integration.channels.IOS, constants.integration.types.CUSTOMER, _.pick(configuration, CONFIG_IOS));
 };
 
-exports.updateIOS = (app, configuration) => {
+exports.updateIOSIntegration = (app, configuration) => {
   return integrations.update(app, constants.integration.channels.IOS, _.pick(configuration, CONFIG_IOS));
 };
 
-exports.removeIOS = (app) => {
+exports.removeIOSIntegration = (app) => {
   return integrations.remove(app, constants.integration.channels.IOS);
 };
 
-exports.addSlack = (app, apiToken) => {
+exports.addSlackIntegration = (app, apiToken) => {
   return slackIntegration.add(app, apiToken);
 };
 
-exports.updateSlack = (app, configuration) => {
+exports.updateSlackIntegration = (app, configuration) => {
   return integrations.update(app, constants.integration.channels.SLACK, _.pick(configuration, CONFIG_SLACK_UPDATE));
 };
 
-exports.removeSlack = (app) => {
+exports.removeSlackIntegration = (app) => {
   return integrations.remove(app, constants.integration.channels.SLACK);
 };
 

@@ -57,7 +57,7 @@ exports.decrypt = (text) => {
 
 exports.generateId = () => {
   return new Promise((resolve, reject) => {
-    crypto.randomBytes(25, (err, buffer) => {
+    crypto.randomBytes(20, (err, buffer) => {
       if (err) {
         reject(err);
       } else {

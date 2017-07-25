@@ -4,7 +4,7 @@ exports.integration = Object.freeze({
     BUSINESS: 'business',
   }),
   channels: Object.freeze({
-    WEBSITE: 'website',
+    WEB: 'web',
     ANDROID: 'android',
     IOS: 'ios',
     SLACK: 'slack',
