@@ -47,7 +47,7 @@ module.exports = (router, app) => {
   function initWebIntegration(req, res) {
     appService.getAppByToken(req.body.app_token).then((app) => {
       if (!app.getIntegration(constants.integration.channels.WEB)) {
-        return appService.addWebIntegration(app, {});
+        return appService.addWebIntegration(app);
       }
       return app;
     }).then((app) => {
@@ -80,8 +80,8 @@ module.exports = (router, app) => {
 
   function initAndroidIntegration(req, res) {
     appService.getAppByToken(req.body.app_token).then((app) => {
-      if (!app.getIntegration(constants.integration.channels.WEB)) {
-        return appService.addAndroidIntegration(app, {});
+      if (!app.getIntegration(constants.integration.channels.ANDROID)) {
+        return appService.addAndroidIntegration(app);
       }
       return app;
     }).then((app) => {
@@ -115,7 +115,7 @@ module.exports = (router, app) => {
   function initIOSIntegration(req, res) {
     appService.getAppByToken(req.body.app_token).then((app) => {
       if (!app.getIntegration(constants.integration.channels.WEB)) {
-        return appService.addIOSIntegration(app, {});
+        return appService.addIOSIntegration(app);
       }
       return app;
     }).then((app) => {

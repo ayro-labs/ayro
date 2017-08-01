@@ -28,6 +28,9 @@ exports.add = (app, channel, type, configuration) => {
 exports.update = (app, channel, configuration) => {
   return appCommons.getApp(app.id).then((app) => {
     const integration = getIntegration(app, channel);
+    if (!integration.configuration) {
+      integration.configuration = {};
+    }
     _.assign(integration.configuration, configuration);
     return app.save();
   });

@@ -61,7 +61,7 @@ const AccountSecretKey = new Schema({
 const Integration = new Schema({
   type: {type: String, required: true, enum: _.values(constants.integration.types)},
   channel: {type: String, required: true, enum: _.values(constants.integration.channels)},
-  configuration: {type: Object, required: true},
+  configuration: {type: Object, required: false},
   registration_date: {type: Date, required: true},
 });
 
