@@ -7,7 +7,7 @@ const Promise = require('bluebird');
 const _ = require('lodash');
 
 const CHATZ_BOT_USERNAME = 'Chatz Bot';
-const CONFIG_SLACK = ['api_token', 'team', 'team_id', 'team_url', 'user', 'user_id', 'channel', 'channel_id'];
+const CONFIG_SLACK = ['access_token', 'team', 'team_id', 'team_url', 'user', 'user_id', 'channel', 'channel_id'];
 
 function getFallbackText(text) {
   let fallback = _.replace(text, /\*/g, '');
@@ -165,13 +165,13 @@ function unarchiveChannelAdvertisingUser(slackClient, userChannel, user, device,
   });
 }
 
-exports.add = (app, apiToken) => {
+exports.add = (app, accessToken) => {
   return Promise.resolve().bind({}).then(() => {
-    this.slackClient = new SlackClient(apiToken);
+    this.slackClient = new SlackClient(accessToken);
     return this.slackClient.auth.test();
   }).then((result) => {
     this.configuration = {
-      api_token: apiToken,
+      access_token: accessToken,
       team: {id: result.team_id, name: result.team, url: result.url},
       user: {id: result.user_id, name: result.user},
     };
@@ -189,7 +189,7 @@ exports.add = (app, apiToken) => {
 
 exports.listChannels = (app) => {
   return integrations.getConfiguration(app, constants.integration.channels.SLACK).then((configuration) => {
-    const slackClient = new SlackClient(configuration.api_token);
+    const slackClient = new SlackClient(configuration.access_token);
     return slackClient.channels.list({exclude_archived: true, exclude_members: true});
   }).then((result) => {
     const channels = [];
@@ -202,14 +202,14 @@ exports.listChannels = (app) => {
 
 exports.createChannel = (app, channel) => {
   return integrations.getConfiguration(app, constants.integration.channels.SLACK).then((configuration) => {
-    const slackClient = new SlackClient(configuration.api_token);
+    const slackClient = new SlackClient(configuration.access_token);
     return slackClient.channels.create({name: channel});
   });
 };
 
 exports.postMessage = (user, device, configuration, message) => {
   return Promise.resolve().bind({}).then(() => {
-    this.slackClient = new SlackClient(configuration.api_token);
+    this.slackClient = new SlackClient(configuration.access_token);
     if (user.extra && user.extra.slack_channel) {
       return getChannel(this.slackClient, user).bind(this).then((channel) => {
         if (!channel) {
@@ -236,7 +236,7 @@ exports.extractUser = (data) => {
 
 exports.extractAuthor = (data, integration) => {
   return Promise.resolve().then(() => {
-    const slackClient = new SlackClient(integration.configuration.api_token);
+    const slackClient = new SlackClient(integration.configuration.access_token);
     return slackClient.users.info(data.user_id);
   }).then((result) => {
     return {
@@ -253,7 +253,7 @@ exports.extractText = (data) => {
 
 exports.confirmMessage = (data, integration, user, chatMessage) => {
   return Promise.resolve().then(() => {
-    const slackClient = new SlackClient(integration.configuration.api_token);
+    const slackClient = new SlackClient(integration.configuration.access_token);
     return slackClient.chat.postMessage(data.channel_id, chatMessage.text, {
       username: `${chatMessage.author.name} to ${user.getFullName()}`,
       as_user: false,

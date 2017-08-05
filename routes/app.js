@@ -7,6 +7,15 @@ const errors = require('../utils/errors');
 
 module.exports = (router, app) => {
 
+  function listApps(req, res) {
+    appService.listApps(req.account).then((apps) => {
+      res.json(apps);
+    }).catch((err) => {
+      logger.error(err);
+      errors.respondWithError(res, err);
+    });
+  }
+
   function createApp(req, res) {
     appService.createApp(req.account, req.body.name).then((app) => {
       res.json(app);
@@ -16,9 +25,10 @@ module.exports = (router, app) => {
     });
   }
 
-  function listApps(req, res) {
-    appService.listApps(req.account).then((apps) => {
-      res.json(apps);
+  function updateApp(req, res) {
+    const app = new App({id: req.params.app});
+    appService.updateApp(req.account, app, req.body.name).then((app) => {
+      res.json(app);
     }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
@@ -44,10 +54,10 @@ module.exports = (router, app) => {
     });
   }
 
-  function initWebIntegration(req, res) {
+  function initWebsiteIntegration(req, res) {
     appService.getAppByToken(req.body.app_token).then((app) => {
-      if (!app.getIntegration(constants.integration.channels.WEB)) {
-        return appService.addWebIntegration(app);
+      if (!app.getIntegration(constants.integration.channels.WEBSITE)) {
+        return appService.addWebsiteIntegration(app);
       }
       return app;
     }).then((app) => {
@@ -58,9 +68,9 @@ module.exports = (router, app) => {
     });
   }
 
-  function updateWebIntegration(req, res) {
+  function updateWebsiteIntegration(req, res) {
     const app = new App({id: req.params.app});
-    appService.updateWebIntegration(app, req.body).then((app) => {
+    appService.updateWebsiteIntegration(app, req.body).then((app) => {
       res.json(app);
     }).catch((err) => {
       logger.error(err);
@@ -68,9 +78,9 @@ module.exports = (router, app) => {
     });
   }
 
-  function removeWebIntegration(req, res) {
+  function removeWebsiteIntegration(req, res) {
     const app = new App({id: req.params.app});
-    appService.removeWebIntegration(app).then((app) => {
+    appService.removeWebsiteIntegration(app).then((app) => {
       res.json(app);
     }).catch((err) => {
       logger.error(err);
@@ -114,7 +124,7 @@ module.exports = (router, app) => {
 
   function initIOSIntegration(req, res) {
     appService.getAppByToken(req.body.app_token).then((app) => {
-      if (!app.getIntegration(constants.integration.channels.WEB)) {
+      if (!app.getIntegration(constants.integration.channels.WEBSITE)) {
         return appService.addIOSIntegration(app);
       }
       return app;
@@ -148,7 +158,7 @@ module.exports = (router, app) => {
 
   function addSlackIntegration(req, res) {
     const app = new App({id: req.params.app});
-    appService.addSlackIntegration(app, req.body.api_token).then((app) => {
+    appService.addSlackIntegration(app, req.body.access_token).then((app) => {
       res.json(app);
     }).catch((err) => {
       logger.error(err);
@@ -196,14 +206,15 @@ module.exports = (router, app) => {
     });
   }
 
-  router.post('/', isAccountAuthenticated, createApp);
   router.get('/', isAccountAuthenticated, listApps);
+  router.post('/', isAccountAuthenticated, createApp);
+  router.put('/:app', isAccountAuthenticated, updateApp);
   router.get('/:app', isAccountAuthenticated, getApp);
   router.delete('/:app', isAccountAuthenticated, deleteApp);
 
-  router.post('/integrations/web/init', isAccountAuthenticated, initWebIntegration);
-  router.put('/:app/integrations/web', isAccountAuthenticated, updateWebIntegration);
-  router.delete('/:app/integrations/web', isAccountAuthenticated, removeWebIntegration);
+  router.post('/integrations/website/init', isAccountAuthenticated, initWebsiteIntegration);
+  router.put('/:app/integrations/website', isAccountAuthenticated, updateWebsiteIntegration);
+  router.delete('/:app/integrations/website', isAccountAuthenticated, removeWebsiteIntegration);
 
   router.post('/integrations/android/init', isAccountAuthenticated, initAndroidIntegration);
   router.put('/:app/integrations/android', isAccountAuthenticated, updateAndroidIntegration);

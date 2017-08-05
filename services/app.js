@@ -7,7 +7,7 @@ const slackIntegration = require('./integrations/slack');
 const appCommons = require('./commons/app');
 const _ = require('lodash');
 
-const CONFIG_WEB = [];
+const CONFIG_WEBSITE = [];
 const CONFIG_ANDROID = ['fcm.server_key', 'fcm.sender_id'];
 const CONFIG_IOS = [];
 const CONFIG_SLACK_UPDATE = ['channel', 'channel_id'];
@@ -22,6 +22,10 @@ exports.createApp = (account, name) => {
     });
     return app.save();
   });
+};
+
+exports.updateApp = (account, app, name) => {
+  return App.findByIdAndUpdate(app.id, {name}, {new: true, runValidators: true}).exec();
 };
 
 exports.deleteApp = (account, app) => {
@@ -45,16 +49,16 @@ exports.listApps = (account) => {
   return App.find({account: account.id}).exec();
 };
 
-exports.addWebIntegration = (app, configuration) => {
-  return integrations.add(app, constants.integration.channels.WEB, constants.integration.types.CUSTOMER, _.pick(configuration, CONFIG_WEB));
+exports.addWebsiteIntegration = (app, configuration) => {
+  return integrations.add(app, constants.integration.channels.WEBSITE, constants.integration.types.CUSTOMER, _.pick(configuration, CONFIG_WEBSITE));
 };
 
-exports.updateWebIntegration = (app, configuration) => {
-  return integrations.update(app, constants.integration.channels.WEB, _.pick(configuration, CONFIG_WEB));
+exports.updateWebsiteIntegration = (app, configuration) => {
+  return integrations.update(app, constants.integration.channels.WEBSITE, _.pick(configuration, CONFIG_WEBSITE));
 };
 
-exports.removeWebIntegration = (app) => {
-  return integrations.remove(app, constants.integration.channels.WEB);
+exports.removeWebsiteIntegration = (app) => {
+  return integrations.remove(app, constants.integration.channels.WEBSITE);
 };
 
 exports.addAndroidIntegration = (app, configuration) => {
@@ -81,8 +85,8 @@ exports.removeIOSIntegration = (app) => {
   return integrations.remove(app, constants.integration.channels.IOS);
 };
 
-exports.addSlackIntegration = (app, apiToken) => {
-  return slackIntegration.add(app, apiToken);
+exports.addSlackIntegration = (app, accessToken) => {
+  return slackIntegration.add(app, accessToken);
 };
 
 exports.updateSlackIntegration = (app, configuration) => {

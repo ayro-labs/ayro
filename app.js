@@ -4,10 +4,10 @@ const routes = require('./configs/routes');
 const logger = require('./utils/logger');
 const loggerServer = require('./utils/logger-server');
 const express = require('express');
-const morgan = require('morgan');
 const compression = require('compression');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
+const morgan = require('morgan');
 const redis = require('redis');
 const session = require('jwt-redis-session');
 
