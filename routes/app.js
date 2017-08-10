@@ -1,9 +1,13 @@
 const App = require('../models').App;
 const appService = require('../services/app');
-const isAccountAuthenticated = require('../utils/middlewares').isAccountAuthenticated;
+const settings = require('../configs/settings');
 const constants = require('../utils/constants');
 const logger = require('../utils/logger');
 const errors = require('../utils/errors');
+const isAccountAuthenticated = require('../utils/middlewares').isAccountAuthenticated;
+const multer = require('multer');
+
+const upload = multer({dest: settings.appIconPath});
 
 module.exports = (router, app) => {
 
@@ -28,6 +32,16 @@ module.exports = (router, app) => {
   function updateApp(req, res) {
     const app = new App({id: req.params.app});
     appService.updateApp(req.account, app, req.body.name).then((app) => {
+      res.json(app);
+    }).catch((err) => {
+      logger.error(err);
+      errors.respondWithError(res, err);
+    });
+  }
+
+  function updateAppIcon(req, res) {
+    const app = new App({id: req.params.app});
+    appService.updateAppIcon(req.account, app, req.file).then((app) => {
       res.json(app);
     }).catch((err) => {
       logger.error(err);
@@ -209,6 +223,7 @@ module.exports = (router, app) => {
   router.get('/', isAccountAuthenticated, listApps);
   router.post('/', isAccountAuthenticated, createApp);
   router.put('/:app', isAccountAuthenticated, updateApp);
+  router.put('/:app/icon', [isAccountAuthenticated, upload.single('icon')], updateAppIcon);
   router.get('/:app', isAccountAuthenticated, getApp);
   router.delete('/:app', isAccountAuthenticated, deleteApp);
 

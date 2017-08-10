@@ -1,10 +1,13 @@
 const App = require('../models').App;
+const settings = require('../configs/settings');
 const constants = require('../utils/constants');
 const cryptography = require('../utils/cryptography');
 const errors = require('../utils/errors');
 const integrations = require('./integrations');
 const slackIntegration = require('./integrations/slack');
 const appCommons = require('./commons/app');
+const path = require('path');
+const fs = require('fs');
 const _ = require('lodash');
 
 const CONFIG_WEBSITE = [];
@@ -25,12 +28,36 @@ exports.createApp = (account, name) => {
 };
 
 exports.updateApp = (account, app, name) => {
-  return App.findByIdAndUpdate(app.id, {name}, {new: true, runValidators: true}).exec();
+  return appCommons.getApp(app.id).then((app) => {
+    if (account.id !== app.account.toString()) {
+      throw errors.chatzError('app.delete.noPermission', 'Account do not have permission to update this app');
+    }
+    return App.findByIdAndUpdate(app.id, {name}, {new: true, runValidators: true}).exec();
+  });
+};
+
+exports.updateAppIcon = (account, app, icon) => {
+  return appCommons.getApp(app.id).then((app) => {
+    if (account.id !== app.account.toString()) {
+      throw errors.chatzError('app.delete.noPermission', 'Account do not have permission to update this app');
+    }
+    const iconName = app.id + path.extname(icon.originalname);
+    const iconPath = path.join(settings.appIconPath, iconName);
+    return new Promise((resolve, reject) => {
+      fs.rename(icon.path, iconPath, (err) => {
+        if (err) {
+          reject(errors.chatzError('app.update.error', 'Error updating app icon', err));
+          return;
+        }
+        resolve(App.findByIdAndUpdate(app.id, {icon: iconName}, {new: true, runValidators: true}).exec());
+      });
+    });
+  });
 };
 
 exports.deleteApp = (account, app) => {
   return appCommons.getApp(app.id).then((app) => {
-    if (account.id !== app.account.id) {
+    if (account.id !== app.account.toString()) {
       throw errors.chatzError('app.delete.noPermission', 'Account do not have permission to delete this app');
     }
     return App.remove({_id: app.id});

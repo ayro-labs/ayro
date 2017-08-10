@@ -1,7 +1,7 @@
 const userService = require('../services/user');
-const isUserAuthenticated = require('../utils/middlewares').isUserAuthenticated;
 const logger = require('../utils/logger');
 const errors = require('../utils/errors');
+const isUserAuthenticated = require('../utils/middlewares').isUserAuthenticated;
 
 module.exports = (router, app) => {
 

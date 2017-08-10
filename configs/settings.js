@@ -10,6 +10,10 @@ exports.debug = properties.getValue('app.debug', false);
 
 exports.publicPath = properties.getValue('app.publicPath', path.join(__dirname, '../public'));
 
+exports.appIconPath = properties.getValue('app.appIconPath', path.join(this.publicPath, 'img/apps'));
+
+exports.accountLogoPath = properties.getValue('app.accountLogoPath', path.join(this.publicPath, 'img/accounts'));
+
 exports.domain = 'chatz.io';
 
 exports.session = {

@@ -1,0 +1,27 @@
+{
+  "rules": {
+    "sort-keys": ["off"],
+    "sort-imports": ["off"],
+    "space-before-function-paren": ["off"],
+    "no-shadow": ["off"],
+    "import/prefer-default-export": ["off"],
+    "arrow-body-style": ["off"],
+    "no-param-reassign": ["off"],
+    "no-underscore-dangle": ["off"],
+    "newline-per-chained-call": ["off"],
+    "padded-blocks": ["off"],
+    "func-names": ["warn", "as-needed"],
+    "prefer-arrow-callback": ["warn"],
+    "max-len": ["error", {"code": 999, "tabWidth": 2}],
+    "object-curly-spacing": ["error", "never"]
+  },
+  "env": {
+    "es6": true,
+    "node": true,
+    "commonjs": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "airbnb-base"
+  ]
+}

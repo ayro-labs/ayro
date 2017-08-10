@@ -48,7 +48,7 @@ const Account = new Schema({
   name: {type: String, required: true, trim: true},
   email: {type: String, required: true, trim: true, index: {unique: true}},
   password: {type: String, required: true},
-  logo_url: {type: String, required: false},
+  logo: {type: String, required: false},
   registration_date: {type: Date, required: true},
 });
 
@@ -68,6 +68,7 @@ const Integration = new Schema({
 const App = new Schema({
   account: {type: ObjectId, ref: 'Account', required: true},
   name: {type: String, required: true, trim: true},
+  icon: {type: String, required: false},
   token: {type: String, required: true},
   integrations: {type: [Integration], required: false},
   registration_date: {type: Date, required: true},

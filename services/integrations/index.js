@@ -35,6 +35,7 @@ exports.update = (app, channel, configuration) => {
       integration.configuration = {};
     }
     _.assign(integration.configuration, configuration);
+    app.markModified('integrations');
     return app.save();
   });
 };
