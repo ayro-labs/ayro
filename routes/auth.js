@@ -58,7 +58,19 @@ module.exports = (router, app) => {
     });
   }
 
+  function signOutAccount(req, res) {
+    req.session.destroy((err) => {
+      if (err) {
+        logger.error(err);
+        errors.respondWithError(res, err);
+        return;
+      }
+      res.json({});
+    });
+  }
+
   router.post('/accounts', authenticateAccount);
+  router.post('/accounts/sign_out', signOutAccount);
   router.post('/users', authenticateUser);
 
   app.use('/auth', router);

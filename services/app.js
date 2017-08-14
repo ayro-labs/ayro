@@ -65,11 +65,11 @@ exports.deleteApp = (account, app) => {
 };
 
 exports.getApp = (id) => {
-  return App.findById(id).exec();
+  return appCommons.getApp(id);
 };
 
 exports.getAppByToken = (token) => {
-  return App.findOne({token}).exec();
+  return appCommons.findApp({token});
 };
 
 exports.listApps = (account) => {

@@ -33,3 +33,14 @@ exports.getApp = (id, options) => {
     return app;
   });
 };
+
+exports.findApp = (query, options) => {
+  return Promise.resolve().then(() => {
+    const promise = App.findOne(query);
+    fillQuery(promise, options);
+    return promise.exec();
+  }).then((app) => {
+    throwAppNotFoundIfNeeded(app, options);
+    return app;
+  });
+};
