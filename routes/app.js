@@ -11,15 +11,6 @@ const upload = multer({dest: settings.appIconPath});
 
 module.exports = (router, app) => {
 
-  function listApps(req, res) {
-    appService.listApps(req.account).then((apps) => {
-      res.json(apps);
-    }).catch((err) => {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    });
-  }
-
   function createApp(req, res) {
     appService.createApp(req.account, req.body.name).then((app) => {
       res.json(app);
@@ -49,6 +40,16 @@ module.exports = (router, app) => {
     });
   }
 
+  function deleteApp(req, res) {
+    const app = new App({id: req.params.app});
+    appService.deleteApp(req.account, app).then(() => {
+      res.json({});
+    }).catch((err) => {
+      logger.error(err);
+      errors.respondWithError(res, err);
+    });
+  }
+
   function getApp(req, res) {
     appService.getApp(req.params.app).then((app) => {
       res.json(app);
@@ -58,10 +59,9 @@ module.exports = (router, app) => {
     });
   }
 
-  function deleteApp(req, res) {
-    const app = new App({id: req.params.app});
-    appService.deleteApp(req.account, app).then((app) => {
-      res.json(app);
+  function listApps(req, res) {
+    appService.listApps(req.account).then((apps) => {
+      res.json(apps);
     }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
@@ -220,12 +220,12 @@ module.exports = (router, app) => {
     });
   }
 
-  router.get('/', isAccountAuthenticated, listApps);
   router.post('/', isAccountAuthenticated, createApp);
   router.put('/:app', isAccountAuthenticated, updateApp);
   router.put('/:app/icon', [isAccountAuthenticated, upload.single('icon')], updateAppIcon);
-  router.get('/:app', isAccountAuthenticated, getApp);
   router.delete('/:app', isAccountAuthenticated, deleteApp);
+  router.get('/:app', isAccountAuthenticated, getApp);
+  router.get('/', isAccountAuthenticated, listApps);
 
   router.post('/integrations/website/init', isAccountAuthenticated, initWebsiteIntegration);
   router.put('/:app/integrations/website', isAccountAuthenticated, updateWebsiteIntegration);

@@ -61,6 +61,8 @@ exports.deleteApp = (account, app) => {
       throw errors.chatzError('app.delete.noPermission', 'Account do not have permission to delete this app');
     }
     return App.remove({_id: app.id});
+  }).then(() => {
+    return null;
   });
 };
 
