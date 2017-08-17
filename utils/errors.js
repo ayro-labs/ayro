@@ -27,6 +27,10 @@ exports.chatzError = (key, message, cause) => {
   return new ChatzError(400, key, message, cause);
 };
 
+exports.permissionError = (key, message, cause) => {
+  return new ChatzError(401, key, message, cause);
+};
+
 exports.notFoundError = (key, message, cause) => {
   return new ChatzError(404, key, message, cause);
 };

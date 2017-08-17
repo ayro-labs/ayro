@@ -37,18 +37,22 @@ module.exports = (router, app) => {
   }
 
   function getAuthenticatedAccount(req, res) {
-    accountService.getAccount(req.account.id).then((account) => {
-      res.json(account);
-    }).catch((err) => {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    });
+    if (req.account) {
+      accountService.getAccount(req.account.id).then((account) => {
+        res.json(account);
+      }).catch((err) => {
+        logger.error(err);
+        errors.respondWithError(res, err);
+      });
+    } else {
+      res.json(null);
+    }
   }
 
   router.post('/', createAccount);
   router.put('/', isAccountAuthenticated, updateAccount);
   router.put('/logo', [isAccountAuthenticated, upload.single('logo')], updateAccountLogo);
-  router.get('/authenticated', isAccountAuthenticated, getAuthenticatedAccount);
+  router.get('/authenticated', getAuthenticatedAccount);
 
   app.use('/accounts', router);
 

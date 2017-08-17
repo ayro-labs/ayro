@@ -30,7 +30,7 @@ exports.createApp = (account, name) => {
 exports.updateApp = (account, app, name) => {
   return appCommons.getApp(app.id).then((app) => {
     if (account.id !== app.account.toString()) {
-      throw errors.chatzError('app.delete.noPermission', 'Account do not have permission to update this app');
+      throw errors.permissionError('app.update.permission.denied', 'Account do not have permission to update this app');
     }
     return App.findByIdAndUpdate(app.id, {name}, {new: true, runValidators: true}).exec();
   });
@@ -39,7 +39,7 @@ exports.updateApp = (account, app, name) => {
 exports.updateAppIcon = (account, app, icon) => {
   return appCommons.getApp(app.id).then((app) => {
     if (account.id !== app.account.toString()) {
-      throw errors.chatzError('app.delete.noPermission', 'Account do not have permission to update this app');
+      throw errors.permissionError('app.update.permission.denied', 'Account do not have permission to update this app');
     }
     const iconName = app.id + path.extname(icon.originalname);
     const iconPath = path.join(settings.appIconPath, iconName);
@@ -58,7 +58,7 @@ exports.updateAppIcon = (account, app, icon) => {
 exports.deleteApp = (account, app) => {
   return appCommons.getApp(app.id).then((app) => {
     if (account.id !== app.account.toString()) {
-      throw errors.chatzError('app.delete.noPermission', 'Account do not have permission to delete this app');
+      throw errors.permissionError('app.delete.permission.denied', 'Account do not have permission to delete this app');
     }
     return App.remove({_id: app.id});
   }).then(() => {
