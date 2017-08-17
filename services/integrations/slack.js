@@ -172,8 +172,15 @@ exports.add = (app, accessToken) => {
   }).then((result) => {
     this.configuration = {
       access_token: accessToken,
-      team: _.pick(result, ['team_id', 'team', 'url']),
-      user: _.pick(result, ['user_id', 'user']),
+      team: {
+        id: result.team_id,
+        name: result.team,
+        url: result.url,
+      },
+      user: {
+        id: result.user_id,
+        name: result.user,
+      },
     };
     return this.slackClient.channels.list({exclude_archived: true, exclude_members: true});
   }).then((result) => {

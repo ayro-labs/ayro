@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "node app.js",
     "lint": "eslint '**/*.js'",
+    "start": "node app.js",
     "webcm": "node processes/webcm.js",
     "test": "mocha --timeout 20000"
   },

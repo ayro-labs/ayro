@@ -227,15 +227,15 @@ module.exports = (router, app) => {
   router.get('/:app', isAccountAuthenticated, getApp);
   router.get('/', isAccountAuthenticated, listApps);
 
-  router.post('/integrations/website/init', isAccountAuthenticated, initWebsiteIntegration);
+  router.post('/integrations/website/init', initWebsiteIntegration);
   router.put('/:app/integrations/website', isAccountAuthenticated, updateWebsiteIntegration);
   router.delete('/:app/integrations/website', isAccountAuthenticated, removeWebsiteIntegration);
 
-  router.post('/integrations/android/init', isAccountAuthenticated, initAndroidIntegration);
+  router.post('/integrations/android/init', initAndroidIntegration);
   router.put('/:app/integrations/android', isAccountAuthenticated, updateAndroidIntegration);
   router.delete('/:app/integrations/android', isAccountAuthenticated, removeAndroidIntegration);
 
-  router.post('/integrations/ios/init', isAccountAuthenticated, initIOSIntegration);
+  router.post('/integrations/ios/init', initIOSIntegration);
   router.put('/:app/integrations/ios', isAccountAuthenticated, updateIOSIntegration);
   router.delete('/:app/integrations/ios', isAccountAuthenticated, removeIOSIntegration);
 
