@@ -79,7 +79,7 @@ exports.listApps = (account) => {
 };
 
 exports.addWebsiteIntegration = (app, configuration) => {
-  return integrations.add(app, constants.integration.channels.WEBSITE, constants.integration.types.CUSTOMER, _.pick(configuration, CONFIG_WEBSITE));
+  return integrations.add(app, constants.integration.channels.WEBSITE, constants.integration.types.USER, _.pick(configuration, CONFIG_WEBSITE));
 };
 
 exports.updateWebsiteIntegration = (app, configuration) => {
@@ -91,7 +91,7 @@ exports.removeWebsiteIntegration = (app) => {
 };
 
 exports.addAndroidIntegration = (app, configuration) => {
-  return integrations.add(app, constants.integration.channels.ANDROID, constants.integration.types.CUSTOMER, _.pick(configuration, CONFIG_ANDROID));
+  return integrations.add(app, constants.integration.channels.ANDROID, constants.integration.types.USER, _.pick(configuration, CONFIG_ANDROID));
 };
 
 exports.updateAndroidIntegration = (app, configuration) => {
@@ -103,7 +103,7 @@ exports.removeAndroidIntegration = (app) => {
 };
 
 exports.addIOSIntegration = (app, configuration) => {
-  return integrations.add(app, constants.integration.channels.IOS, constants.integration.types.CUSTOMER, _.pick(configuration, CONFIG_IOS));
+  return integrations.add(app, constants.integration.channels.IOS, constants.integration.types.USER, _.pick(configuration, CONFIG_IOS));
 };
 
 exports.updateIOSIntegration = (app, configuration) => {
