@@ -10,7 +10,7 @@ const path = require('path');
 const fs = require('fs');
 const _ = require('lodash');
 
-const CONFIG_WEBSITE = [];
+const CONFIG_WEBSITE = ['primary_color', 'conversation_color'];
 const CONFIG_ANDROID = ['fcm.server_key', 'fcm.sender_id'];
 const CONFIG_IOS = [];
 const CONFIG_SLACK_UPDATE = ['channel', 'channel_id'];

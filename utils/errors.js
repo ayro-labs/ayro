@@ -1,7 +1,7 @@
 const settings = require('../configs/settings');
 const util = require('util');
 
-function ChatzError(status, key, message, cause) {
+function ChatzError(status, code, message, cause) {
   if (!cause && ChatzError.super_.captureStackTrace) {
     ChatzError.super_.captureStackTrace(this, this.constructor);
   } else if (cause) {
@@ -9,11 +9,11 @@ function ChatzError(status, key, message, cause) {
   }
   this.name = this.constructor.name;
   this.status = status;
-  this.key = key;
+  this.code = code;
   this.message = message;
   this.cause = cause;
   this.json = () => {
-    const json = {status: this.status, key: this.key, message: this.message};
+    const json = {status: this.status, code: this.code, message: this.message};
     if (settings.debug === true && cause) {
       json.cause = cause.message;
     }
@@ -23,16 +23,16 @@ function ChatzError(status, key, message, cause) {
 }
 util.inherits(ChatzError, Error);
 
-exports.chatzError = (key, message, cause) => {
-  return new ChatzError(400, key, message, cause);
+exports.chatzError = (code, message, cause) => {
+  return new ChatzError(400, code, message, cause);
 };
 
-exports.permissionError = (key, message, cause) => {
-  return new ChatzError(401, key, message, cause);
+exports.permissionError = (code, message, cause) => {
+  return new ChatzError(401, code, message, cause);
 };
 
-exports.notFoundError = (key, message, cause) => {
-  return new ChatzError(404, key, message, cause);
+exports.notFoundError = (code, message, cause) => {
+  return new ChatzError(404, code, message, cause);
 };
 
 exports.internalError = (message, cause) => {

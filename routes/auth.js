@@ -3,6 +3,8 @@ const appService = require('../services/app');
 const userService = require('../services/user');
 const logger = require('../utils/logger');
 const errors = require('../utils/errors');
+const isAccountAuthenticated = require('../utils/middlewares').isAccountAuthenticated;
+const isUserAuthenticated = require('../utils/middlewares').isUserAuthenticated;
 const _ = require('lodash');
 
 module.exports = (router, app) => {
@@ -20,7 +22,7 @@ module.exports = (router, app) => {
     });
   }
 
-  function authenticateAccount(req, res) {
+  function accountSignIn(req, res) {
     accountService.authenticate(req.body.email, req.body.password).bind({}).then((account) => {
       this.account = account;
       return createSession(req, {account: {_id: account.id}});
@@ -35,7 +37,18 @@ module.exports = (router, app) => {
     });
   }
 
-  function authenticateUser(req, res) {
+  function accountSignOut(req, res) {
+    req.session.destroy((err) => {
+      if (err) {
+        logger.error(err);
+        errors.respondWithError(res, err);
+        return;
+      }
+      res.json({});
+    });
+  }
+
+  function userSignIn(req, res) {
     appService.getAppByToken(req.body.app_token).bind({}).then((app) => {
       userService.assignUserUid(req.body.user, req.body.device);
       return userService.saveUser(app, req.body.user);
@@ -58,7 +71,8 @@ module.exports = (router, app) => {
     });
   }
 
-  function signOutAccount(req, res) {
+
+  function userSignOut(req, res) {
     req.session.destroy((err) => {
       if (err) {
         logger.error(err);
@@ -69,9 +83,10 @@ module.exports = (router, app) => {
     });
   }
 
-  router.post('/accounts', authenticateAccount);
-  router.post('/accounts/sign_out', signOutAccount);
-  router.post('/users', authenticateUser);
+  router.post('/accounts', accountSignIn);
+  router.delete('/accounts', isAccountAuthenticated, accountSignOut);
+  router.post('/users', userSignIn);
+  router.delete('/users', isUserAuthenticated, userSignOut);
 
   app.use('/auth', router);
 

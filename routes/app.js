@@ -75,7 +75,10 @@ module.exports = (router, app) => {
       }
       return app;
     }).then((app) => {
-      res.json(app);
+      const integration = app.getIntegration(constants.integration.channels.WEBSITE);
+      const appJson = app.toJSON();
+      delete appJson.integrations;
+      res.json({integration, app: appJson});
     }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
@@ -109,7 +112,10 @@ module.exports = (router, app) => {
       }
       return app;
     }).then((app) => {
-      res.json(app);
+      const integration = app.getIntegration(constants.integration.channels.ANDROID);
+      const appJson = app.toJSON();
+      delete appJson.integrations;
+      res.json({integration, app: appJson});
     }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
@@ -138,12 +144,15 @@ module.exports = (router, app) => {
 
   function initIOSIntegration(req, res) {
     appService.getAppByToken(req.body.app_token).then((app) => {
-      if (!app.getIntegration(constants.integration.channels.WEBSITE)) {
+      if (!app.getIntegration(constants.integration.channels.IOS)) {
         return appService.addIOSIntegration(app);
       }
       return app;
     }).then((app) => {
-      res.json(app);
+      const integration = app.getIntegration(constants.integration.channels.IOS);
+      const appJson = app.toJSON();
+      delete appJson.integrations;
+      res.json({integration, app: appJson});
     }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
