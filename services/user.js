@@ -64,9 +64,12 @@ exports.updateDevice = (device, data) => {
 };
 
 exports.saveDevice = (user, data) => {
-  return userCommons.findDevice({user: user.id, uid: data.uid}, {require: false}).then((device) => {
+  return userCommons.findDevice({uid: data.uid}, {require: false}).then((device) => {
     if (!device) {
       return $.createDevice(user, data);
+    }
+    if (user.id !== device.user.toString()) {
+      data.user = user.id;
     }
     return $.updateDevice(device, data);
   });

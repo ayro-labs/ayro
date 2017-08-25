@@ -6,7 +6,7 @@ const isUserAuthenticated = require('../utils/middlewares').isUserAuthenticated;
 module.exports = (router, app) => {
 
   function listMessages(req, res) {
-    chatService.listMessages(req.device).then((messages) => {
+    chatService.listMessages(req.user, req.device).then((messages) => {
       res.json(messages);
     }).catch((err) => {
       logger.error(err);
