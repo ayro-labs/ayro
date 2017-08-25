@@ -97,6 +97,7 @@ const Author = new Schema({
 });
 
 const ChatMessage = new Schema({
+  user: {type: ObjectId, ref: 'User', required: true},
   device: {type: ObjectId, ref: 'Device', required: true},
   author: {type: Author, required: false},
   text: {type: String, required: true},
@@ -147,7 +148,7 @@ Device.methods.isWeb = function() {
 
 const User = new Schema({
   app: {type: ObjectId, ref: 'App', required: true},
-  uid: {type: String, required: true, index: {unique: true}},
+  uid: {type: String, required: true},
   first_name: {type: String, required: false, trim: true},
   last_name: {type: String, required: false, trim: true},
   email: {type: String, required: false, trim: true},
@@ -161,6 +162,7 @@ const User = new Schema({
   registration_date: {type: Date, required: true},
 });
 User.index({'extra.slack_channel.id': 1});
+User.index({app: 1, uid: 1}, {unique: true});
 User.virtual('devices', {
   ref: 'Device',
   localField: '_id',

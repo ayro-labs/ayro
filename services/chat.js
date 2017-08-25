@@ -9,8 +9,36 @@ const _ = require('lodash');
 
 const EVENT_CHAT_MESSAGE = 'chat_message';
 
-exports.listMessages = (device) => {
-  return ChatMessage.find({device: device.id}).sort({date: 'desc'}).exec().then((chatMessages) => {
+const getIntegrationService = (channel) => {
+  switch (channel) {
+    case constants.integration.channels.SLACK:
+      return slack;
+    default:
+      return null;
+  }
+};
+
+const pushMessageToUser = (service, integration, user, data) => {
+  return Promise.all([service.extractAuthor(data, integration), service.extractText(data)]).bind({}).spread((author, text) => {
+    const chatMessage = new ChatMessage({
+      author,
+      text,
+      user: user.id,
+      device: user.latest_device.id,
+      direction: constants.chatMessage.directions.INCOMING,
+      date: new Date(),
+    });
+    return chatMessage.save();
+  }).then((chatMessage) => {
+    this.chatMessage = chatMessage;
+    return push.message(user, EVENT_CHAT_MESSAGE, chatMessage);
+  }).then(() => {
+    return service.confirmMessage(data, integration, user, this.chatMessage);
+  });
+};
+
+exports.listMessages = (user, device) => {
+  return ChatMessage.find({user: user.id, device: device.id}).sort({date: 'desc'}).exec().then((chatMessages) => {
     return _.reverse(chatMessages);
   });
 };
@@ -31,6 +59,7 @@ exports.postMessage = (user, device, message) => {
   }).then((user) => {
     this.user = user;
     this.chatMessage = new ChatMessage({
+      user: this.user.id,
       device: this.device.id,
       text: message.text,
       direction: constants.chatMessage.directions.OUTGOING,
@@ -53,33 +82,6 @@ exports.postMessage = (user, device, message) => {
   });
 };
 
-const getIntegrationService = (channel) => {
-  switch (channel) {
-    case constants.integration.channels.SLACK:
-      return slack;
-    default:
-      return null;
-  }
-};
-
-const pushMessageToUser = (service, integration, user, data) => {
-  return Promise.all([service.extractAuthor(data, integration), service.extractText(data)]).bind({}).spread((author, text) => {
-    const chatMessage = new ChatMessage({
-      device: user.latest_device.id,
-      author,
-      text,
-      direction: constants.chatMessage.directions.INCOMING,
-      date: new Date(),
-    });
-    return chatMessage.save();
-  }).then((chatMessage) => {
-    this.chatMessage = chatMessage;
-    return push.message(user, EVENT_CHAT_MESSAGE, chatMessage);
-  }).then(() => {
-    return service.confirmMessage(data, integration, user, this.chatMessage);
-  });
-};
-
 exports.pushMessage = (channel, data) => {
   return Promise.resolve().then(() => {
     const service = getIntegrationService(channel);
@@ -90,10 +92,7 @@ exports.pushMessage = (channel, data) => {
       return user.populate('app latest_device').execPopulate();
     }).then((user) => {
       const integration = user.app.getIntegration(channel);
-      if (integration) {
-        return pushMessageToUser(service, integration, user, data);
-      }
-      return null;
+      return integration ? pushMessageToUser(service, integration, user, data) : null;
     });
   });
 };
