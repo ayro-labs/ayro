@@ -18,25 +18,6 @@ const getIntegrationService = (channel) => {
   }
 };
 
-const pushMessageToUser = (service, integration, user, data) => {
-  return Promise.all([service.extractAuthor(data, integration), service.extractText(data)]).bind({}).spread((author, text) => {
-    const chatMessage = new ChatMessage({
-      author,
-      text,
-      user: user.id,
-      device: user.latest_device.id,
-      direction: constants.chatMessage.directions.INCOMING,
-      date: new Date(),
-    });
-    return chatMessage.save();
-  }).then((chatMessage) => {
-    this.chatMessage = chatMessage;
-    return push.message(user, EVENT_CHAT_MESSAGE, chatMessage);
-  }).then(() => {
-    return service.confirmMessage(data, integration, user, this.chatMessage);
-  });
-};
-
 exports.listMessages = (user, device) => {
   return ChatMessage.find({user: user.id, device: device.id}).sort({date: 'desc'}).exec().then((chatMessages) => {
     return _.reverse(chatMessages);
@@ -45,17 +26,19 @@ exports.listMessages = (user, device) => {
 
 exports.postMessage = (user, device, message) => {
   return Promise.all([
-    userCommons.getUser(user.id, {populate: 'app latest_device'}),
+    userCommons.getUser(user.id),
     userCommons.getDevice(device.id),
   ]).bind({}).spread((user, device) => {
     if (String(user.id) !== String(device.user)) {
       throw errors.chatzError('device.unknown', 'Unknown device');
     }
     this.device = device;
-    if (!user.latest_device || user.latest_device.id !== device.id) {
+    if (!user.latest_device || user.latest_device.toString() !== device.id) {
       return userCommons.updateUser(user, {latest_device: device.id});
     }
     return user;
+  }).then((user) => {
+    return userCommons.populateUser(user, 'app');
   }).then((user) => {
     this.user = user;
     this.chatMessage = new ChatMessage({
@@ -83,16 +66,42 @@ exports.postMessage = (user, device, message) => {
 };
 
 exports.pushMessage = (channel, data) => {
-  return Promise.resolve().then(() => {
+  return Promise.bind({}).then(() => {
     const service = getIntegrationService(channel);
     if (!service) {
-      return null;
+      throw errors.chatzError('integration.notSupported', 'Integration not supported');
     }
-    return service.extractUser(data).then((user) => {
-      return user.populate('app latest_device').execPopulate();
-    }).then((user) => {
-      const integration = user.app.getIntegration(channel);
-      return integration ? pushMessageToUser(service, integration, user, data) : null;
+    this.service = service;
+    return service.extractUser(data);
+  }).then((user) => {
+    return userCommons.getUser(user.id, {populate: 'app latest_device'});
+  }).then((user) => {
+    const integration = user.app.getIntegration(channel);
+    if (!integration) {
+      throw errors.chatzError('integration.notSupported', 'Integration not supported');
+    }
+    this.user = user;
+    this.integration = integration;
+    return Promise.all([
+      this.service.extractAuthor(data, integration),
+      this.service.extractText(data),
+    ]);
+  }).spread((author, text) => {
+    const chatMessage = new ChatMessage({
+      author,
+      text,
+      user: this.user.id,
+      device: this.user.latest_device.id,
+      direction: constants.chatMessage.directions.INCOMING,
+      date: new Date(),
     });
+    return chatMessage.save();
+  }).then((chatMessage) => {
+    this.chatMessage = chatMessage;
+    return push.message(this.user, EVENT_CHAT_MESSAGE, this.chatMessage);
+  }).then(() => {
+    return this.service.confirmMessage(data, this.integration, this.user, this.chatMessage);
+  }).then(() => {
+    return this.chatMessage;
   });
 };

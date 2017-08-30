@@ -52,6 +52,10 @@ exports.findUser = (query, options) => {
   });
 };
 
+exports.populateUser = (user, fields) => {
+  return user.populate(fields).execPopulate();
+};
+
 exports.updateUser = (user, data) => {
   return Promise.resolve().then(() => {
     if (data.first_name || data.last_name) {
