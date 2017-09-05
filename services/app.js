@@ -15,6 +15,9 @@ const CONFIG_ANDROID = ['fcm.server_key', 'fcm.sender_id'];
 const CONFIG_IOS = [];
 const CONFIG_SLACK_UPDATE = ['channel', 'channel_id'];
 
+const DEFAULT_PRIMARY_COLOR = '#007bff';
+const DEFAULT_CONVERSATION_COLOR = '#007bff';
+
 exports.createApp = (account, name) => {
   return cryptography.generateId().then((token) => {
     const app = new App({
@@ -78,7 +81,11 @@ exports.listApps = (account) => {
   return App.find({account: account.id}).exec();
 };
 
-exports.addWebsiteIntegration = (app, configuration) => {
+exports.addWebsiteIntegration = (app) => {
+  const configuration = {
+    primary_color: DEFAULT_PRIMARY_COLOR,
+    conversation_color: DEFAULT_CONVERSATION_COLOR,
+  };
   return integrations.add(app, constants.integration.channels.WEBSITE, constants.integration.types.USER, _.pick(configuration, CONFIG_WEBSITE));
 };
 
@@ -90,8 +97,8 @@ exports.removeWebsiteIntegration = (app) => {
   return integrations.remove(app, constants.integration.channels.WEBSITE);
 };
 
-exports.addAndroidIntegration = (app, configuration) => {
-  return integrations.add(app, constants.integration.channels.ANDROID, constants.integration.types.USER, _.pick(configuration, CONFIG_ANDROID));
+exports.addAndroidIntegration = (app) => {
+  return integrations.add(app, constants.integration.channels.ANDROID, constants.integration.types.USER);
 };
 
 exports.updateAndroidIntegration = (app, configuration) => {
@@ -102,8 +109,8 @@ exports.removeAndroidIntegration = (app) => {
   return integrations.remove(app, constants.integration.channels.ANDROID);
 };
 
-exports.addIOSIntegration = (app, configuration) => {
-  return integrations.add(app, constants.integration.channels.IOS, constants.integration.types.USER, _.pick(configuration, CONFIG_IOS));
+exports.addIOSIntegration = (app) => {
+  return integrations.add(app, constants.integration.channels.IOS, constants.integration.types.USER);
 };
 
 exports.updateIOSIntegration = (app, configuration) => {
