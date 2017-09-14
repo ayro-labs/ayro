@@ -11,7 +11,7 @@ const fs = require('fs');
 const _ = require('lodash');
 
 const CONFIG_WEBSITE = ['primary_color', 'conversation_color'];
-const CONFIG_ANDROID = ['fcm.server_key', 'fcm.sender_id'];
+const CONFIG_ANDROID = ['primary_color', 'conversation_color', 'fcm.server_key', 'fcm.sender_id'];
 const CONFIG_IOS = [];
 const CONFIG_SLACK_UPDATE = ['channel', 'channel_id'];
 
@@ -98,7 +98,11 @@ exports.removeWebsiteIntegration = (app) => {
 };
 
 exports.addAndroidIntegration = (app) => {
-  return integrations.add(app, constants.integration.channels.ANDROID, constants.integration.types.USER);
+  const configuration = {
+    primary_color: DEFAULT_PRIMARY_COLOR,
+    conversation_color: DEFAULT_CONVERSATION_COLOR,
+  };
+  return integrations.add(app, constants.integration.channels.ANDROID, constants.integration.types.USER, _.pick(configuration, CONFIG_ANDROID));
 };
 
 exports.updateAndroidIntegration = (app, configuration) => {
