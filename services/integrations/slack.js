@@ -23,13 +23,13 @@ function getUserAttachment(user) {
     information.push(`ID: ${user.uid}`);
   }
   if (!user.name_generated) {
-    information.push(`Name: ${user.getFullName()}`);
+    information.push(`Nome: ${user.getFullName()}`);
   }
   if (user.email) {
     information.push(`Email: ${user.email}`);
   }
   if (user.sign_up_date) {
-    information.push(`Signed up at: ${user.sign_up_date}`);
+    information.push(`Data de cadastro: ${user.sign_up_date}`);
   }
   if (user.properties) {
     _.each(user.properties, (value, key) => {
@@ -37,11 +37,11 @@ function getUserAttachment(user) {
     });
   }
   return {
-    fallback: 'User information',
-    title: 'User information',
+    fields,
+    fallback: 'Informações do Usuário',
+    title: 'Informações do Usuário',
     text: information.join('\n'),
     color: 'good',
-    fields,
   };
 }
 
@@ -53,7 +53,7 @@ function getDeviceAttachment(device) {
   if (deviceInfo) {
     if (device.isSmartphone()) {
       if (deviceInfo.app_id && deviceInfo.app_version) {
-        information.push(`App version: ${deviceInfo.app_version} (${deviceInfo.app_id})`);
+        information.push(`Versão do app: ${deviceInfo.app_version} (${deviceInfo.app_id})`);
       }
       if (deviceInfo.os_name && deviceInfo.os_version) {
         information.push(`OS: ${deviceInfo.os_name} ${deviceInfo.os_version}`);
@@ -62,7 +62,7 @@ function getDeviceAttachment(device) {
         information.push(`Smartphone: ${_.capitalize(deviceInfo.manufacturer)} ${deviceInfo.model}`);
       }
       if (deviceInfo.carrier) {
-        information.push(`Carrier: ${deviceInfo.carrier}`);
+        information.push(`Operadora: ${deviceInfo.carrier}`);
       }
     }
     if (device.isWeb()) {
@@ -72,11 +72,11 @@ function getDeviceAttachment(device) {
     }
   }
   return {
-    fallback: 'Device information',
-    title: 'Device information',
+    fields,
+    fallback: 'Informações do Dispositivo',
+    title: 'Informações do Dispositivo',
     text: information.join('\n'),
     color: 'warning',
-    fields,
   };
 }
 
@@ -108,7 +108,7 @@ function createChannel(slackClient, user, conflict) {
 
 function advertiseUser(slackClient, user, device, message, supportChannel, userChannel) {
   return Promise.resolve().then(() => {
-    const advertiseMessage = `*${user.getFullName()}* wants to talk with your team in <#${userChannel.id}|${userChannel.name}>`;
+    const advertiseMessage = `*${user.getFullName()}* quer conversar com o seu time no canal <#${userChannel.id}|${userChannel.name}>`;
     return slackClient.chat.postMessage(supportChannel.id, advertiseMessage, {
       username: CHATZ_BOT_USERNAME,
       as_user: false,
@@ -119,7 +119,7 @@ function advertiseUser(slackClient, user, device, message, supportChannel, userC
       }],
     });
   }).then(() => {
-    const advertiseMessage = `These are all the information we have so far about *${user.getFullName()}*`;
+    const advertiseMessage = `Estas são as informações que nós temos até agora sobre *${user.getFullName()}*`;
     return slackClient.chat.postMessage(userChannel.id, advertiseMessage, {
       username: CHATZ_BOT_USERNAME,
       as_user: false,
@@ -232,7 +232,7 @@ exports.postMessage = (user, device, configuration, message) => {
     return createChannelAdvertisingUser(this.slackClient, user, device, message, configuration.channel);
   }).then((channel) => {
     return this.slackClient.chat.postMessage(channel.id, message, {
-      username: user.getFullName() + (user.name_generated ? ' (Generated name)' : ''),
+      username: user.getFullName() + (user.name_generated ? ' (Nome gerado)' : ''),
       as_user: false,
       icon_url: user.photo_url,
     });
@@ -264,7 +264,7 @@ exports.confirmMessage = (data, integration, user, chatMessage) => {
   return Promise.resolve().then(() => {
     const slackClient = new SlackClient(integration.configuration.access_token);
     return slackClient.chat.postMessage(data.channel_id, chatMessage.text, {
-      username: `${chatMessage.author.name} to ${user.getFullName()}`,
+      username: `${chatMessage.author.name} para ${user.getFullName()}`,
       as_user: false,
       icon_url: chatMessage.author.photo_url,
     });
