@@ -126,7 +126,7 @@ exports.removeIOSIntegration = (app) => {
 };
 
 exports.addSlackIntegration = (app, accessToken) => {
-  return slackIntegration.add(app, accessToken);
+  return slackIntegration.addIntegration(app, accessToken);
 };
 
 exports.updateSlackIntegration = (app, configuration) => {

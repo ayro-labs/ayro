@@ -46,9 +46,9 @@ exports.webcm = {
 };
 
 exports.slack = {
-  clientId: '4332799729.201066840038',
-  clientSecret: '1d8e1127054e9577da4cc6e25b83e74e',
-  verificationToken: 'tHYsNNTDP00nL2HlqhAdEraQ',
+  clientId: '238285510608.246046996448',
+  clientSecret: 'a10204a6416c5e4b50a1209c6380568f',
+  verificationToken: '5aRssO4wD1yjYeyfDNuA6np2',
 };
 
 logger.info('Using %s environment settings', this.env);

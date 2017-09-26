@@ -32,9 +32,19 @@ module.exports = (router, app) => {
     });
   }
 
+  function postProfile(req, res) {
+    chatService.postProfile(req.params.channel, req.body).then(() => {
+      res.json({});
+    }).catch((err) => {
+      logger.error(err);
+      errors.respondWithError(res, err);
+    });
+  }
+
   router.get('/', isUserAuthenticated, listMessages);
   router.post('/:platform', isUserAuthenticated, postMessage);
   router.post('/:channel/push', pushMessage);
+  router.post('/:channel/profile', postProfile);
 
   app.use('/chat', router);
 

@@ -15,7 +15,24 @@ function getFallbackText(text) {
   return fallback;
 }
 
-function getUserAttachment(user) {
+function getCommandsInfoAttachments() {
+  return [
+    {
+      fallback: 'Comando /chz - Envie mensagens para o usuário',
+      title: 'Envie mensagens para o usuário',
+      text: 'Comando: /chz [mensagem]\nExemplo de uso: /chz Olá, como posso ajudá-lo?',
+      color: '#007bff',
+    },
+    {
+      fallback: 'Comando /profile - Veja o perfil do usuário',
+      title: 'Veja o perfil do usuário',
+      text: 'Comando: /profile',
+      color: '#007bff',
+    },
+  ];
+}
+
+function getUserInfoAttachment(user) {
   const information = [];
   const fields = [];
   information.push(`App: ${user.app.name}`);
@@ -45,11 +62,11 @@ function getUserAttachment(user) {
   };
 }
 
-function getDeviceAttachment(device) {
+function getDeviceInfoAttachment(device) {
   const information = [];
   const fields = [];
   const deviceInfo = device.info;
-  information.push(`Platform: ${device.getPlatformName()}`);
+  information.push(`Platforma: ${device.getPlatformName()}`);
   if (deviceInfo) {
     if (device.isSmartphone()) {
       if (deviceInfo.app_id && deviceInfo.app_version) {
@@ -80,6 +97,38 @@ function getDeviceAttachment(device) {
   };
 }
 
+function postBotIntro(slackClient, user, channel) {
+  return Promise.resolve().then(() => {
+    const message = `Olá, eu sou o Chatz Bot!\n<@${user.id}> acabou de integrar este Workspace com o <http://www.chatz.io|Chatz>. Agora você pode conversar com seus clientes em tempo real, direto do Slack.`;
+    return slackClient.chat.postMessage(channel.id, message, {
+      username: CHATZ_BOT_USERNAME,
+      as_user: false,
+    });
+  });
+}
+
+function postChannelIntro(slackClient, user, channel) {
+  return Promise.resolve().then(() => {
+    const message = `Este é o canal exclusivo para conversar com *${user.getFullName()}*.\nNeste canal você pode utilizar os seguintes comandos:`;
+    return slackClient.chat.postMessage(channel.id, message, {
+      username: CHATZ_BOT_USERNAME,
+      as_user: false,
+      attachments: getCommandsInfoAttachments(),
+    });
+  });
+}
+
+function postProfile(slackClient, user, device, channel) {
+  return Promise.resolve().then(() => {
+    const message = `Estas são as informações que nós temos até agora sobre *${user.getFullName()}*.`;
+    return slackClient.chat.postMessage(channel.id, message, {
+      username: CHATZ_BOT_USERNAME,
+      as_user: false,
+      attachments: [getUserInfoAttachment(user), getDeviceInfoAttachment(device)],
+    });
+  });
+}
+
 function createChannel(slackClient, user, conflict) {
   return Promise.resolve().then(() => {
     let channel;
@@ -106,32 +155,29 @@ function createChannel(slackClient, user, conflict) {
   });
 }
 
-function advertiseUser(slackClient, user, device, message, supportChannel, userChannel) {
+function introduceUser(slackClient, user, device, message, supportChannel, userChannel) {
   return Promise.resolve().then(() => {
-    const advertiseMessage = `*${user.getFullName()}* quer conversar com o seu time no canal <#${userChannel.id}|${userChannel.name}>`;
-    return slackClient.chat.postMessage(supportChannel.id, advertiseMessage, {
+    const introMessage = `*${user.getFullName()}* quer conversar com o seu time no canal <#${userChannel.id}|${userChannel.name}>`;
+    return slackClient.chat.postMessage(supportChannel.id, introMessage, {
       username: CHATZ_BOT_USERNAME,
       as_user: false,
       attachments: [{
-        fallback: getFallbackText(advertiseMessage),
+        fallback: getFallbackText(introMessage),
         text: message,
         color: 'good',
       }],
     });
   }).then(() => {
-    const advertiseMessage = `Estas são as informações que nós temos até agora sobre *${user.getFullName()}*`;
-    return slackClient.chat.postMessage(userChannel.id, advertiseMessage, {
-      username: CHATZ_BOT_USERNAME,
-      as_user: false,
-      attachments: [getUserAttachment(user), getDeviceAttachment(device)],
-    });
+    return postChannelIntro(slackClient, user, userChannel);
+  }).then(() => {
+    return postProfile(slackClient, user, device, userChannel);
   });
 }
 
-function createChannelAdvertisingUser(slackClient, user, device, message, supportChannel) {
+function createChannelIntroducingUser(slackClient, user, device, message, supportChannel) {
   return createChannel(slackClient, user).bind({}).tap((userChannel) => {
     this.userChannel = userChannel;
-    return advertiseUser(slackClient, user, device, message, supportChannel, userChannel);
+    return introduceUser(slackClient, user, device, message, supportChannel, userChannel);
   }).tap(() => {
     return User.update({_id: user.id}, {extra: _.assign(user.extra || {}, {slack_channel: this.userChannel})}).exec();
   });
@@ -152,9 +198,9 @@ function getChannel(slackClient, user) {
   });
 }
 
-function unarchiveChannelAdvertisingUser(slackClient, userChannel, user, device, message, supportChannel) {
+function unarchiveChannelIntroducingUser(slackClient, userChannel, user, device, message, supportChannel) {
   return slackClient.channels.unarchive(userChannel.id).then(() => {
-    return advertiseUser(slackClient, user, device, message, supportChannel, userChannel);
+    return introduceUser(slackClient, user, device, message, supportChannel, userChannel);
   }).then(() => {
     return userChannel;
   }).catch((err) => {
@@ -165,7 +211,7 @@ function unarchiveChannelAdvertisingUser(slackClient, userChannel, user, device,
   });
 }
 
-exports.add = (app, accessToken) => {
+exports.addIntegration = (app, accessToken) => {
   return Promise.resolve().bind({}).then(() => {
     this.slackClient = new SlackClient(accessToken);
     return this.slackClient.auth.test();
@@ -191,6 +237,8 @@ exports.add = (app, accessToken) => {
       }
     });
     return integrations.add(app, constants.integration.channels.SLACK, constants.integration.types.BUSINESS, _.pick(configuration, CONFIG_SLACK));
+  }).tap(() => {
+    return postBotIntro(this.slackClient, this.configuration.user, this.configuration.channel);
   });
 };
 
@@ -222,20 +270,34 @@ exports.postMessage = (user, device, configuration, message) => {
     if (user.extra && user.extra.slack_channel) {
       return getChannel(this.slackClient, user).bind(this).then((channel) => {
         if (!channel) {
-          return createChannelAdvertisingUser(this.slackClient, user, device, message, configuration.channel);
+          return createChannelIntroducingUser(this.slackClient, user, device, message, configuration.channel);
         } else if (channel.archived) {
-          return unarchiveChannelAdvertisingUser(this.slackClient, channel, user, device, message, configuration.channel);
+          return unarchiveChannelIntroducingUser(this.slackClient, channel, user, device, message, configuration.channel);
         }
         return channel;
       });
     }
-    return createChannelAdvertisingUser(this.slackClient, user, device, message, configuration.channel);
+    return createChannelIntroducingUser(this.slackClient, user, device, message, configuration.channel);
   }).then((channel) => {
     return this.slackClient.chat.postMessage(channel.id, message, {
-      username: user.getFullName() + (user.name_generated ? ' (Nome gerado)' : ''),
+      username: user.getFullName() + (user.name_generated ? ' (nome gerado)' : ''),
       as_user: false,
       icon_url: user.photo_url,
     });
+  }).then(() => {
+    return null;
+  });
+};
+
+exports.postProfile = (user, device, configuration) => {
+  return Promise.resolve().then(() => {
+    const slackClient = new SlackClient(configuration.access_token);
+    if (user.extra && user.extra.slack_channel) {
+      return postProfile(slackClient, user, device, {id: user.extra.slack_channel});
+    }
+    return null;
+  }).then(() => {
+    return null;
   });
 };
 

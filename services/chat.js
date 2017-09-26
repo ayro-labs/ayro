@@ -52,14 +52,15 @@ exports.postMessage = (user, device, message) => {
   }).then((chatMessage) => {
     const context = this;
     const integrations = this.user.app.listIntegrations(constants.integration.types.BUSINESS);
+    const promises = [];
     integrations.forEach((integration) => {
       switch (integration.channel) {
         case constants.integration.channels.SLACK:
-          return slack.postMessage(context.user, context.device, integration.configuration, chatMessage.text);
-        default:
-          return null;
+          promises.push(slack.postMessage(context.user, context.device, integration.configuration, chatMessage.text));
+          break;
       }
     });
+    return Promise.all(promises);
   }).then(() => {
     return this.chatMessage;
   });
@@ -102,6 +103,35 @@ exports.pushMessage = (channel, data) => {
   }).then(() => {
     return this.service.confirmMessage(data, this.integration, this.user, this.chatMessage);
   }).then(() => {
-    return this.chatMessage;
+    return null;
+  });
+};
+
+exports.postProfile = (channel, data) => {
+  return Promise.bind({}).then(() => {
+    const service = getIntegrationService(channel);
+    if (!service) {
+      throw errors.chatzError('integration.notSupported', 'Integration not supported');
+    }
+    this.service = service;
+    return service.extractUser(data);
+  }).then((user) => {
+    return userCommons.getUser(user.id, {populate: 'app'});
+  }).then((user) => {
+    const integration = user.app.getIntegration(channel);
+    if (!integration) {
+      throw errors.chatzError('integration.notSupported', 'Integration not supported');
+    }
+    this.user = user;
+    this.integration = integration;
+    const context = this;
+    switch (integration.channel) {
+      case constants.integration.channels.SLACK:
+        return slack.postProfile(context.user, context.device, integration.configuration);
+      default:
+        return null;
+    }
+  }).then(() => {
+    return null;
   });
 };
