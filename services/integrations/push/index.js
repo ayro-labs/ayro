@@ -8,13 +8,13 @@ exports.message = (user, event, message) => {
     const device = user.latest_device;
     let promise;
     switch (device.platform) {
-      case constants.device.platforms.WEB:
+      case constants.device.platforms.WEB.id:
         promise = webPush.push;
         break;
-      case constants.device.platforms.ANDROID:
+      case constants.device.platforms.ANDROID.id:
         promise = androidPush.push;
         break;
-      case constants.device.platforms.IOS:
+      case constants.device.platforms.IOS.id:
         promise = iosPush.push;
         break;
       default:

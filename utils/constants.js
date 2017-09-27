@@ -13,9 +13,18 @@ exports.integration = Object.freeze({
 
 exports.device = Object.freeze({
   platforms: Object.freeze({
-    WEB: 'web',
-    ANDROID: 'android',
-    IOS: 'ios',
+    WEB: Object.freeze({
+      id: 'web',
+      name: 'Web Messenger',
+    }),
+    ANDROID: Object.freeze({
+      id: 'android',
+      name: 'Android Messaging',
+    }),
+    IOS: Object.freeze({
+      id: 'ios',
+      name: 'iOS Messaging',
+    }),
   }),
 });
 

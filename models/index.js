@@ -128,22 +128,20 @@ const Device = new Schema({
   registration_date: {type: Date, required: true},
 });
 Device.methods.getPlatformName = function() {
-  if (this.platform === constants.device.platforms.IOS) {
-    return 'iOS';
-  }
-  return _.capitalize(this.platform);
+  const platform = constants.device.platforms[_.toUpper(this.platform)];
+  return platform ? platform.name : '';
 };
 Device.methods.isSmartphone = function() {
-  return _.includes([constants.device.platforms.ANDROID, constants.device.platforms.IOS], this.platform);
+  return _.includes([constants.device.platforms.ANDROID.id, constants.device.platforms.IOS.id], this.platform);
 };
 Device.methods.isAndroid = function() {
-  return this.platform === constants.device.platforms.ANDROID;
+  return this.platform === constants.device.platforms.ANDROID.id;
 };
 Device.methods.isIOS = function() {
-  return this.platform === constants.device.platforms.IOS;
+  return this.platform === constants.device.platforms.IOS.id;
 };
 Device.methods.isWeb = function() {
-  return this.platform === constants.device.platforms.WEB;
+  return this.platform === constants.device.platforms.WEB.id;
 };
 
 const User = new Schema({
