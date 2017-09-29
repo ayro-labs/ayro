@@ -1,5 +1,6 @@
 const User = require('../models').User;
 const Device = require('../models').Device;
+const ChatMessage = require('../models').ChatMessage;
 const errors = require('../utils/errors');
 const userCommons = require('./commons/user');
 const randomName = require('node-random-name');
@@ -7,6 +8,12 @@ const Promise = require('bluebird');
 const _ = require('lodash');
 
 const $ = this;
+
+function removeDeviceOfPlatform(user, platform) {
+  return ChatMessage.remove({user: user.id}).then(() => {
+    return Device.remove({user: user.id, platform});
+  });
+}
 
 exports.assignUserUid = (userData, deviceData) => {
   userData.identified = !_.isNil(userData.uid);
@@ -64,7 +71,9 @@ exports.updateDevice = (device, data) => {
 };
 
 exports.saveDevice = (user, data) => {
-  return userCommons.findDevice({uid: data.uid}, {require: false}).then((device) => {
+  return removeDeviceOfPlatform(user, data.platform).then(() => {
+    return userCommons.findDevice({uid: data.uid}, {require: false});
+  }).then((device) => {
     if (!device) {
       return $.createDevice(user, data);
     }

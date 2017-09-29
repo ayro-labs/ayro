@@ -7,6 +7,7 @@ exports.integration = Object.freeze({
     WEBSITE: 'website',
     ANDROID: 'android',
     IOS: 'ios',
+    MESSENGER: 'messenger',
     SLACK: 'slack',
   }),
 });

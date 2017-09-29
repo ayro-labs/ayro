@@ -3,7 +3,9 @@ const authRoutes = require('../routes/auth');
 const accountRoutes = require('../routes/account');
 const appRoutes = require('../routes/app');
 const userRoutes = require('../routes/user');
-const chatRoutes = require('../routes/chat');
+const slackChatRoutes = require('../routes/chat/slack');
+const messengerChatRoutes = require('../routes/chat/messenger');
+const nativeChatRoutes = require('../routes/chat/native');
 
 exports.configure = (express, app) => {
 
@@ -13,6 +15,8 @@ exports.configure = (express, app) => {
   accountRoutes(express.Router(), app);
   appRoutes(express.Router(), app);
   userRoutes(express.Router(), app);
-  chatRoutes(express.Router(), app);
+  slackChatRoutes(express.Router(), app);
+  messengerChatRoutes(express.Router(), app);
+  nativeChatRoutes(express.Router(), app);
 
 };

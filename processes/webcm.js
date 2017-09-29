@@ -52,7 +52,7 @@ server.post('/push/:user', (req, res) => {
 });
 
 server.listen(settings.webcm.port, settings.webcm.host, null, () => {
-  logger.info('%s listening at %s', server.name, server.url);
+  logger.info('Web Cloud Messaging listening at %s', server.name, server.url);
 });
 
 pubSubServer.listen(settings.webcm.pubSub.port, settings.webcm.pubSub.host, null, () => {
