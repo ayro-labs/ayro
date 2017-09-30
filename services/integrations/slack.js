@@ -7,7 +7,7 @@ const Promise = require('bluebird');
 const _ = require('lodash');
 
 const CHATZ_BOT_USERNAME = 'Chatz Bot';
-const CONFIG_SLACK = ['access_token', 'team', 'team_id', 'team_url', 'user', 'user_id', 'channel', 'channel_id'];
+const CONFIG_ATTRIBUTES = ['access_token', 'team.id', 'team.name', 'team.url', 'user.id', 'user.name', 'channel.id', 'channel.name'];
 
 function getFallbackText(text) {
   let fallback = _.replace(text, /\*/g, '');
@@ -243,7 +243,7 @@ exports.addIntegration = (app, accessToken) => {
         configuration.channel = _.pick(channel, ['id', 'name']);
       }
     });
-    return integrations.add(app, constants.integration.channels.SLACK, constants.integration.types.BUSINESS, _.pick(configuration, CONFIG_SLACK));
+    return integrations.add(app, constants.integration.channels.SLACK, constants.integration.types.BUSINESS, _.pick(configuration, CONFIG_ATTRIBUTES));
   }).tap(() => {
     return postBotIntro(this.slackClient, this.configuration.user, this.configuration.channel);
   });

@@ -1,12 +1,11 @@
-const chatService = require('../../services/chat');
+const messengerService = require('../../services/chat/messenger');
 const logger = require('../../utils/logger');
 const errors = require('../../utils/errors');
-const constants = require('../../utils/constants');
 
 module.exports = (router, app) => {
 
   function postMessage(req, res) {
-    chatService.pushMessage(constants.integration.channels.MESSENGER, req.body).then(() => {
+    messengerService.postMessage(req.body).then(() => {
       res.json({});
     }).catch((err) => {
       logger.error(err);
@@ -14,7 +13,7 @@ module.exports = (router, app) => {
     });
   }
 
-  router.post('/message', postMessage);
+  router.post('/', postMessage);
 
   app.use('/chat/messenger', router);
 

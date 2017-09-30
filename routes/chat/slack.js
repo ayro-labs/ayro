@@ -23,7 +23,7 @@ module.exports = (router, app) => {
     });
   }
 
-  router.post('/message', postMessage);
+  router.post('/', postMessage);
   router.post('/profile', postProfile);
 
   app.use('/chat/slack', router);

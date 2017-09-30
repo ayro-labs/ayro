@@ -1,15 +1,15 @@
-const ChatMessage = require('../models').ChatMessage;
-const constants = require('../utils/constants');
-const errors = require('../utils/errors');
-const userCommons = require('./commons/user');
-const slack = require('./integrations/slack');
-const push = require('./integrations/push');
+const ChatMessage = require('../../models').ChatMessage;
+const constants = require('../../utils/constants');
+const errors = require('../../utils/errors');
+const userCommons = require('../commons/user');
+const slack = require('../integrations/slack');
+const push = require('../integrations/push');
 const Promise = require('bluebird');
 const _ = require('lodash');
 
 const EVENT_CHAT_MESSAGE = 'chat_message';
 
-const getIntegrationService = (channel) => {
+const getBusinessIntegration = (channel) => {
   switch (channel) {
     case constants.integration.channels.SLACK:
       return slack;
@@ -24,40 +24,8 @@ exports.listMessages = (user, device) => {
   });
 };
 
-exports.postProfile = (channel, data) => {
-  return Promise.bind({}).then(() => {
-    const service = getIntegrationService(channel);
-    if (!service) {
-      throw errors.chatzError('integration.notSupported', 'Integration not supported');
-    }
-    this.service = service;
-    return service.extractUser(data);
-  }).then((user) => {
-    return userCommons.getUser(user.id, {populate: 'app devices'});
-  }).then((user) => {
-    const integration = user.app.getIntegration(channel);
-    if (!integration) {
-      throw errors.chatzError('integration.notSupported', 'Integration not supported');
-    }
-    this.user = user;
-    this.integration = integration;
-    const context = this;
-    switch (integration.channel) {
-      case constants.integration.channels.SLACK:
-        return slack.postProfile(integration.configuration, context.user);
-      default:
-        return null;
-    }
-  }).then(() => {
-    return null;
-  });
-};
-
 exports.postMessage = (user, device, message) => {
-  return Promise.all([
-    userCommons.getUser(user.id),
-    userCommons.getDevice(device.id),
-  ]).bind({}).spread((user, device) => {
+  return Promise.all([userCommons.getUser(user.id), userCommons.getDevice(device.id)]).bind({}).spread((user, device) => {
     if (String(user.id) !== String(device.user)) {
       throw errors.chatzError('device.unknown', 'Unknown device');
     }
@@ -83,10 +51,9 @@ exports.postMessage = (user, device, message) => {
     const integrations = this.user.app.listIntegrations(constants.integration.types.BUSINESS);
     const promises = [];
     integrations.forEach((integration) => {
-      switch (integration.channel) {
-        case constants.integration.channels.SLACK:
-          promises.push(slack.postMessage(integration.configuration, context.user, chatMessage.text));
-          break;
+      const businessIntegration = getBusinessIntegration(integration.channel);
+      if (businessIntegration) {
+        promises.push(businessIntegration.postMessage(integration.configuration, context.user, chatMessage.text));
       }
     });
     return Promise.all(promises);
@@ -97,12 +64,12 @@ exports.postMessage = (user, device, message) => {
 
 exports.pushMessage = (channel, data) => {
   return Promise.bind({}).then(() => {
-    const service = getIntegrationService(channel);
-    if (!service) {
+    const businessIntegration = getBusinessIntegration(channel);
+    if (!businessIntegration) {
       throw errors.chatzError('integration.notSupported', 'Integration not supported');
     }
-    this.service = service;
-    return service.extractUser(data);
+    this.businessIntegration = businessIntegration;
+    return businessIntegration.extractUser(data);
   }).then((user) => {
     return userCommons.getUser(user.id, {populate: 'app latest_device'});
   }).then((user) => {
@@ -113,8 +80,8 @@ exports.pushMessage = (channel, data) => {
     this.user = user;
     this.integration = integration;
     return Promise.all([
-      this.service.extractAuthor(integration.configuration, data),
-      this.service.extractText(data),
+      this.businessIntegration.extractAuthor(integration.configuration, data),
+      this.businessIntegration.extractText(data),
     ]);
   }).spread((author, text) => {
     const chatMessage = new ChatMessage({
@@ -130,7 +97,28 @@ exports.pushMessage = (channel, data) => {
     this.chatMessage = chatMessage;
     return push.message(this.user, EVENT_CHAT_MESSAGE, this.chatMessage);
   }).then(() => {
-    return this.service.confirmMessage(this.integration.configuration, data, this.user, this.chatMessage);
+    return this.businessIntegration.confirmMessage(this.integration.configuration, data, this.user, this.chatMessage);
+  }).then(() => {
+    return null;
+  });
+};
+
+exports.postProfile = (channel, data) => {
+  return Promise.bind({}).then(() => {
+    const businessIntegration = getBusinessIntegration(channel);
+    if (!businessIntegration) {
+      throw errors.chatzError('integration.notSupported', 'Integration not supported');
+    }
+    this.businessIntegration = businessIntegration;
+    return businessIntegration.extractUser(data);
+  }).then((user) => {
+    return userCommons.getUser(user.id, {populate: 'app devices'});
+  }).then((user) => {
+    const integration = user.app.getIntegration(channel);
+    if (!integration) {
+      throw errors.chatzError('integration.notSupported', 'Integration not supported');
+    }
+    return this.businessIntegration.postProfile(integration.configuration, user);
   }).then(() => {
     return null;
   });

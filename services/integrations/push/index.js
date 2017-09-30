@@ -2,6 +2,7 @@ const constants = require('../../../utils/constants');
 const webPush = require('./web');
 const androidPush = require('./android');
 const iosPush = require('./ios');
+const messengerPush = require('./messenger');
 
 exports.message = (user, event, message) => {
   return Promise.resolve().then(() => {
@@ -16,6 +17,9 @@ exports.message = (user, event, message) => {
         break;
       case constants.device.platforms.IOS.id:
         promise = iosPush.push;
+        break;
+      case constants.device.platforms.MESSENGER.id:
+        promise = messengerPush.push;
         break;
       default:
         // Do nothing

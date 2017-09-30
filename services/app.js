@@ -4,6 +4,7 @@ const constants = require('../utils/constants');
 const cryptography = require('../utils/cryptography');
 const errors = require('../utils/errors');
 const integrations = require('./integrations');
+const messengerIntegration = require('./integrations/messenger');
 const slackIntegration = require('./integrations/slack');
 const appCommons = require('./commons/app');
 const path = require('path');
@@ -123,6 +124,14 @@ exports.updateIOSIntegration = (app, configuration) => {
 
 exports.removeIOSIntegration = (app) => {
   return integrations.remove(app, constants.integration.channels.IOS);
+};
+
+exports.addMessengerIntegration = (app, profileId, pageId) => {
+  return messengerIntegration.add(app, profileId, pageId);
+};
+
+exports.removeMessengerIntegration = (app) => {
+  return integrations.remove(app, constants.integration.channels.MESSENGER);
 };
 
 exports.addSlackIntegration = (app, accessToken) => {

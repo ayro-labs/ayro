@@ -5,7 +5,7 @@ const appRoutes = require('../routes/app');
 const userRoutes = require('../routes/user');
 const slackChatRoutes = require('../routes/chat/slack');
 const messengerChatRoutes = require('../routes/chat/messenger');
-const nativeChatRoutes = require('../routes/chat/native');
+const chatRoutes = require('../routes/chat');
 
 exports.configure = (express, app) => {
 
@@ -17,6 +17,6 @@ exports.configure = (express, app) => {
   userRoutes(express.Router(), app);
   slackChatRoutes(express.Router(), app);
   messengerChatRoutes(express.Router(), app);
-  nativeChatRoutes(express.Router(), app);
+  chatRoutes(express.Router(), app);
 
 };
