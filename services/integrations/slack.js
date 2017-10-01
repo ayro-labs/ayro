@@ -312,7 +312,7 @@ exports.extractUser = (data) => {
   return userCommons.findUser({'extra.slack_channel.id': data.channel_id}, {require: true});
 };
 
-exports.extractAuthor = (configuration, data) => {
+exports.extractAgent = (configuration, data) => {
   return Promise.resolve().then(() => {
     const slackClient = new SlackClient(configuration.access_token);
     return slackClient.users.info(data.user_id);
@@ -333,9 +333,9 @@ exports.confirmMessage = (configuration, data, user, chatMessage) => {
   return Promise.resolve().then(() => {
     const slackClient = new SlackClient(configuration.access_token);
     return slackClient.chat.postMessage(data.channel_id, chatMessage.text, {
-      username: `${chatMessage.author.name} para ${user.getFullName()}`,
+      username: `${chatMessage.agent.name} para ${user.getFullName()}`,
       as_user: false,
-      icon_url: chatMessage.author.photo_url,
+      icon_url: chatMessage.agent.photo_url,
     });
   });
 };

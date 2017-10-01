@@ -52,12 +52,6 @@ const Account = new Schema({
   registration_date: {type: Date, required: true},
 });
 
-const AccountSecretKey = new Schema({
-  account: {type: ObjectId, ref: 'Account', required: true},
-  secret: {type: String, required: true},
-  registration_date: {type: Date, required: true},
-});
-
 const Integration = new Schema({
   type: {type: String, required: true, enum: _.values(constants.integration.types)},
   channel: {type: String, required: true, enum: _.values(constants.integration.channels)},
@@ -84,13 +78,7 @@ App.methods.listIntegrations = function(type) {
   });
 };
 
-const AppSecretKey = new Schema({
-  app: {type: ObjectId, ref: 'App', required: true},
-  secret: {type: String, required: true},
-  registration_date: {type: Date, required: true},
-});
-
-const Author = new Schema({
+const Agent = new Schema({
   id: {type: String, required: false},
   name: {type: String, required: false},
   photo_url: {type: String, required: false},
@@ -99,7 +87,7 @@ const Author = new Schema({
 const ChatMessage = new Schema({
   user: {type: ObjectId, ref: 'User', required: true},
   device: {type: ObjectId, ref: 'Device', required: true},
-  author: {type: Author, required: false},
+  agent: {type: Agent, required: false},
   text: {type: String, required: true},
   direction: {type: String, required: true, enum: _.values(constants.chatMessage.directions)},
   date: {type: Date, required: true},
@@ -177,9 +165,7 @@ User.methods.getFullName = function() {
 };
 
 exports.Account = mongoose.model('Account', customize(Account, ['password']));
-exports.AccountSecretKey = mongoose.model('AccountSecretKey', customize(AccountSecretKey));
 exports.App = mongoose.model('App', customize(App));
-exports.AppSecretKey = mongoose.model('AppSecretKey', customize(AppSecretKey));
 exports.ChatMessage = mongoose.model('ChatMessage', customize(ChatMessage));
 exports.Device = mongoose.model('Device', customize(Device));
 exports.User = mongoose.model('User', customize(User));

@@ -80,12 +80,12 @@ exports.pushMessage = (channel, data) => {
     this.user = user;
     this.integration = integration;
     return Promise.all([
-      this.businessIntegration.extractAuthor(integration.configuration, data),
+      this.businessIntegration.extractAgent(integration.configuration, data),
       this.businessIntegration.extractText(data),
     ]);
-  }).spread((author, text) => {
+  }).spread((agent, text) => {
     const chatMessage = new ChatMessage({
-      author,
+      agent,
       text,
       user: this.user.id,
       device: this.user.latest_device.id,
