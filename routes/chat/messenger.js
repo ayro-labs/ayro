@@ -5,7 +5,7 @@ const errors = require('../../utils/errors');
 module.exports = (router, app) => {
 
   function confirmSubscription(req, res) {
-    res.json(req.header('hub.challenge'));
+    res.json(req.query['hub.challenge']);
   }
 
   function postMessage(req, res) {
