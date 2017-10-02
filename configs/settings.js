@@ -51,5 +51,16 @@ exports.slack = {
   verificationToken: '5aRssO4wD1yjYeyfDNuA6np2',
 };
 
+if (properties.getValue('https')) {
+  exports.https = {
+    key: properties.getValue('https.key'),
+    cert: properties.getValue('https.cert'),
+  };
+}
+
+if (this.env === 'production' && !this.https) {
+  throw new Error('Https is required when running in production environment');
+}
+
 logger.info('Using %s environment settings', this.env);
 logger.info('Debug mode is %s', this.debug ? 'ON' : 'OFF');

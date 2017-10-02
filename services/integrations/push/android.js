@@ -1,5 +1,5 @@
 const constants = require('../../../utils/constants');
-const restify = require('restify');
+const restify = require('restify-clients');
 
 const ORIGIN_CHATZ = 'chatz';
 const TIME_TO_LIVE = 600;

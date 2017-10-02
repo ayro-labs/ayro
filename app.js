@@ -3,6 +3,8 @@ const middlewares = require('./configs/middlewares');
 const routes = require('./configs/routes');
 const logger = require('./utils/logger');
 const loggerServer = require('./utils/logger-server');
+const fs = require('fs');
+const https = require('https');
 const express = require('express');
 const cors = require('cors');
 const compression = require('compression');
@@ -51,6 +53,14 @@ app.use(session({
 middlewares.configure(app);
 routes.configure(express, app);
 
-app.listen(app.get('port'), () => {
-  logger.info('Chatz server is listening on port %s', app.get('port'));
-});
+if (settings.https) {
+  const cert = fs.readFileSync(settings.https.cert);
+  const key = fs.readFileSync(settings.https.key);
+  https.createServer({cert, key}, app).listen(app.get('port'), () => {
+    logger.info('Chatz server is listening on port %s', app.get('port'));
+  });
+} else {
+  app.listen(app.get('port'), () => {
+    logger.info('Chatz server is listening on port %s', app.get('port'));
+  });
+}

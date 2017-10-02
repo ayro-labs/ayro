@@ -1,8 +1,11 @@
 const settings = require('../../../configs/settings');
 const constants = require('../../../utils/constants');
-const restify = require('restify');
+const restify = require('restify-clients');
 
-const webcmClient = restify.createJsonClient(`http://${settings.webcm.host}:${settings.webcm.port}`);
+const protocol = settings.env === 'production' ? 'https' : 'http';
+const url = `${protocol}://${settings.webcm.host}:${settings.webcm.port}`;
+
+const webcmClient = restify.createJsonClient(url);
 
 exports.push = (user, event, message) => {
   return new Promise((resolve, reject) => {

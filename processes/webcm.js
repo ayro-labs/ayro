@@ -1,7 +1,9 @@
 const settings = require('../configs/settings');
 const logger = require('../utils/logger');
 const sessions = require('../utils/sessions');
+const fs = require('fs');
 const http = require('http');
+const https = require('https');
 const restify = require('restify');
 const faye = require('faye');
 const util = require('util');
@@ -36,11 +38,18 @@ const authentication = {
   },
 };
 
-const server = restify.createServer({name: 'Web Cloud Messaging'});
+const httpsCert = settings.https ? fs.readFileSync(settings.https.cert) : null;
+const httpsKey = settings.https ? fs.readFileSync(settings.https.key) : null;
+
+const server = restify.createServer({
+  name: 'Web Cloud Messaging',
+  certificate: httpsCert,
+  key: httpsKey,
+});
 server.use(restify.queryParser());
 server.use(restify.bodyParser());
 
-const pubSubServer = http.createServer();
+const pubSubServer = settings.https ? https.createServer({cert: httpsCert, key: httpsKey}) : http.createServer();
 const bayeux = new faye.NodeAdapter({mount: '/'});
 bayeux.addExtension(authentication);
 bayeux.attach(pubSubServer);
@@ -52,9 +61,9 @@ server.post('/push/:user', (req, res) => {
 });
 
 server.listen(settings.webcm.port, settings.webcm.host, null, () => {
-  logger.info('Web Cloud Messaging listening at %s', server.name, server.url);
+  logger.info('Web Cloud Messaging listening on port %s', settings.webcm.port);
 });
 
 pubSubServer.listen(settings.webcm.pubSub.port, settings.webcm.pubSub.host, null, () => {
-  logger.info('Web Cloud Messaging (Pub/Sub) listening at http://%s:%s', settings.webcm.pubSub.host, settings.webcm.pubSub.port);
+  logger.info('Web Cloud Messaging (Pub/Sub) listening on port %s', settings.webcm.pubSub.port);
 });
