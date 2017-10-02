@@ -13,7 +13,7 @@ module.exports = (router, app) => {
     });
   }
 
-  router.post('/', postMessage);
+  router.get('/', postMessage);
 
   app.use('/chat/messenger', router);
 
