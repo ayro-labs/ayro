@@ -4,6 +4,10 @@ const errors = require('../../utils/errors');
 
 module.exports = (router, app) => {
 
+  function confirmSubscription(req, res) {
+    res.json(req.header('hub.challenge'));
+  }
+
   function postMessage(req, res) {
     messengerService.postMessage(req.body).then(() => {
       res.json({});
@@ -13,7 +17,8 @@ module.exports = (router, app) => {
     });
   }
 
-  router.get('/', postMessage);
+  router.get('/', confirmSubscription);
+  router.post('/', postMessage);
 
   app.use('/chat/messenger', router);
 
