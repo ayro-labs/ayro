@@ -52,6 +52,7 @@ exports.slack = {
 };
 
 exports.messenger = {
+  appSecret: '28a2b0321aec6799be5f0e884431f626',
   pageToken: 'EAAWaleAwUwIBANNlqHDrZA7xZA2gu4bXEjtvwqC33k3NU6QzcZANwXUiOuqynPZBBq8JnEZCEwhUIYye4oKbEsodU5XwcsmwGR9ikZAISV7G0BNVNDsRDhRAgfa52a3YvJPGwHLq7aiGzCabdxDh5TnnlIqJAwUrajsNnWDEhRxAZDZD',
   verificationToken: '9f28f2cff653df1e950f4808213b800d7acd9fe0',
 };

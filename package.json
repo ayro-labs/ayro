@@ -25,6 +25,7 @@
     "cors": "2.8.4",
     "deasync": "0.1.10",
     "express": "4.15.3",
+    "express-x-hub": "1.0.4",
     "faye": "1.2.4",
     "hiredis": "0.5.0",
     "json.date-extensions": "1.2.2",
