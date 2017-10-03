@@ -51,6 +51,11 @@ exports.slack = {
   verificationToken: '5aRssO4wD1yjYeyfDNuA6np2',
 };
 
+exports.messenger = {
+  pageToken: 'EAAWaleAwUwIBANNlqHDrZA7xZA2gu4bXEjtvwqC33k3NU6QzcZANwXUiOuqynPZBBq8JnEZCEwhUIYye4oKbEsodU5XwcsmwGR9ikZAISV7G0BNVNDsRDhRAgfa52a3YvJPGwHLq7aiGzCabdxDh5TnnlIqJAwUrajsNnWDEhRxAZDZD',
+  verificationToken: '9f28f2cff653df1e950f4808213b800d7acd9fe0',
+};
+
 if (properties.getValue('https')) {
   exports.https = {
     key: properties.getValue('https.key'),
