@@ -14,15 +14,20 @@ const SUBSCRIBE_EVENT = 'subscribe';
 module.exports = (router, app) => {
 
   function confirmSubscription(req, res) {
-    if (req.query['hub.mode'] === SUBSCRIBE_EVENT && req.query['hub.verify_token'] === settings.messenger.verificationToken) {
-      res.send(req.query['hub.challenge']);
-    } else {
-      logger.warn('Could not verify Messenger callback');
+    if (req.query['hub.mode'] !== SUBSCRIBE_EVENT || req.query['hub.verify_token'] !== settings.messenger.verificationToken) {
+      logger.warn('(Messenger) Could not verify subscribe event');
       res.sendStatus(403);
+      return;
     }
+    res.send(req.query['hub.challenge']);
   }
 
   function postMessage(req, res) {
+    if (!req.isXHub || !req.isXHubValid()) {
+      logger.warn('(Messenger) Could not verify message signature');
+      res.sendStatus(403);
+      return;
+    }
     messengerService.postMessage(req.body).then(() => {
       res.json({});
     }).catch((err) => {
