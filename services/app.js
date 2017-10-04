@@ -83,11 +83,13 @@ exports.listApps = (account) => {
 };
 
 exports.addWebsiteIntegration = (app) => {
-  const configuration = {
-    primary_color: DEFAULT_PRIMARY_COLOR,
-    conversation_color: DEFAULT_CONVERSATION_COLOR,
-  };
-  return integrations.add(app, constants.integration.channels.WEBSITE, constants.integration.types.USER, _.pick(configuration, CONFIG_WEBSITE));
+  return Promise.resolve().then(() => {
+    const configuration = {
+      primary_color: DEFAULT_PRIMARY_COLOR,
+      conversation_color: DEFAULT_CONVERSATION_COLOR,
+    };
+    return integrations.add(app, constants.integration.channels.WEBSITE, constants.integration.types.USER, _.pick(configuration, CONFIG_WEBSITE));
+  });
 };
 
 exports.updateWebsiteIntegration = (app, configuration) => {
@@ -99,11 +101,13 @@ exports.removeWebsiteIntegration = (app) => {
 };
 
 exports.addAndroidIntegration = (app) => {
-  const configuration = {
-    primary_color: DEFAULT_PRIMARY_COLOR,
-    conversation_color: DEFAULT_CONVERSATION_COLOR,
-  };
-  return integrations.add(app, constants.integration.channels.ANDROID, constants.integration.types.USER, _.pick(configuration, CONFIG_ANDROID));
+  return Promise.resolve().then(() => {
+    const configuration = {
+      primary_color: DEFAULT_PRIMARY_COLOR,
+      conversation_color: DEFAULT_CONVERSATION_COLOR,
+    };
+    return integrations.add(app, constants.integration.channels.ANDROID, constants.integration.types.USER, _.pick(configuration, CONFIG_ANDROID));
+  });
 };
 
 exports.updateAndroidIntegration = (app, configuration) => {
@@ -126,12 +130,20 @@ exports.removeIOSIntegration = (app) => {
   return integrations.remove(app, constants.integration.channels.IOS);
 };
 
-exports.addMessengerIntegration = (app, profileId, pageId) => {
-  return messengerIntegration.add(app, profileId, pageId);
+exports.addMessengerIntegration = (app, profile) => {
+  return messengerIntegration.addIntegration(app, profile);
+};
+
+exports.updateMessengerIntegration = (app, page) => {
+  return messengerIntegration.updateIntegration(app, page);
 };
 
 exports.removeMessengerIntegration = (app) => {
   return integrations.remove(app, constants.integration.channels.MESSENGER);
+};
+
+exports.listMessengerPages = (app) => {
+  return messengerIntegration.listPages(app);
 };
 
 exports.addSlackIntegration = (app, accessToken) => {

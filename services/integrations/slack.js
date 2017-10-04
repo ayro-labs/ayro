@@ -7,7 +7,6 @@ const Promise = require('bluebird');
 const _ = require('lodash');
 
 const CHATZ_BOT_USERNAME = 'Chatz Bot';
-const CONFIG_ATTRIBUTES = ['access_token', 'team.id', 'team.name', 'team.url', 'user.id', 'user.name', 'channel.id', 'channel.name'];
 
 function getFallbackText(text) {
   let fallback = _.replace(text, /\*/g, '');
@@ -224,7 +223,6 @@ exports.addIntegration = (app, accessToken) => {
     return this.slackClient.auth.test();
   }).then((result) => {
     this.configuration = {
-      access_token: accessToken,
       team: {
         id: result.team_id,
         name: result.team,
@@ -233,6 +231,7 @@ exports.addIntegration = (app, accessToken) => {
       user: {
         id: result.user_id,
         name: result.user,
+        access_token: accessToken,
       },
     };
     return this.slackClient.channels.list({exclude_archived: true, exclude_members: true});
@@ -243,7 +242,7 @@ exports.addIntegration = (app, accessToken) => {
         configuration.channel = _.pick(channel, ['id', 'name']);
       }
     });
-    return integrations.add(app, constants.integration.channels.SLACK, constants.integration.types.BUSINESS, _.pick(configuration, CONFIG_ATTRIBUTES));
+    return integrations.add(app, constants.integration.channels.SLACK, constants.integration.types.BUSINESS, configuration);
   }).tap(() => {
     return postBotIntro(this.slackClient, this.configuration.user, this.configuration.channel);
   });
@@ -251,7 +250,7 @@ exports.addIntegration = (app, accessToken) => {
 
 exports.listChannels = (app) => {
   return integrations.getConfiguration(app, constants.integration.channels.SLACK).then((configuration) => {
-    const slackClient = new SlackClient(configuration.access_token);
+    const slackClient = new SlackClient(configuration.user.access_token);
     return slackClient.channels.list({exclude_archived: true, exclude_members: true});
   }).then((result) => {
     const channels = [];
@@ -264,7 +263,7 @@ exports.listChannels = (app) => {
 
 exports.createChannel = (app, channel) => {
   return integrations.getConfiguration(app, constants.integration.channels.SLACK).then((configuration) => {
-    const slackClient = new SlackClient(configuration.access_token);
+    const slackClient = new SlackClient(configuration.user.access_token);
     return slackClient.channels.create(channel);
   }).then((result) => {
     return _.pick(result.channel, ['id', 'name']);
@@ -273,7 +272,7 @@ exports.createChannel = (app, channel) => {
 
 exports.postMessage = (configuration, user, message) => {
   return Promise.resolve().bind({}).then(() => {
-    this.slackClient = new SlackClient(configuration.access_token);
+    this.slackClient = new SlackClient(configuration.user.access_token);
     if (user.extra && user.extra.slack_channel) {
       return getChannel(this.slackClient, user).bind(this).then((userChannel) => {
         if (!userChannel) {
@@ -298,7 +297,7 @@ exports.postMessage = (configuration, user, message) => {
 
 exports.postProfile = (configuration, user) => {
   return Promise.resolve().then(() => {
-    const slackClient = new SlackClient(configuration.access_token);
+    const slackClient = new SlackClient(configuration.user.access_token);
     if (user.extra && user.extra.slack_channel) {
       return postProfile(slackClient, user, user.extra.slack_channel).then(() => {
         return null;
@@ -314,7 +313,7 @@ exports.extractUser = (data) => {
 
 exports.extractAgent = (configuration, data) => {
   return Promise.resolve().then(() => {
-    const slackClient = new SlackClient(configuration.access_token);
+    const slackClient = new SlackClient(configuration.user.access_token);
     return slackClient.users.info(data.user_id);
   }).then((result) => {
     return {
@@ -331,7 +330,7 @@ exports.extractText = (data) => {
 
 exports.confirmMessage = (configuration, data, user, chatMessage) => {
   return Promise.resolve().then(() => {
-    const slackClient = new SlackClient(configuration.access_token);
+    const slackClient = new SlackClient(configuration.user.access_token);
     return slackClient.chat.postMessage(data.channel_id, chatMessage.text, {
       username: `${chatMessage.agent.name} para ${user.getFullName()}`,
       as_user: false,

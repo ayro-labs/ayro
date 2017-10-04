@@ -45,16 +45,20 @@ exports.webcm = {
   },
 };
 
+exports.facebook = {
+  appId: '1577343385621250',
+  appSecret: '28a2b0321aec6799be5f0e884431f626',
+};
+
+exports.messenger = {
+  pageToken: 'EAAWaleAwUwIBANNlqHDrZA7xZA2gu4bXEjtvwqC33k3NU6QzcZANwXUiOuqynPZBBq8JnEZCEwhUIYye4oKbEsodU5XwcsmwGR9ikZAISV7G0BNVNDsRDhRAgfa52a3YvJPGwHLq7aiGzCabdxDh5TnnlIqJAwUrajsNnWDEhRxAZDZD',
+  verificationToken: '9f28f2cff653df1e950f4808213b800d7acd9fe0',
+};
+
 exports.slack = {
   clientId: '238285510608.246046996448',
   clientSecret: 'a10204a6416c5e4b50a1209c6380568f',
   verificationToken: '5aRssO4wD1yjYeyfDNuA6np2',
-};
-
-exports.messenger = {
-  appSecret: '28a2b0321aec6799be5f0e884431f626',
-  pageToken: 'EAAWaleAwUwIBANNlqHDrZA7xZA2gu4bXEjtvwqC33k3NU6QzcZANwXUiOuqynPZBBq8JnEZCEwhUIYye4oKbEsodU5XwcsmwGR9ikZAISV7G0BNVNDsRDhRAgfa52a3YvJPGwHLq7aiGzCabdxDh5TnnlIqJAwUrajsNnWDEhRxAZDZD',
-  verificationToken: '9f28f2cff653df1e950f4808213b800d7acd9fe0',
 };
 
 if (properties.getValue('https')) {

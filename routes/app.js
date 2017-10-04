@@ -179,6 +179,46 @@ module.exports = (router, app) => {
     });
   }
 
+  function addMessengerIntegration(req, res) {
+    const app = new App({id: req.params.app});
+    appService.addMessengerIntegration(app, req.body.profile).then((app) => {
+      res.json(app);
+    }).catch((err) => {
+      logger.error(err);
+      errors.respondWithError(res, err);
+    });
+  }
+
+  function updateMessengerIntegration(req, res) {
+    const app = new App({id: req.params.app});
+    appService.updateMessengerIntegration(app, req.body.page).then((app) => {
+      res.json(app);
+    }).catch((err) => {
+      logger.error(err);
+      errors.respondWithError(res, err);
+    });
+  }
+
+  function removeMessengerIntegration(req, res) {
+    const app = new App({id: req.params.app});
+    appService.removeMessengerIntegration(app).then((app) => {
+      res.json(app);
+    }).catch((err) => {
+      logger.error(err);
+      errors.respondWithError(res, err);
+    });
+  }
+
+  function listMessengerPages(req, res) {
+    const app = new App({id: req.params.app});
+    appService.listMessengerPages(app).then((pages) => {
+      res.json(pages);
+    }).catch((err) => {
+      logger.error(err);
+      errors.respondWithError(res, err);
+    });
+  }
+
   function addSlackIntegration(req, res) {
     const app = new App({id: req.params.app});
     appService.addSlackIntegration(app, req.body.access_token).then((app) => {
@@ -211,8 +251,8 @@ module.exports = (router, app) => {
 
   function listSlackChannels(req, res) {
     const app = new App({id: req.params.app});
-    appService.listSlackChannels(app).then((app) => {
-      res.json(app);
+    appService.listSlackChannels(app).then((channels) => {
+      res.json(channels);
     }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
@@ -221,8 +261,8 @@ module.exports = (router, app) => {
 
   function createSlackChannel(req, res) {
     const app = new App({id: req.params.app});
-    appService.createSlackChannel(app, req.body.channel).then((app) => {
-      res.json(app);
+    appService.createSlackChannel(app, req.body.channel).then((channel) => {
+      res.json(channel);
     }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
@@ -247,6 +287,11 @@ module.exports = (router, app) => {
   router.post('/integrations/ios/init', initIOSIntegration);
   router.put('/:app/integrations/ios', isAccountAuthenticated, updateIOSIntegration);
   router.delete('/:app/integrations/ios', isAccountAuthenticated, removeIOSIntegration);
+
+  router.post('/:app/integrations/messenger', isAccountAuthenticated, addMessengerIntegration);
+  router.put('/:app/integrations/messenger', isAccountAuthenticated, updateMessengerIntegration);
+  router.delete('/:app/integrations/messenger', isAccountAuthenticated, removeMessengerIntegration);
+  router.get('/:app/integrations/messenger/pages', isAccountAuthenticated, listMessengerPages);
 
   router.post('/:app/integrations/slack', isAccountAuthenticated, addSlackIntegration);
   router.put('/:app/integrations/slack', isAccountAuthenticated, updateSlackIntegration);
