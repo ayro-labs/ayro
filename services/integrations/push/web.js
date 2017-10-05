@@ -1,6 +1,7 @@
 const settings = require('../../../configs/settings');
 const constants = require('../../../utils/constants');
 const restify = require('restify-clients');
+const Promise = require('bluebird');
 
 const protocol = settings.env === 'production' ? 'https' : 'http';
 const url = `${protocol}://${settings.webcm.host}:${settings.webcm.port}`;

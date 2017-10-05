@@ -105,6 +105,9 @@ const DeviceInfo = new Schema({
   // Web
   browser_name: {type: String, required: false},
   browser_version: {type: String, required: false},
+  // Messenger
+  profile_id: {type: String, required: false},
+  profile_name: {type: String, required: false},
 });
 
 const Device = new Schema({
@@ -130,6 +133,9 @@ Device.methods.isIOS = function() {
 };
 Device.methods.isWeb = function() {
   return this.platform === constants.device.platforms.WEB.id;
+};
+Device.methods.isMessenger = function() {
+  return this.platform === constants.device.platforms.MESSENGER.id;
 };
 
 const User = new Schema({

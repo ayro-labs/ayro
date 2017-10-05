@@ -1,5 +1,6 @@
 const constants = require('../../../utils/constants');
 const restify = require('restify-clients');
+const Promise = require('bluebird');
 
 const ORIGIN_CHATZ = 'chatz';
 const TIME_TO_LIVE = 600;
