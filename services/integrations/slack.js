@@ -1,12 +1,13 @@
-const integrations = require('.');
 const constants = require('../../utils/constants');
 const User = require('../../models').User;
+const integrationCommons = require('../commons/integration');
 const userCommons = require('../commons/user');
 const SlackClient = require('@slack/client').WebClient;
 const Promise = require('bluebird');
 const _ = require('lodash');
 
 const CHATZ_BOT_USERNAME = 'Chatz Bot';
+const CONFIG_SLACK_UPDATE = ['channel', 'channel_id'];
 
 function getFallbackText(text) {
   let fallback = _.replace(text, /\*/g, '');
@@ -242,14 +243,22 @@ exports.addIntegration = (app, accessToken) => {
         configuration.channel = _.pick(channel, ['id', 'name']);
       }
     });
-    return integrations.add(app, constants.integration.channels.SLACK, constants.integration.types.BUSINESS, configuration);
+    return integrationCommons.addIntegration(app, constants.integration.channels.SLACK, constants.integration.types.BUSINESS, configuration);
   }).tap(() => {
     return postBotIntro(this.slackClient, this.configuration.user, this.configuration.channel);
   });
 };
 
+exports.updateIntegration = (app, configuration) => {
+  return integrationCommons.updateIntegration(app, constants.integration.channels.SLACK, _.pick(configuration, CONFIG_SLACK_UPDATE));
+};
+
+exports.removeIntegration = (app) => {
+  return integrationCommons.removeIntegration(app, constants.integration.channels.SLACK);
+};
+
 exports.listChannels = (app) => {
-  return integrations.getConfiguration(app, constants.integration.channels.SLACK).then((configuration) => {
+  return integrationCommons.getConfiguration(app, constants.integration.channels.SLACK).then((configuration) => {
     const slackClient = new SlackClient(configuration.user.access_token);
     return slackClient.channels.list({exclude_archived: true, exclude_members: true});
   }).then((result) => {
@@ -262,7 +271,7 @@ exports.listChannels = (app) => {
 };
 
 exports.createChannel = (app, channel) => {
-  return integrations.getConfiguration(app, constants.integration.channels.SLACK).then((configuration) => {
+  return integrationCommons.getConfiguration(app, constants.integration.channels.SLACK).then((configuration) => {
     const slackClient = new SlackClient(configuration.user.access_token);
     return slackClient.channels.create(channel);
   }).then((result) => {

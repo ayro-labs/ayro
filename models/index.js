@@ -32,11 +32,13 @@ function customize(schema, excludes) {
     this.set('_id', id);
   });
   schema.set('toJSON', {
+    virtuals: true,
     transform: (doc, ret) => {
       return transform(ret, excludes);
     },
   });
   schema.set('toObject', {
+    virtuals: true,
     transform: (doc, ret) => {
       return transform(ret, excludes);
     },
@@ -52,20 +54,17 @@ const Account = new Schema({
   registration_date: {type: Date, required: true},
 });
 
-const Integration = new Schema({
-  type: {type: String, required: true, enum: _.values(constants.integration.types)},
-  channel: {type: String, required: true, enum: _.values(constants.integration.channels)},
-  configuration: {type: Object, required: false},
-  registration_date: {type: Date, required: true},
-});
-
 const App = new Schema({
   account: {type: ObjectId, ref: 'Account', required: true},
   name: {type: String, required: true, trim: true},
   icon: {type: String, required: false},
   token: {type: String, required: true},
-  integrations: {type: [Integration], required: false},
   registration_date: {type: Date, required: true},
+});
+App.virtual('integrations', {
+  ref: 'Integration',
+  localField: '_id',
+  foreignField: 'app',
 });
 App.methods.getIntegration = function(channel) {
   return this.integrations.find(function(integration) {
@@ -78,65 +77,15 @@ App.methods.listIntegrations = function(type) {
   });
 };
 
-const Agent = new Schema({
-  id: {type: String, required: false},
-  name: {type: String, required: false},
-  photo_url: {type: String, required: false},
-});
-
-const ChatMessage = new Schema({
-  user: {type: ObjectId, ref: 'User', required: true},
-  device: {type: ObjectId, ref: 'Device', required: true},
-  agent: {type: Agent, required: false},
-  text: {type: String, required: true},
-  direction: {type: String, required: true, enum: _.values(constants.chatMessage.directions)},
-  date: {type: Date, required: true},
-}, {collection: 'chat_messages'});
-
-const DeviceInfo = new Schema({
-  // Android and iOS
-  app_id: {type: String, required: false},
-  app_version: {type: String, required: false},
-  os_name: {type: String, required: false},
-  os_version: {type: String, required: false},
-  manufacturer: {type: String, required: false},
-  model: {type: String, required: false},
-  carrier: {type: String, required: false},
-  // Web
-  browser_name: {type: String, required: false},
-  browser_version: {type: String, required: false},
-  // Messenger
-  profile_id: {type: String, required: false},
-  profile_name: {type: String, required: false},
-});
-
-const Device = new Schema({
-  user: {type: ObjectId, ref: 'User', required: true},
-  uid: {type: String, required: true, index: {unique: true}},
-  platform: {type: String, required: true},
-  push_token: {type: String, required: false},
-  info: {type: DeviceInfo, required: false},
+const Integration = new Schema({
+  app: {type: ObjectId, ref: 'App', required: true},
+  type: {type: String, required: true, enum: _.values(constants.integration.types)},
+  channel: {type: String, required: true, enum: _.values(constants.integration.channels)},
+  configuration: {type: Object, required: false},
   registration_date: {type: Date, required: true},
 });
-Device.methods.getPlatformName = function() {
-  const platform = constants.device.platforms[_.toUpper(this.platform)];
-  return platform ? platform.name : '';
-};
-Device.methods.isSmartphone = function() {
-  return _.includes([constants.device.platforms.ANDROID.id, constants.device.platforms.IOS.id], this.platform);
-};
-Device.methods.isAndroid = function() {
-  return this.platform === constants.device.platforms.ANDROID.id;
-};
-Device.methods.isIOS = function() {
-  return this.platform === constants.device.platforms.IOS.id;
-};
-Device.methods.isWeb = function() {
-  return this.platform === constants.device.platforms.WEB.id;
-};
-Device.methods.isMessenger = function() {
-  return this.platform === constants.device.platforms.MESSENGER.id;
-};
+Integration.index({app: 1, channel: 1}, {unique: true});
+Integration.index({type: 1, 'configuration.page.id': 1});
 
 const User = new Schema({
   app: {type: ObjectId, ref: 'App', required: true},
@@ -170,8 +119,66 @@ User.methods.getFullName = function() {
   return fullName;
 };
 
+const DeviceInfo = new Schema({
+  // Android
+  app_id: {type: String, required: false},
+  app_version: {type: String, required: false},
+  os_name: {type: String, required: false},
+  os_version: {type: String, required: false},
+  manufacturer: {type: String, required: false},
+  model: {type: String, required: false},
+  carrier: {type: String, required: false},
+  // Web
+  browser_name: {type: String, required: false},
+  browser_version: {type: String, required: false},
+  // Messenger
+  profile_id: {type: String, required: false},
+  profile_name: {type: String, required: false},
+});
+
+const Device = new Schema({
+  user: {type: ObjectId, ref: 'User', required: true},
+  uid: {type: String, required: true, index: {unique: true}},
+  platform: {type: String, required: true},
+  push_token: {type: String, required: false},
+  info: {type: DeviceInfo, required: false},
+  registration_date: {type: Date, required: true},
+});
+Device.methods.getPlatformName = function() {
+  const platform = constants.device.platforms[_.toUpper(this.platform)];
+  return platform ? platform.name : '';
+};
+Device.methods.isSmartphone = function() {
+  return _.includes([constants.device.platforms.ANDROID.id, constants.device.platforms.IOS.id], this.platform);
+};
+Device.methods.isAndroid = function() {
+  return this.platform === constants.device.platforms.ANDROID.id;
+};
+Device.methods.isWeb = function() {
+  return this.platform === constants.device.platforms.WEB.id;
+};
+Device.methods.isMessenger = function() {
+  return this.platform === constants.device.platforms.MESSENGER.id;
+};
+
+const Agent = new Schema({
+  id: {type: String, required: false},
+  name: {type: String, required: false},
+  photo_url: {type: String, required: false},
+});
+
+const ChatMessage = new Schema({
+  user: {type: ObjectId, ref: 'User', required: true},
+  device: {type: ObjectId, ref: 'Device', required: true},
+  agent: {type: Agent, required: false},
+  text: {type: String, required: true},
+  direction: {type: String, required: true, enum: _.values(constants.chatMessage.directions)},
+  date: {type: Date, required: true},
+}, {collection: 'chat_messages'});
+
 exports.Account = mongoose.model('Account', customize(Account, ['password']));
 exports.App = mongoose.model('App', customize(App));
-exports.ChatMessage = mongoose.model('ChatMessage', customize(ChatMessage));
-exports.Device = mongoose.model('Device', customize(Device));
+exports.Integration = mongoose.model('Integration', customize(Integration));
 exports.User = mongoose.model('User', customize(User));
+exports.Device = mongoose.model('Device', customize(Device));
+exports.ChatMessage = mongoose.model('ChatMessage', customize(ChatMessage));

@@ -44,3 +44,11 @@ exports.findApp = (query, options) => {
     return app;
   });
 };
+
+exports.findApps = (query, options) => {
+  return Promise.resolve().then(() => {
+    const promise = App.find(query);
+    fillQuery(promise, options);
+    return promise.exec();
+  });
+};

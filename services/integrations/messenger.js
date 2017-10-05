@@ -1,23 +1,13 @@
-const integrations = require('.');
 const constants = require('../../utils/constants');
-const settings = require('../../configs/settings');
+const apis = require('../../utils/apis');
+const integrationCommons = require('../commons/integration');
 const Promise = require('bluebird');
-const FB = require('fb');
 const _ = require('lodash');
-
-function getFacebookApi(configuration, withPageToken) {
-  return new FB.Facebook({
-    appId: settings.facebook.appId,
-    appSecret: settings.facebook.appSecret,
-    accessToken: withPageToken && configuration.page ? configuration.page.access_token : configuration.profile.access_token,
-    version: 'v2.10',
-  });
-}
 
 function subscribePage(configuration) {
   return Promise.resolve().then(() => {
     if (configuration.page) {
-      return getFacebookApi(configuration, true).api(`${configuration.page.id}/subscribed_apps`, 'post');
+      return apis.facebook(configuration, true).api(`${configuration.page.id}/subscribed_apps`, 'post');
     }
     return Promise.resolve();
   });
@@ -26,7 +16,7 @@ function subscribePage(configuration) {
 function unsubscribePage(configuration) {
   return Promise.resolve().then(() => {
     if (configuration.page) {
-      return getFacebookApi(configuration, true).api(`${configuration.page.id}/subscribed_apps`, 'delete');
+      return apis.facebook(configuration, true).api(`${configuration.page.id}/subscribed_apps`, 'delete');
     }
     return Promise.resolve();
   });
@@ -41,22 +31,22 @@ exports.addIntegration = (app, profile) => {
         access_token: profile.access_token,
       },
     };
-    return integrations.add(app, constants.integration.channels.MESSENGER, constants.integration.types.USER, configuration);
+    return integrationCommons.addIntegration(app, constants.integration.channels.MESSENGER, constants.integration.types.USER, configuration);
   });
 };
 
 exports.updateIntegration = (app, page) => {
-  return integrations.getConfiguration(app, constants.integration.channels.MESSENGER).bind({}).then((configuration) => {
+  return integrationCommons.getConfiguration(app, constants.integration.channels.MESSENGER).bind({}).then((configuration) => {
     this.configurationOld = _.cloneDeep(configuration);
     this.configuration = configuration;
-    return getFacebookApi(configuration).api(page.id, {fields: ['id', 'name', 'access_token']});
+    return apis.facebook(configuration).api(page.id, {fields: ['id', 'name', 'access_token']});
   }).then((result) => {
     this.configuration.page = {
       id: result.id,
       name: result.name,
       access_token: result.access_token,
     };
-    return integrations.update(app, constants.integration.channels.MESSENGER, this.configuration);
+    return integrationCommons.updateIntegration(app, constants.integration.channels.MESSENGER, this.configuration);
   }).tap(() => {
     return unsubscribePage(this.configurationOld);
   }).tap(() => {
@@ -64,9 +54,13 @@ exports.updateIntegration = (app, page) => {
   });
 };
 
+exports.removeMessengerIntegration = (app) => {
+  return integrationCommons.removeIntegration(app, constants.integration.channels.MESSENGER);
+};
+
 exports.listPages = (app) => {
-  return integrations.getConfiguration(app, constants.integration.channels.MESSENGER).then((configuration) => {
-    return getFacebookApi(configuration).api('me/accounts');
+  return integrationCommons.getConfiguration(app, constants.integration.channels.MESSENGER).then((configuration) => {
+    return apis.facebook(configuration).api('me/accounts');
   }).then((result) => {
     const pages = [];
     result.data.forEach((page) => {

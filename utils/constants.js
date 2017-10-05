@@ -6,7 +6,6 @@ exports.integration = Object.freeze({
   channels: Object.freeze({
     WEBSITE: 'website',
     ANDROID: 'android',
-    IOS: 'ios',
     MESSENGER: 'messenger',
     SLACK: 'slack',
   }),
@@ -22,9 +21,9 @@ exports.device = Object.freeze({
       id: 'android',
       name: 'Android Messaging',
     }),
-    IOS: Object.freeze({
-      id: 'ios',
-      name: 'iOS Messaging',
+    MESSENGER: Object.freeze({
+      id: 'messenger',
+      name: 'Facebook Messenger',
     }),
   }),
 });

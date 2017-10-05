@@ -1,16 +1,6 @@
-const settings = require('../../../configs/settings');
 const constants = require('../../../utils/constants');
+const apis = require('../../../utils/apis');
 const Promise = require('bluebird');
-const FB = require('fb');
-
-function getFacebookApi(configuration) {
-  return new FB.Facebook({
-    appId: settings.facebook.appId,
-    appSecret: settings.facebook.appSecret,
-    accessToken: configuration.page.access_token,
-    version: 'v2.10',
-  });
-}
 
 exports.push = (user, event, message) => {
   return Promise.resolve().then(() => {
@@ -27,6 +17,6 @@ exports.push = (user, event, message) => {
         text: message,
       },
     };
-    return getFacebookApi(integration.configuration).api('me/messages', data);
+    return apis.facebook(integration.configuration, true).api('me/messages', data);
   });
 };
