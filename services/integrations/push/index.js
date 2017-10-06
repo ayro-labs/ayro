@@ -3,7 +3,7 @@ const webPush = require('./web');
 const androidPush = require('./android');
 const messengerPush = require('./messenger');
 
-exports.message = (user, event, message) => {
+exports.message = (integration, user, event, message) => {
   return Promise.resolve().then(() => {
     const device = user.latest_device;
     let promise;
@@ -22,7 +22,7 @@ exports.message = (user, event, message) => {
         break;
     }
     if (promise) {
-      return promise(user, event, message);
+      return promise(integration, user, device, event, message);
     }
     return null;
   });

@@ -1,8 +1,8 @@
 const constants = require('../../utils/constants');
 const User = require('../../models').User;
+const apis = require('../../utils/apis');
 const integrationCommons = require('../commons/integration');
 const userCommons = require('../commons/user');
-const SlackClient = require('@slack/client').WebClient;
 const Promise = require('bluebird');
 const _ = require('lodash');
 
@@ -220,7 +220,7 @@ function unarchiveChannelIntroducingUser(slackClient, user, device, message, sup
 
 exports.addIntegration = (app, accessToken) => {
   return Promise.resolve().bind({}).then(() => {
-    this.slackClient = new SlackClient(accessToken);
+    this.slackClient = apis.slack(accessToken);
     return this.slackClient.auth.test();
   }).then((result) => {
     this.configuration = {
@@ -258,8 +258,8 @@ exports.removeIntegration = (app) => {
 };
 
 exports.listChannels = (app) => {
-  return integrationCommons.getConfiguration(app, constants.integration.channels.SLACK).then((configuration) => {
-    const slackClient = new SlackClient(configuration.user.access_token);
+  return integrationCommons.getIntegration(app, constants.integration.channels.SLACK).then((integration) => {
+    const slackClient = apis.slack(integration.configuration);
     return slackClient.channels.list({exclude_archived: true, exclude_members: true});
   }).then((result) => {
     const channels = [];
@@ -271,8 +271,8 @@ exports.listChannels = (app) => {
 };
 
 exports.createChannel = (app, channel) => {
-  return integrationCommons.getConfiguration(app, constants.integration.channels.SLACK).then((configuration) => {
-    const slackClient = new SlackClient(configuration.user.access_token);
+  return integrationCommons.getIntegration(app, constants.integration.channels.SLACK).then((integration) => {
+    const slackClient = apis.slack(integration.configuration);
     return slackClient.channels.create(channel);
   }).then((result) => {
     return _.pick(result.channel, ['id', 'name']);
@@ -281,7 +281,7 @@ exports.createChannel = (app, channel) => {
 
 exports.postMessage = (configuration, user, message) => {
   return Promise.resolve().bind({}).then(() => {
-    this.slackClient = new SlackClient(configuration.user.access_token);
+    this.slackClient = apis.slack(configuration);
     if (user.extra && user.extra.slack_channel) {
       return getChannel(this.slackClient, user).bind(this).then((userChannel) => {
         if (!userChannel) {
@@ -306,7 +306,7 @@ exports.postMessage = (configuration, user, message) => {
 
 exports.postProfile = (configuration, user) => {
   return Promise.resolve().then(() => {
-    const slackClient = new SlackClient(configuration.user.access_token);
+    const slackClient = apis.slack(configuration);
     if (user.extra && user.extra.slack_channel) {
       return postProfile(slackClient, user, user.extra.slack_channel).then(() => {
         return null;
@@ -322,7 +322,7 @@ exports.extractUser = (data) => {
 
 exports.extractAgent = (configuration, data) => {
   return Promise.resolve().then(() => {
-    const slackClient = new SlackClient(configuration.user.access_token);
+    const slackClient = apis.slack(configuration);
     return slackClient.users.info(data.user_id);
   }).then((result) => {
     return {
@@ -339,7 +339,7 @@ exports.extractText = (data) => {
 
 exports.confirmMessage = (configuration, data, user, chatMessage) => {
   return Promise.resolve().then(() => {
-    const slackClient = new SlackClient(configuration.user.access_token);
+    const slackClient = apis.slack(configuration);
     return slackClient.chat.postMessage(data.channel_id, chatMessage.text, {
       username: `${chatMessage.agent.name} para ${user.getFullName()}`,
       as_user: false,

@@ -1,7 +1,9 @@
+const App = require('../../models').App;
 const ChatMessage = require('../../models').ChatMessage;
 const constants = require('../../utils/constants');
 const errors = require('../../utils/errors');
 const userCommons = require('../commons/user');
+const integrationCommons = require('../commons/integration');
 const slack = require('../integrations/slack');
 const push = require('../integrations/push');
 const Promise = require('bluebird');
@@ -38,19 +40,22 @@ exports.postMessage = (user, device, message) => {
     return userCommons.populateUser(user, 'app devices');
   }).then((user) => {
     this.user = user;
-    this.chatMessage = new ChatMessage({
+    return integrationCommons.listIntegrations(user.app, constants.integration.types.BUSINESS);
+  }).then((integrations) => {
+    this.integrations = integrations;
+    const chatMessage = new ChatMessage({
       user: this.user.id,
       device: this.device.id,
       text: message.text,
       direction: constants.chatMessage.directions.OUTGOING,
       date: new Date(),
     });
-    return this.chatMessage.save();
+    return chatMessage.save();
   }).then((chatMessage) => {
+    this.chatMessage = chatMessage;
     const context = this;
-    const integrations = this.user.app.listIntegrations(constants.integration.types.BUSINESS);
     const promises = [];
-    integrations.forEach((integration) => {
+    this.integrations.forEach((integration) => {
       const businessIntegration = getBusinessIntegration(integration.channel);
       if (businessIntegration) {
         promises.push(businessIntegration.postMessage(integration.configuration, context.user, chatMessage.text));
@@ -64,20 +69,17 @@ exports.postMessage = (user, device, message) => {
 
 exports.pushMessage = (channel, data) => {
   return Promise.bind({}).then(() => {
-    const businessIntegration = getBusinessIntegration(channel);
-    if (!businessIntegration) {
+    this.businessIntegration = getBusinessIntegration(channel);
+    if (!this.businessIntegration) {
       throw errors.chatzError('integration.notSupported', 'Integration not supported');
     }
-    this.businessIntegration = businessIntegration;
-    return businessIntegration.extractUser(data);
+    return this.businessIntegration.extractUser(data);
   }).then((user) => {
-    return userCommons.getUser(user.id, {populate: 'app latest_device'});
+    return userCommons.getUser(user.id, {populate: 'latest_device'});
   }).then((user) => {
-    const integration = user.app.getIntegration(channel);
-    if (!integration) {
-      throw errors.chatzError('integration.notSupported', 'Integration not supported');
-    }
     this.user = user;
+    return integrationCommons.getIntegration(new App({id: user.app}), channel);
+  }).then((integration) => {
     this.integration = integration;
     return Promise.all([
       this.businessIntegration.extractAgent(integration.configuration, data),
@@ -95,7 +97,7 @@ exports.pushMessage = (channel, data) => {
     return chatMessage.save();
   }).then((chatMessage) => {
     this.chatMessage = chatMessage;
-    return push.message(this.user, EVENT_CHAT_MESSAGE, this.chatMessage);
+    return push.message(this.integration, this.user, EVENT_CHAT_MESSAGE, this.chatMessage);
   }).then(() => {
     return this.businessIntegration.confirmMessage(this.integration.configuration, data, this.user, this.chatMessage);
   }).then(() => {
@@ -114,11 +116,10 @@ exports.postProfile = (channel, data) => {
   }).then((user) => {
     return userCommons.getUser(user.id, {populate: 'app devices'});
   }).then((user) => {
-    const integration = user.app.getIntegration(channel);
-    if (!integration) {
-      throw errors.chatzError('integration.notSupported', 'Integration not supported');
-    }
-    return this.businessIntegration.postProfile(integration.configuration, user);
+    this.user = user;
+    return integrationCommons.getIntegration(new App({id: user.app}), channel);
+  }).then((integration) => {
+    return this.businessIntegration.postProfile(integration.configuration, this.user);
   }).then(() => {
     return null;
   });

@@ -1,4 +1,3 @@
-const constants = require('../../../utils/constants');
 const restify = require('restify-clients');
 const Promise = require('bluebird');
 
@@ -7,17 +6,11 @@ const TIME_TO_LIVE = 600;
 
 const fcmClient = restify.createJsonClient('https://fcm.googleapis.com/fcm/send');
 
-exports.push = (user, event, message) => {
+exports.push = (integration, user, device, event, message) => {
   return new Promise((resolve, reject) => {
-    const device = user.latest_device;
-    const integration = user.app.getIntegration(constants.integration.channels.ANDROID);
-    if (!integration || !device.isAndroid() || !device.push_token) {
-      resolve();
-      return;
-    }
     const configuration = integration.configuration;
-    if (!configuration || !configuration.fcm || !configuration.fcm.server_key) {
-      resolve();
+    if (!device.push_token || !configuration.fcm || !configuration.fcm.server_key) {
+      resolve(null);
       return;
     }
     const options = {

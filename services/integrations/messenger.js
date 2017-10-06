@@ -36,10 +36,10 @@ exports.addIntegration = (app, profile) => {
 };
 
 exports.updateIntegration = (app, page) => {
-  return integrationCommons.getConfiguration(app, constants.integration.channels.MESSENGER).bind({}).then((configuration) => {
-    this.configurationOld = _.cloneDeep(configuration);
-    this.configuration = configuration;
-    return apis.facebook(configuration).api(page.id, {fields: ['id', 'name', 'access_token']});
+  return integrationCommons.getIntegration(app, constants.integration.channels.MESSENGER).bind({}).then((integration) => {
+    this.oldConfiguration = _.cloneDeep(integration.configuration);
+    this.configuration = integration.configuration;
+    return apis.facebook(integration.configuration).api(page.id, {fields: ['id', 'name', 'access_token']});
   }).then((result) => {
     this.configuration.page = {
       id: result.id,
@@ -48,7 +48,7 @@ exports.updateIntegration = (app, page) => {
     };
     return integrationCommons.updateIntegration(app, constants.integration.channels.MESSENGER, this.configuration);
   }).tap(() => {
-    return unsubscribePage(this.configurationOld);
+    return unsubscribePage(this.oldConfiguration);
   }).tap(() => {
     return subscribePage(this.configuration);
   });
@@ -59,8 +59,8 @@ exports.removeMessengerIntegration = (app) => {
 };
 
 exports.listPages = (app) => {
-  return integrationCommons.getConfiguration(app, constants.integration.channels.MESSENGER).then((configuration) => {
-    return apis.facebook(configuration).api('me/accounts');
+  return integrationCommons.getIntegration(app, constants.integration.channels.MESSENGER).then((integration) => {
+    return apis.facebook(integration.configuration).api('me/accounts');
   }).then((result) => {
     const pages = [];
     result.data.forEach((page) => {

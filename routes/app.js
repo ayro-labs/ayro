@@ -84,7 +84,7 @@ module.exports = (router, app) => {
       this.app = app;
       return integrationService.getIntegration(app, constants.integration.channels.WEBSITE, {require: false});
     }).then((integration) => {
-      return integration || integrationService.addWebsiteIntegration(app);
+      return integration || integrationService.addWebsiteIntegration(this.app);
     }).then((integration) => {
       res.json({app: this.app, integration});
     }).catch((err) => {
@@ -118,7 +118,7 @@ module.exports = (router, app) => {
       this.app = app;
       return integrationService.getIntegration(app, constants.integration.channels.ANDROID, {require: false});
     }).then((integration) => {
-      return integration || integrationService.addAndroidIntegration(app);
+      return integration || integrationService.addAndroidIntegration(this.app);
     }).then((integration) => {
       res.json({app: this.app, integration});
     }).catch((err) => {
@@ -149,7 +149,7 @@ module.exports = (router, app) => {
 
   function addMessengerIntegration(req, res) {
     const app = new App({id: req.params.app});
-    appService.addMessengerIntegration(app, req.body.profile).then((integration) => {
+    integrationService.addMessengerIntegration(app, req.body.profile).then((integration) => {
       res.json(integration);
     }).catch((err) => {
       logger.error(err);
@@ -179,7 +179,7 @@ module.exports = (router, app) => {
 
   function listMessengerPages(req, res) {
     const app = new App({id: req.params.app});
-    appService.listMessengerPages(app).then((pages) => {
+    integrationService.listMessengerPages(app).then((pages) => {
       res.json(pages);
     }).catch((err) => {
       logger.error(err);
@@ -189,7 +189,7 @@ module.exports = (router, app) => {
 
   function addSlackIntegration(req, res) {
     const app = new App({id: req.params.app});
-    appService.addSlackIntegration(app, req.body.access_token).then((integration) => {
+    integrationService.addSlackIntegration(app, req.body.access_token).then((integration) => {
       res.json(integration);
     }).catch((err) => {
       logger.error(err);
@@ -219,7 +219,7 @@ module.exports = (router, app) => {
 
   function listSlackChannels(req, res) {
     const app = new App({id: req.params.app});
-    appService.listSlackChannels(app).then((channels) => {
+    integrationService.listSlackChannels(app).then((channels) => {
       res.json(channels);
     }).catch((err) => {
       logger.error(err);
@@ -229,7 +229,7 @@ module.exports = (router, app) => {
 
   function createSlackChannel(req, res) {
     const app = new App({id: req.params.app});
-    appService.createSlackChannel(app, req.body.channel).then((channel) => {
+    integrationService.createSlackChannel(app, req.body.channel).then((channel) => {
       res.json(channel);
     }).catch((err) => {
       logger.error(err);

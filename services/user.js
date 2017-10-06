@@ -9,16 +9,30 @@ const _ = require('lodash');
 
 const $ = this;
 
-function removeDeviceOfPlatform(user, platform) {
-  return ChatMessage.remove({user: user.id}).then(() => {
-    return Device.remove({user: user.id, platform});
-  });
-}
-
 exports.assignUserUid = (userData, deviceData) => {
   userData.identified = !_.isNil(userData.uid);
   userData.uid = userData.uid || deviceData.uid;
 };
+
+function removeDeviceIfNeeded(user, data) {
+  return Promise.all([
+    userCommons.getUser(user.id),
+    userCommons.findDevice({user: user.id, platform: data.platform}, {require: false}),
+  ]).spread((user, device) => {
+    if (device && device.uid !== data.uid) {
+      return ChatMessage.remove({user: device.user}).then(() => {
+        return Device.remove({_id: device.id});
+      }).then(() => {
+        if (user.latest_device && user.latest_device.toString() === device.id) {
+          user.latest_device = device.id;
+          return User.updateOne({_id: user.id}, {$unset: ''});
+        }
+        return null;
+      });
+    }
+    return null;
+  });
+}
 
 exports.createUser = (app, data) => {
   return Promise.resolve().then(() => {
@@ -71,7 +85,7 @@ exports.updateDevice = (device, data) => {
 };
 
 exports.saveDevice = (user, data) => {
-  return removeDeviceOfPlatform(user, data.platform).then(() => {
+  return removeDeviceIfNeeded(user, data).then(() => {
     return userCommons.findDevice({uid: data.uid}, {require: false});
   }).then((device) => {
     if (!device) {

@@ -12,7 +12,7 @@ exports.addIntegration = (app) => {
       primary_color: DEFAULT_PRIMARY_COLOR,
       conversation_color: DEFAULT_CONVERSATION_COLOR,
     };
-    return integrationCommons.add(app, constants.integration.channels.ANDROID, constants.integration.types.USER, _.pick(configuration, CONFIG_ANDROID));
+    return integrationCommons.addIntegration(app, constants.integration.channels.ANDROID, constants.integration.types.USER, _.pick(configuration, CONFIG_ANDROID));
   });
 };
 

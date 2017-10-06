@@ -23,6 +23,17 @@ function throwIntegrationNotFoundIfNeeded(integration, options) {
   }
 }
 
+exports.listIntegrations = (app, type, options) => {
+  return Promise.resolve().then(() => {
+    const promise = Integration.find(type ? {app: app.id, type} : {app: app.id});
+    fillQuery(promise, options);
+    return promise.exec();
+  }).then((integration) => {
+    throwIntegrationNotFoundIfNeeded(integration, options);
+    return integration;
+  });
+};
+
 exports.getIntegration = (app, channel, options) => {
   return Promise.resolve().then(() => {
     const promise = Integration.findOne({app: app.id, channel});

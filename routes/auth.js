@@ -25,12 +25,9 @@ module.exports = (router, app) => {
   function accountSignIn(req, res) {
     accountService.authenticate(req.body.email, req.body.password).bind({}).then((account) => {
       this.account = account;
-      return createSession(req, {account: {_id: account.id}});
+      return createSession(req, {account: {id: account.id}});
     }).then((token) => {
-      res.json({
-        token,
-        account: this.account,
-      });
+      res.json({token, account: this.account});
     }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
@@ -39,12 +36,12 @@ module.exports = (router, app) => {
 
   function accountSignOut(req, res) {
     req.session.destroy((err) => {
-      if (err) {
+      if (!err) {
+        res.json({});
+      } else {
         logger.error(err);
         errors.respondWithError(res, err);
-        return;
       }
-      res.json({});
     });
   }
 
@@ -56,15 +53,9 @@ module.exports = (router, app) => {
       this.user = user;
       return userService.saveDevice(user, req.body.device);
     }).then((device) => {
-      return createSession(req, {
-        user: {_id: this.user.id},
-        device: {_id: device.id},
-      });
+      return createSession(req, {user: {id: this.user.id}, device: {id: device.id}});
     }).then((token) => {
-      res.json({
-        token,
-        user: this.user,
-      });
+      res.json({token, user: this.user});
     }).catch((err) => {
       logger.error(err);
       errors.respondWithError(res, err);
@@ -74,12 +65,12 @@ module.exports = (router, app) => {
 
   function userSignOut(req, res) {
     req.session.destroy((err) => {
-      if (err) {
+      if (!err) {
+        res.json({});
+      } else {
         logger.error(err);
         errors.respondWithError(res, err);
-        return;
       }
-      res.json({});
     });
   }
 

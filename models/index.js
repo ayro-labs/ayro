@@ -66,16 +66,6 @@ App.virtual('integrations', {
   localField: '_id',
   foreignField: 'app',
 });
-App.methods.getIntegration = function(channel) {
-  return this.integrations.find(function(integration) {
-    return integration.channel === channel;
-  });
-};
-App.methods.listIntegrations = function(type) {
-  return this.integrations.filter(function(integration) {
-    return integration.type === type;
-  });
-};
 
 const Integration = new Schema({
   app: {type: ObjectId, ref: 'App', required: true},
@@ -144,12 +134,13 @@ const Device = new Schema({
   info: {type: DeviceInfo, required: false},
   registration_date: {type: Date, required: true},
 });
+Device.index({uid: 1}, {unique: true});
 Device.methods.getPlatformName = function() {
   const platform = constants.device.platforms[_.toUpper(this.platform)];
   return platform ? platform.name : '';
 };
 Device.methods.isSmartphone = function() {
-  return _.includes([constants.device.platforms.ANDROID.id, constants.device.platforms.IOS.id], this.platform);
+  return _.includes([constants.device.platforms.ANDROID.id], this.platform);
 };
 Device.methods.isAndroid = function() {
   return this.platform === constants.device.platforms.ANDROID.id;

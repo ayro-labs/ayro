@@ -1,12 +1,10 @@
-const constants = require('../../../utils/constants');
 const apis = require('../../../utils/apis');
 const Promise = require('bluebird');
 
-exports.push = (user, event, message) => {
+exports.push = (integration, user, device, event, message) => {
   return Promise.resolve().then(() => {
-    const device = user.latest_device;
-    const integration = user.app.getIntegration(constants.integration.channels.MESSENGER);
-    if (!integration || !device.isMessenger()) {
+    const configuration = integration.configuration;
+    if (!device.info || !device.info.profile_id || !configuration.page) {
       return null;
     }
     const data = {
@@ -17,6 +15,6 @@ exports.push = (user, event, message) => {
         text: message,
       },
     };
-    return apis.facebook(integration.configuration, true).api('me/messages', data);
+    return apis.facebook(configuration, true).api('me/messages', data);
   });
 };
