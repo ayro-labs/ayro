@@ -54,7 +54,7 @@ exports.updateIntegration = (app, page) => {
   });
 };
 
-exports.removeMessengerIntegration = (app) => {
+exports.removeIntegration = (app) => {
   return integrationCommons.removeIntegration(app, constants.integration.channels.MESSENGER);
 };
 

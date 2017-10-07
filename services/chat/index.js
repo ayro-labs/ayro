@@ -1,4 +1,5 @@
 const App = require('../../models').App;
+const User = require('../../models').User;
 const ChatMessage = require('../../models').ChatMessage;
 const constants = require('../../utils/constants');
 const errors = require('../../utils/errors');
@@ -75,7 +76,7 @@ exports.pushMessage = (channel, data) => {
     }
     return this.businessIntegration.extractUser(data);
   }).then((user) => {
-    return userCommons.getUser(user.id, {populate: 'latest_device'});
+    return User.populate(user, 'latest_device');
   }).then((user) => {
     this.user = user;
     return integrationCommons.getIntegration(new App({id: user.app}), channel);
