@@ -1,21 +1,7 @@
 const Account = require('../../models').Account;
 const errors = require('../../utils/errors');
+const queries = require('../../utils/queries');
 const Promise = require('bluebird');
-const _ = require('lodash');
-
-function fillQuery(promise, options) {
-  if (options) {
-    if (!_.has(options, 'require')) {
-      options.require = true;
-    }
-    if (options.populate) {
-      promise.populate(options.populate);
-    }
-    if (options.lean) {
-      promise.lean();
-    }
-  }
-}
 
 function throwAccountNotFoundIfNeeded(account, options) {
   if (!account && (!options || options.require)) {
@@ -26,7 +12,7 @@ function throwAccountNotFoundIfNeeded(account, options) {
 exports.getAccount = (id, options) => {
   return Promise.resolve().then(() => {
     const promise = Account.findById(id);
-    fillQuery(promise, options);
+    queries.fillQuery(promise, options);
     return promise.exec();
   }).then((account) => {
     throwAccountNotFoundIfNeeded(account, options);
@@ -37,7 +23,7 @@ exports.getAccount = (id, options) => {
 exports.findAccount = (query, options) => {
   return Promise.resolve().then(() => {
     const promise = Account.findOne(query);
-    fillQuery(promise, options);
+    queries.fillQuery(promise, options);
     return promise.exec();
   }).then((account) => {
     throwAccountNotFoundIfNeeded(account, options);

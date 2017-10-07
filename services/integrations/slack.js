@@ -20,7 +20,7 @@ function getCommandsInfoAttachments() {
     {
       fallback: 'Comando /chz - Envie mensagens para o usuário',
       title: 'Envie mensagens para o usuário',
-      text: 'Comando: /chz [mensagem]\nExemplo de uso: /chz Olá, como posso ajudá-lo?',
+      text: 'Comando: /chz [mensagem]',
       color: '#007bff',
     },
     {

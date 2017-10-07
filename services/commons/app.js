@@ -1,21 +1,7 @@
 const App = require('../../models').App;
 const errors = require('../../utils/errors');
+const queries = require('../../utils/queries');
 const Promise = require('bluebird');
-const _ = require('lodash');
-
-function fillQuery(promise, options) {
-  if (options) {
-    if (!_.has(options, 'require')) {
-      options.require = true;
-    }
-    if (options.populate) {
-      promise.populate(options.populate);
-    }
-    if (options.lean) {
-      promise.lean();
-    }
-  }
-}
 
 function throwAppNotFoundIfNeeded(app, options) {
   if (!app && (!options || options.require)) {
@@ -26,7 +12,7 @@ function throwAppNotFoundIfNeeded(app, options) {
 exports.getApp = (id, options) => {
   return Promise.resolve().then(() => {
     const promise = App.findById(id);
-    fillQuery(promise, options);
+    queries.fillQuery(promise, options);
     return promise.exec();
   }).then((app) => {
     throwAppNotFoundIfNeeded(app, options);
@@ -37,7 +23,7 @@ exports.getApp = (id, options) => {
 exports.findApp = (query, options) => {
   return Promise.resolve().then(() => {
     const promise = App.findOne(query);
-    fillQuery(promise, options);
+    queries.fillQuery(promise, options);
     return promise.exec();
   }).then((app) => {
     throwAppNotFoundIfNeeded(app, options);
@@ -48,7 +34,7 @@ exports.findApp = (query, options) => {
 exports.findApps = (query, options) => {
   return Promise.resolve().then(() => {
     const promise = App.find(query);
-    fillQuery(promise, options);
+    queries.fillQuery(promise, options);
     return promise.exec();
   });
 };

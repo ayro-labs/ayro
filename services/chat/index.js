@@ -4,6 +4,7 @@ const ChatMessage = require('../../models').ChatMessage;
 const constants = require('../../utils/constants');
 const errors = require('../../utils/errors');
 const userCommons = require('../commons/user');
+const deviceCommons = require('../commons/device');
 const integrationCommons = require('../commons/integration');
 const slack = require('../integrations/slack');
 const push = require('../integrations/push');
@@ -28,7 +29,7 @@ exports.listMessages = (user, device) => {
 };
 
 exports.postMessage = (user, device, message) => {
-  return Promise.all([userCommons.getUser(user.id), userCommons.getDevice(device.id)]).bind({}).spread((user, device) => {
+  return Promise.all([userCommons.getUser(user.id), deviceCommons.getDevice(device.id)]).bind({}).spread((user, device) => {
     if (String(user.id) !== String(device.user)) {
       throw errors.chatzError('device.unknown', 'Unknown device');
     }

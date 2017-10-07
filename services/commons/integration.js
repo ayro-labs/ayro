@@ -1,21 +1,8 @@
 const Integration = require('../../models').Integration;
 const errors = require('../../utils/errors');
+const queries = require('../../utils/queries');
 const Promise = require('bluebird');
 const _ = require('lodash');
-
-function fillQuery(promise, options) {
-  if (options) {
-    if (!_.has(options, 'require')) {
-      options.require = true;
-    }
-    if (options.populate) {
-      promise.populate(options.populate);
-    }
-    if (options.lean) {
-      promise.lean();
-    }
-  }
-}
 
 function throwIntegrationNotFoundIfNeeded(integration, options) {
   if (!integration && (!options || options.require)) {
@@ -26,7 +13,7 @@ function throwIntegrationNotFoundIfNeeded(integration, options) {
 exports.listIntegrations = (app, type, options) => {
   return Promise.resolve().then(() => {
     const promise = Integration.find(type ? {app: app.id, type} : {app: app.id});
-    fillQuery(promise, options);
+    queries.fillQuery(promise, options);
     return promise.exec();
   }).then((integration) => {
     throwIntegrationNotFoundIfNeeded(integration, options);
@@ -37,11 +24,22 @@ exports.listIntegrations = (app, type, options) => {
 exports.getIntegration = (app, channel, options) => {
   return Promise.resolve().then(() => {
     const promise = Integration.findOne({app: app.id, channel});
-    fillQuery(promise, options);
+    queries.fillQuery(promise, options);
     return promise.exec();
   }).then((integration) => {
     throwIntegrationNotFoundIfNeeded(integration, options);
     return integration;
+  });
+};
+
+exports.findIntegration = (query, options) => {
+  return Promise.resolve().then(() => {
+    const promise = Integration.findOne(query);
+    queries.fillQuery(promise, options);
+    return promise.exec();
+  }).then((user) => {
+    throwIntegrationNotFoundIfNeeded(user, options);
+    return user;
   });
 };
 

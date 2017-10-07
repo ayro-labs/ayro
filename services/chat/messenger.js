@@ -1,33 +1,25 @@
-const User = require('../../models').User;
-const apis = require('../../utils/apis');
+const App = require('../../models').App;
+const constants = require('../../utils/constants');
 const userCommons = require('../commons/user');
+const deviceCommons = require('../commons/device');
+const integrationCommons = require('../commons/integration');
+const uuid = require('uuid').v4;
 const chatService = require('.');
-const Promise = require('bluebird');
 
 exports.postMessage = (data) => {
-  // return userCommons.findDevice({'info.profile_id': data.sender.id}, {require: false}).then((device) => {
-  //   if (!device) {
-
-  //   }
-  //   const user = new User({id: device.user});
-  //   return chatService.postMessage(user, device, data.message.text);
-  // });
+  return integrationCommons.findIntegration({channel: constants.integration.channels.MESSENGER, 'configuration.page.id': data.recipient.id}).then((integration) => {
+    return deviceCommons.findDevices({'info.profile_id': data.sender.id}, {populate: 'user'}).then((devices) => {
+      const device = devices.find((device) => {
+        return device.user.app === integration.app;
+      });
+      if (!device) {
+        return userCommons.createUser(new App({id: integration.app}), {uid: uuid(), identified: false}).then((user) => {
+          return deviceCommons.createDevice(user, {uid: uuid()});
+        });
+      }
+      return device;
+    }).then((device) => {
+      return chatService.postMessage(device.user, device, data.message.text);
+    });
+  });
 };
-
-
-// {
-//   "sender":{
-//     "id":"<PSID>"
-//   },
-//   "recipient":{
-//     "id":"<PAGE_ID>"
-//   },
-//   "timestamp":1458692752478,
-//   "message":{
-//     "mid":"mid.1457764197618:41d102a3e1ae206a38",
-//     "text":"hello, world!",
-//     "quick_reply": {
-//       "payload": "<DEVELOPER_DEFINED_PAYLOAD>"
-//     }
-//   }
-// }

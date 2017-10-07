@@ -1,6 +1,7 @@
 const accountService = require('../services/account');
 const appService = require('../services/app');
 const userService = require('../services/user');
+const deviceService = require('../services/device');
 const logger = require('../utils/logger');
 const errors = require('../utils/errors');
 const isAccountAuthenticated = require('../utils/middlewares').isAccountAuthenticated;
@@ -47,11 +48,10 @@ module.exports = (router, app) => {
 
   function userSignIn(req, res) {
     appService.getAppByToken(req.body.app_token).bind({}).then((app) => {
-      userService.assignUserUid(req.body.user, req.body.device);
       return userService.saveUser(app, req.body.user);
     }).then((user) => {
       this.user = user;
-      return userService.saveDevice(user, req.body.device);
+      return deviceService.saveDevice(user, req.body.device);
     }).then((device) => {
       return createSession(req, {user: {id: this.user.id}, device: {id: device.id}});
     }).then((token) => {

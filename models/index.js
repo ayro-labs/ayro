@@ -75,7 +75,7 @@ const Integration = new Schema({
   registration_date: {type: Date, required: true},
 });
 Integration.index({app: 1, channel: 1}, {unique: true});
-Integration.index({type: 1, 'configuration.page.id': 1});
+Integration.index({channel: 1, 'configuration.page.id': 1});
 
 const User = new Schema({
   app: {type: ObjectId, ref: 'App', required: true},
@@ -92,8 +92,8 @@ const User = new Schema({
   latest_device: {type: ObjectId, ref: 'Device', required: false},
   registration_date: {type: Date, required: true},
 });
-User.index({'extra.slack_channel.id': 1});
 User.index({app: 1, uid: 1}, {unique: true});
+User.index({'extra.slack_channel.id': 1});
 User.virtual('devices', {
   ref: 'Device',
   localField: '_id',
@@ -135,6 +135,7 @@ const Device = new Schema({
   registration_date: {type: Date, required: true},
 });
 Device.index({uid: 1}, {unique: true});
+Device.index({'info.profile_id': 1});
 Device.methods.getPlatformName = function() {
   const platform = constants.device.platforms[_.toUpper(this.platform)];
   return platform ? platform.name : '';
