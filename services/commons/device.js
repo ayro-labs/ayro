@@ -31,6 +31,14 @@ exports.findDevice = (query, options) => {
   });
 };
 
+exports.findDevices = (query, options) => {
+  return Promise.resolve().then(() => {
+    const promise = Device.findOne(query);
+    queries.fillQuery(promise, options);
+    return promise.exec();
+  });
+};
+
 exports.createDevice = (user, data) => {
   return Promise.resolve().then(() => {
     if (!data.uid) {
