@@ -13,7 +13,7 @@ const upload = multer({dest: settings.appIconPath});
 module.exports = (router, app) => {
 
   function listApps(req, res) {
-    appService.listApps(req.account, req.params.app, req.query.integrations === 'true').then((apps) => {
+    appService.listApps(req.account, req.query.integrations === 'true').then((apps) => {
       res.json(apps);
     }).catch((err) => {
       logger.error(err);
