@@ -14,7 +14,7 @@ exports.postMessage = (data) => {
     }
     return deviceCommons.findDevices({'info.profile_id': data.sender.id}, {populate: 'user'}).then((devices) => {
       const device = devices.find((device) => {
-        return device.user.app === integration.app;
+        return device.user.app.toString() === integration.app.toString();
       });
       if (!device) {
         const deviceData = {
