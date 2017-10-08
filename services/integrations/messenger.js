@@ -16,9 +16,13 @@ function subscribePage(configuration) {
 function unsubscribePage(configuration) {
   return Promise.resolve().then(() => {
     if (configuration.page) {
-      return apis.facebook(configuration, true).api(`${configuration.page.id}/subscribed_apps`, 'delete');
+      return apis.facebook(configuration, true).api(`${configuration.page.id}/subscribed_apps`, 'delete').catch((err) => {
+        if (err.response.error.code !== 100) {
+          throw err;
+        }
+      });
     }
-    return Promise.resolve();
+    return null;
   });
 }
 
@@ -41,12 +45,14 @@ exports.updateIntegration = (app, page) => {
     this.configuration = integration.configuration;
     return apis.facebook(integration.configuration).api(page.id, {fields: ['id', 'name', 'access_token']});
   }).then((result) => {
-    this.configuration.page = {
-      id: result.id,
-      name: result.name,
-      access_token: result.access_token,
+    const configuration = {
+      page: {
+        id: result.id,
+        name: result.name,
+        access_token: result.access_token,
+      },
     };
-    return integrationCommons.updateIntegration(app, constants.integration.channels.MESSENGER, this.configuration);
+    return integrationCommons.updateIntegration(app, constants.integration.channels.MESSENGER, configuration);
   }).tap(() => {
     return unsubscribePage(this.oldConfiguration);
   }).tap(() => {

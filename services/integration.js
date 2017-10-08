@@ -52,8 +52,8 @@ exports.addSlackIntegration = (app, accessToken) => {
   return slackIntegration.addIntegration(app, accessToken);
 };
 
-exports.updateSlackIntegration = (app, configuration) => {
-  return slackIntegration.updateIntegration(app, configuration);
+exports.updateSlackIntegration = (app, channel) => {
+  return slackIntegration.updateIntegration(app, channel);
 };
 
 exports.removeSlackIntegration = (app) => {

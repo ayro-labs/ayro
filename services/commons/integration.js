@@ -60,19 +60,19 @@ exports.addIntegration = (app, channel, type, configuration) => {
 };
 
 exports.updateIntegration = (app, channel, configuration) => {
-  return this.getIntegration(app, channel, {require: true}).then((integration) => {
+  return this.getIntegration(app, channel).then((integration) => {
     if (!integration.configuration) {
       integration.configuration = {};
     }
     _.assign(integration.configuration, configuration);
-    return Integration.updateOne({_id: integration.id}, integration.configuration).exec().then(() => {
+    return Integration.update({_id: integration.id}, {configuration: integration.configuration}).exec().then(() => {
       return integration;
     });
   });
 };
 
 exports.removeIntegration = (app, channel) => {
-  return this.getIntegration(app, channel, {require: true}).then((integration) => {
+  return this.getIntegration(app, channel).then((integration) => {
     return Integration.remove({_id: integration.id});
   });
 };

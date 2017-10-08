@@ -7,7 +7,6 @@ const Promise = require('bluebird');
 const _ = require('lodash');
 
 const CHATZ_BOT_USERNAME = 'Chatz Bot';
-const CONFIG_SLACK_UPDATE = ['channel', 'channel_id'];
 
 function getFallbackText(text) {
   let fallback = _.replace(text, /\*/g, '');
@@ -249,8 +248,11 @@ exports.addIntegration = (app, accessToken) => {
   });
 };
 
-exports.updateIntegration = (app, configuration) => {
-  return integrationCommons.updateIntegration(app, constants.integration.channels.SLACK, _.pick(configuration, CONFIG_SLACK_UPDATE));
+exports.updateIntegration = (app, channel) => {
+  return Promise.resolve().then(() => {
+    const configuration = {channel};
+    return integrationCommons.updateIntegration(app, constants.integration.channels.SLACK, configuration);
+  });
 };
 
 exports.removeIntegration = (app) => {

@@ -13,7 +13,7 @@ const upload = multer({dest: settings.appIconPath});
 module.exports = (router, app) => {
 
   function listApps(req, res) {
-    appService.listApps(req.account, req.query.integrations ? Boolean(req.query.integrations) : false).then((apps) => {
+    appService.listApps(req.account, req.params.app, req.query.integrations === 'true').then((apps) => {
       res.json(apps);
     }).catch((err) => {
       logger.error(err);
@@ -22,7 +22,7 @@ module.exports = (router, app) => {
   }
 
   function getApp(req, res) {
-    appService.getApp(req.account, req.params.app, req.query.integrations ? Boolean(req.query.integrations) : false).then((app) => {
+    appService.getApp(req.account, req.params.app, req.query.integrations === 'true').then((app) => {
       res.json(app);
     }).catch((err) => {
       logger.error(err);
@@ -71,7 +71,7 @@ module.exports = (router, app) => {
 
   function getIntegration(req, res) {
     const app = new App({id: req.params.app});
-    integrationService.getIntegration(app, req.params.channel).then((integration) => {
+    integrationService.getIntegration(app, req.params.channel, {require: req.query.require ? req.query.require === 'true' : null}).then((integration) => {
       res.json(integration);
     }).catch((err) => {
       logger.error(err);
@@ -199,7 +199,7 @@ module.exports = (router, app) => {
 
   function updateSlackIntegration(req, res) {
     const app = new App({id: req.params.app});
-    integrationService.updateSlackIntegration(app, req.body).then((integration) => {
+    integrationService.updateSlackIntegration(app, req.body.channel).then((integration) => {
       res.json(integration);
     }).catch((err) => {
       logger.error(err);
