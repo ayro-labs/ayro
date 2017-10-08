@@ -1,10 +1,10 @@
 const App = require('../../models').App;
 const Device = require('../../models').Device;
 const constants = require('../../utils/constants');
+const hash = require('../../utils/hash');
 const userCommons = require('../commons/user');
 const deviceCommons = require('../commons/device');
 const integrationCommons = require('../commons/integration');
-const uuid = require('uuid').v4;
 const chatService = require('.');
 
 exports.postMessage = (data) => {
@@ -17,8 +17,15 @@ exports.postMessage = (data) => {
         return device.user.app === integration.app;
       });
       if (!device) {
-        return userCommons.createUser(new App({id: integration.app}), {uid: uuid(), identified: false}).then((user) => {
-          return deviceCommons.createDevice(user, {uid: uuid()});
+        const deviceData = {
+          uid: hash.uuid(),
+          platform: constants.device.platforms.MESSENGER.id,
+          info: {
+            profile_id: data.sender.id,
+          },
+        };
+        return userCommons.createUser(new App({id: integration.app}), {uid: hash.uuid(), identified: false}).then((user) => {
+          return deviceCommons.createDevice(user, deviceData);
         }).then((device) => {
           return Device.populate(device, 'user');
         });

@@ -2,6 +2,7 @@ const settings = require('../configs/settings');
 const Promise = require('bluebird');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
+const uuid = require('uuid').v4;
 
 const $ = this;
 
@@ -55,7 +56,7 @@ exports.decrypt = (text) => {
   });
 };
 
-exports.generateId = () => {
+exports.token = () => {
   return new Promise((resolve, reject) => {
     crypto.randomBytes(20, (err, buffer) => {
       if (err) {
@@ -65,4 +66,8 @@ exports.generateId = () => {
       }
     });
   });
+};
+
+exports.uuid = () => {
+  return uuid().replace(/-/g, '');
 };

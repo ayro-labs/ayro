@@ -1,6 +1,6 @@
 const Account = require('../models').Account;
 const settings = require('../configs/settings');
-const cryptography = require('../utils/cryptography');
+const hash = require('../utils/hash');
 const errors = require('../utils/errors');
 const accountCommons = require('./commons/account');
 const path = require('path');
@@ -10,7 +10,7 @@ const _ = require('lodash');
 const ACCOUNT_UPDATE = ['name', 'email'];
 
 exports.createAccount = (name, email, password) => {
-  return cryptography.hash(password).then((hash) => {
+  return hash.hash(password).then((hash) => {
     const account = new Account({
       name,
       email,
@@ -44,7 +44,7 @@ exports.updateAccountLogo = (account, logo) => {
 exports.authenticate = (email, password) => {
   return accountCommons.findAccount({email}).bind({}).then((account) => {
     this.account = account;
-    return account ? cryptography.compare(password, account.password) : false;
+    return account ? hash.compare(password, account.password) : false;
   }).then((equals) => {
     if (!equals) {
       throw errors.chatzError('account.auth.wrongPassword', 'Wrong account password');

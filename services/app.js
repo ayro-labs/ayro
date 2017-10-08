@@ -1,6 +1,6 @@
 const App = require('../models').App;
 const settings = require('../configs/settings');
-const cryptography = require('../utils/cryptography');
+const hash = require('../utils/hash');
 const errors = require('../utils/errors');
 const appCommons = require('./commons/app');
 const path = require('path');
@@ -19,7 +19,7 @@ exports.getAppByToken = (token, withIntegrations) => {
 };
 
 exports.createApp = (account, name) => {
-  return cryptography.generateId().then((token) => {
+  return hash.token().then((token) => {
     const app = new App({
       account: account.id,
       name,
