@@ -8,7 +8,10 @@ const uuid = require('uuid').v4;
 const chatService = require('.');
 
 exports.postMessage = (data) => {
-  return integrationCommons.findIntegration({channel: constants.integration.channels.MESSENGER, 'configuration.page.id': data.recipient.id}).then((integration) => {
+  return integrationCommons.findIntegration({channel: constants.integration.channels.MESSENGER, 'configuration.page.id': data.recipient.id}, {require: false}).then((integration) => {
+    if (!integration) {
+      return null;
+    }
     return deviceCommons.findDevices({'info.profile_id': data.sender.id}, {populate: 'user'}).then((devices) => {
       const device = devices.find((device) => {
         return device.user.app === integration.app;
