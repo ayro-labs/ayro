@@ -33,7 +33,7 @@ exports.findDevice = (query, options) => {
 
 exports.findDevices = (query, options) => {
   return Promise.resolve().then(() => {
-    const promise = Device.findOne(query);
+    const promise = Device.find(query);
     queries.fillQuery(promise, options);
     return promise.exec();
   });
