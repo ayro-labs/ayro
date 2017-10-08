@@ -32,7 +32,7 @@ exports.postMessage = (data) => {
       }
       return device;
     }).then((device) => {
-      return chatService.postMessage(device.user, device, data.message.text);
+      return chatService.postMessage(device.user, device, {text: data.message.text});
     });
   });
 };
