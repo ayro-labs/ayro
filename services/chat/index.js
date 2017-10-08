@@ -13,14 +13,14 @@ const _ = require('lodash');
 
 const EVENT_CHAT_MESSAGE = 'chat_message';
 
-const getBusinessIntegration = (channel) => {
+function getBusinessChannelApi(channel) {
   switch (channel) {
     case constants.integration.channels.SLACK:
       return slack;
     default:
       return null;
   }
-};
+}
 
 exports.listMessages = (user, device) => {
   return ChatMessage.find({user: user.id, device: device.id}).sort({date: 'desc'}).exec().then((chatMessages) => {
@@ -58,9 +58,9 @@ exports.postMessage = (user, device, message) => {
     const context = this;
     const promises = [];
     this.integrations.forEach((integration) => {
-      const businessIntegration = getBusinessIntegration(integration.channel);
-      if (businessIntegration) {
-        promises.push(businessIntegration.postMessage(integration.configuration, context.user, chatMessage.text));
+      const businessChannelApi = getBusinessChannelApi(integration.channel);
+      if (businessChannelApi) {
+        promises.push(businessChannelApi.postMessage(integration.configuration, context.user, chatMessage.text));
       }
     });
     return Promise.all(promises);
@@ -71,21 +71,21 @@ exports.postMessage = (user, device, message) => {
 
 exports.pushMessage = (channel, data) => {
   return Promise.bind({}).then(() => {
-    this.businessIntegration = getBusinessIntegration(channel);
-    if (!this.businessIntegration) {
-      throw errors.chatzError('integration.notSupported', 'Integration not supported');
+    this.businessChannelApi = getBusinessChannelApi(channel);
+    if (!this.businessChannelApi) {
+      throw errors.chatzError('channel.notSupported', 'Channel not supported');
     }
-    return this.businessIntegration.extractUser(data);
+    return this.businessChannelApi.extractUser(data);
   }).then((user) => {
     return User.populate(user, 'latest_device');
   }).then((user) => {
     this.user = user;
     return integrationCommons.getIntegration(new App({id: user.app}), channel);
-  }).then((integration) => {
-    this.integration = integration;
+  }).spread((businessIntegration) => {
+    this.businessIntegration = businessIntegration;
     return Promise.all([
-      this.businessIntegration.extractAgent(integration.configuration, data),
-      this.businessIntegration.extractText(data),
+      this.businessChannelApi.extractAgent(businessIntegration.configuration, data),
+      this.businessChannelApi.extractText(data),
     ]);
   }).spread((agent, text) => {
     const chatMessage = new ChatMessage({
@@ -99,9 +99,9 @@ exports.pushMessage = (channel, data) => {
     return chatMessage.save();
   }).then((chatMessage) => {
     this.chatMessage = chatMessage;
-    return push.message(this.integration, this.user, EVENT_CHAT_MESSAGE, this.chatMessage);
+    return push.message(this.user, EVENT_CHAT_MESSAGE, this.chatMessage);
   }).then(() => {
-    return this.businessIntegration.confirmMessage(this.integration.configuration, data, this.user, this.chatMessage);
+    return this.businessChannelApi.confirmMessage(this.businessIntegration.configuration, data, this.user, this.chatMessage);
   }).then(() => {
     return null;
   });
@@ -109,19 +109,19 @@ exports.pushMessage = (channel, data) => {
 
 exports.postProfile = (channel, data) => {
   return Promise.bind({}).then(() => {
-    const businessIntegration = getBusinessIntegration(channel);
-    if (!businessIntegration) {
+    const businessChannelApi = getBusinessChannelApi(channel);
+    if (!businessChannelApi) {
       throw errors.chatzError('integration.notSupported', 'Integration not supported');
     }
-    this.businessIntegration = businessIntegration;
-    return businessIntegration.extractUser(data);
+    this.businessChannelApi = businessChannelApi;
+    return businessChannelApi.extractUser(data);
   }).then((user) => {
     return userCommons.getUser(user.id, {populate: 'app devices'});
   }).then((user) => {
     this.user = user;
     return integrationCommons.getIntegration(new App({id: user.app}), channel);
   }).then((integration) => {
-    return this.businessIntegration.postProfile(integration.configuration, this.user);
+    return this.businessChannelApi.postProfile(integration.configuration, this.user);
   }).then(() => {
     return null;
   });

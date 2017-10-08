@@ -6,9 +6,8 @@ const TIME_TO_LIVE = 600;
 
 const fcmClient = restify.createJsonClient('https://fcm.googleapis.com/fcm/send');
 
-exports.push = (integration, user, device, event, message) => {
+exports.push = (configuration, user, device, event, message) => {
   return new Promise((resolve, reject) => {
-    const configuration = integration.configuration;
     if (!device.push_token || !configuration.fcm || !configuration.fcm.server_key) {
       resolve(null);
       return;
