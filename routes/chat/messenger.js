@@ -17,7 +17,7 @@ module.exports = (router, app) => {
   }
 
   function postMessage(req, res) {
-    messengerService.postMessage(req.body.entry.messaging[0]).then(() => {
+    messengerService.postMessage(req.body.entry[0].messaging[0]).then(() => {
       res.json({});
     }).catch((err) => {
       logger.error(err);
