@@ -33,10 +33,6 @@ exports.findUser = (query, options) => {
   });
 };
 
-exports.populateUser = (user, fields) => {
-  return user.populate(fields).execPopulate();
-};
-
 exports.createUser = (app, data) => {
   return Promise.resolve().then(() => {
     if (!data.uid) {

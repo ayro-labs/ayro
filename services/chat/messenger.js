@@ -1,4 +1,5 @@
 const App = require('../../models').App;
+const Device = require('../../models').Device;
 const constants = require('../../utils/constants');
 const userCommons = require('../commons/user');
 const deviceCommons = require('../commons/device');
@@ -15,6 +16,8 @@ exports.postMessage = (data) => {
       if (!device) {
         return userCommons.createUser(new App({id: integration.app}), {uid: uuid(), identified: false}).then((user) => {
           return deviceCommons.createDevice(user, {uid: uuid()});
+        }).then((device) => {
+          return Device.populate(device, 'user');
         });
       }
       return device;

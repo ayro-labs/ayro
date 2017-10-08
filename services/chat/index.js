@@ -39,7 +39,7 @@ exports.postMessage = (user, device, message) => {
     }
     return user;
   }).then((user) => {
-    return userCommons.populateUser(user, 'app devices');
+    return User.populate(user, 'app devices');
   }).then((user) => {
     this.user = user;
     return integrationCommons.listIntegrations(user.app, constants.integration.types.BUSINESS);
