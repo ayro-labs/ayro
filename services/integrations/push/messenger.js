@@ -11,9 +11,11 @@ exports.push = (configuration, user, device, event, message) => {
         id: device.info.profile_id,
       },
       message: {
-        text: message,
+        text: message.text,
       },
     };
-    return apis.facebook(configuration, true).api('me/messages', data);
+    return apis.facebook(configuration, true).api('me/messages', 'post', data);
+  }).then(() => {
+    return null;
   });
 };

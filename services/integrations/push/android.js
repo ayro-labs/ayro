@@ -22,11 +22,11 @@ exports.push = (configuration, user, device, event, message) => {
       time_to_live: TIME_TO_LIVE,
       data: {origin: ORIGIN_CHATZ, event, message},
     };
-    fcmClient.post(options, data, (err, obj) => {
+    fcmClient.post(options, data, (err) => {
       if (err) {
         reject(err);
       } else {
-        resolve(obj);
+        resolve(null);
       }
     });
   });

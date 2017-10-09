@@ -10,9 +10,9 @@ function getUserChannel(device) {
     case constants.device.platforms.WEB.id:
       return constants.integration.channels.WEBSITE;
     case constants.device.platforms.ANDROID.id:
-      return constants.integration.channels.WEBSITE;
+      return constants.integration.channels.ANDROID;
     case constants.device.platforms.MESSENGER.id:
-      return constants.integration.channels.WEBSITE;
+      return constants.integration.channels.MESSENGER;
     default:
       return null;
   }

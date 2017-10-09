@@ -81,7 +81,7 @@ exports.pushMessage = (channel, data) => {
   }).then((user) => {
     this.user = user;
     return integrationCommons.getIntegration(new App({id: user.app}), channel);
-  }).spread((businessIntegration) => {
+  }).then((businessIntegration) => {
     this.businessIntegration = businessIntegration;
     return Promise.all([
       this.businessChannelApi.extractAgent(businessIntegration.configuration, data),

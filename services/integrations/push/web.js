@@ -9,11 +9,11 @@ const webcmClient = restify.createJsonClient(WEBCM_URL);
 
 exports.push = (configuration, user, device, event, message) => {
   return new Promise((resolve, reject) => {
-    webcmClient.post(`/push/${user.id}`, {event, message}, (err, obj) => {
+    webcmClient.post(`/push/${user.id}`, {event, message}, (err) => {
       if (err) {
         reject(err);
       } else {
-        resolve(obj);
+        resolve(null);
       }
     });
   });
