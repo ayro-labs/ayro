@@ -42,12 +42,10 @@ exports.createUser = (app, data) => {
     const user = new User(data);
     user.app = app.id;
     user.registration_date = new Date();
-    user.name_generated = false;
     if (!user.first_name && !user.last_name) {
       const names = _.split(randomName(), ' ');
       user.first_name = names[0];
       user.last_name = names[1];
-      user.name_generated = true;
     }
     return user.save();
   });
@@ -56,9 +54,6 @@ exports.createUser = (app, data) => {
 exports.updateUser = (user, data) => {
   return Promise.resolve().then(() => {
     delete data._id;
-    if (data.first_name || data.last_name) {
-      data.name_generated = false;
-    }
     return User.findByIdAndUpdate(user.id, data, {new: true, runValidators: true}).exec();
   });
 };

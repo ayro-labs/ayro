@@ -38,7 +38,7 @@ function getUserInfoAttachment(user) {
   if (user.identified) {
     information.push(`ID: ${user.uid}`);
   }
-  if (!user.name_generated) {
+  if (user.getFullName()) {
     information.push(`Nome: ${user.getFullName()}`);
   }
   if (user.email) {
@@ -83,10 +83,16 @@ function getDeviceInfoAttachments(user) {
         if (deviceInfo.carrier) {
           information.push(`Operadora: ${deviceInfo.carrier}`);
         }
-      }
-      if (device.isWeb()) {
+      } else if (device.isWeb()) {
         if (deviceInfo.browser_name && deviceInfo.browser_version) {
           information.push(`Browser: ${deviceInfo.browser_name} ${deviceInfo.browser_version}`);
+        }
+      } else if (device.isMessenger()) {
+        if (deviceInfo.profile_gender) {
+          const gender = constants.genders[_.toUpper(deviceInfo.profile_gender)];
+          if (gender) {
+            information.push(`Gênero: ${gender}`);
+          }
         }
       }
     }
@@ -297,7 +303,7 @@ exports.postMessage = (configuration, user, message) => {
     return createChannelIntroducingUser(this.slackClient, user, message, configuration.channel);
   }).then((userChannel) => {
     return this.slackClient.chat.postMessage(userChannel.id, message, {
-      username: user.getFullName() + (user.name_generated ? ' (nome gerado)' : ''),
+      username: user.getFullName(),
       as_user: false,
       icon_url: user.photo_url,
     });

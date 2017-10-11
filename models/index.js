@@ -85,7 +85,6 @@ const User = new Schema({
   email: {type: String, required: false, trim: true},
   photo_url: {type: String, required: false},
   identified: {type: String, required: true},
-  name_generated: {type: String, required: true},
   properties: {type: Object, required: false},
   extra: {type: Object, required: false},
   sign_up_date: {type: Date, required: false},
@@ -124,6 +123,10 @@ const DeviceInfo = new Schema({
   // Messenger
   profile_id: {type: String, required: false},
   profile_name: {type: String, required: false},
+  profile_gender: {type: String, required: false},
+  profile_photo: {type: String, required: false},
+  profile_locale: {type: String, required: false},
+  profile_timezone: {type: String, required: false},
 });
 
 const Device = new Schema({

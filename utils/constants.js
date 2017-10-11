@@ -34,3 +34,8 @@ exports.chatMessage = Object.freeze({
     OUTGOING: 'outgoing',
   }),
 });
+
+exports.genders = Object.freeze({
+  MALE: 'Masculino',
+  FEMALE: 'Feminino',
+});
