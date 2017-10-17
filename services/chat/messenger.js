@@ -39,7 +39,7 @@ exports.postMessage = (data) => {
               info: {
                 profile_id: data.sender.id,
                 profile_name: user.getFullName(),
-                profile_photo: result.profile_pic,
+                profile_picture: result.profile_pic,
                 profile_gender: result.gender ? _.toLower(result.gender) : null,
                 profile_locale: result.locale,
                 profile_timezone: result.timezone,

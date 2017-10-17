@@ -88,11 +88,20 @@ function getDeviceInfoAttachments(user) {
           information.push(`Browser: ${deviceInfo.browser_name} ${deviceInfo.browser_version}`);
         }
       } else if (device.isMessenger()) {
+        if (deviceInfo.profile_name) {
+          information.push(`Nome do perfil: ${deviceInfo.profile_name} (<${deviceInfo.profile_picture}|foto>)`);
+        }
         if (deviceInfo.profile_gender) {
-          const gender = constants.genders[_.toUpper(deviceInfo.profile_gender)];
-          if (gender) {
-            information.push(`Gênero: ${gender}`);
+          const profileGender = constants.genders[_.toUpper(deviceInfo.profile_gender)];
+          if (profileGender) {
+            information.push(`Gênero: ${profileGender}`);
           }
+        }
+        if (deviceInfo.profile_locale) {
+          information.push(`Localidade: ${deviceInfo.profile_locale}`);
+        }
+        if (deviceInfo.profile_timezone) {
+          information.push(`Fuso horário: ${deviceInfo.profile_timezone}`);
         }
       }
     }
