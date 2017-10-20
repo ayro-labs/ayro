@@ -1,7 +1,14 @@
 {
   "name": "chatz",
+  "description": "Chatz backend",
   "version": "1.0.0",
   "private": true,
+  "author": {
+    "name": "Chatz team",
+    "email": "team@chatz.io",
+    "url": "https://chatz.io"
+  },
+  "homepage": "https://chatz.io",
   "scripts": {
     "lint": "eslint '**/*.js'",
     "start": "node app.js",
