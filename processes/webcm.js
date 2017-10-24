@@ -46,8 +46,8 @@ const server = restify.createServer({
   certificate: httpsCert,
   key: httpsKey,
 });
-server.use(restify.queryParser());
-server.use(restify.bodyParser());
+server.use(restify.plugins.queryParser());
+server.use(restify.plugins.bodyParser());
 
 const pubSubServer = settings.https ? https.createServer({cert: httpsCert, key: httpsKey}) : http.createServer();
 const bayeux = new faye.NodeAdapter({mount: '/'});
