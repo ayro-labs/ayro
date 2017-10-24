@@ -121,7 +121,7 @@ function getDeviceInfoAttachments(user) {
 
 function postBotIntro(slackClient, user, channel) {
   return Promise.resolve().then(() => {
-    const message = `Olá, eu sou o Chatz Bot!\n<@${user.id}> acabou de integrar este Workspace com o <http://www.chatz.io|Chatz>. Agora você pode conversar com seus clientes em tempo real, direto do Slack.`;
+    const message = `Olá, eu sou o Chatz Bot!\n<@${user.id}> acabou de integrar este Workspace com o <https://chatz.io|Chatz>. Agora você pode conversar com seus clientes em tempo real, direto do Slack.`;
     return slackClient.chat.postMessage(channel.id, message, {
       username: CHATZ_BOT_USERNAME,
       as_user: false,
