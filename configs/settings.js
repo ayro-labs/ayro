@@ -37,10 +37,10 @@ exports.redis = {
 };
 
 exports.webcm = {
-  host: properties.getValue('webcm.host', '0.0.0.0'),
+  host: properties.getValue('webcm.host', 'localhost'),
   port: properties.getValue('webcm.port', 3100),
   pubSub: {
-    host: properties.getValue('webcm.pubSub.host', '0.0.0.0'),
+    host: properties.getValue('webcm.pubSub.host', 'localhost'),
     port: properties.getValue('webcm.pubSub.port', 3102),
   },
 };
