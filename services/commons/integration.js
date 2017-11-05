@@ -1,4 +1,4 @@
-const Integration = require('../../models').Integration;
+const {Integration} = require('../../models');
 const errors = require('../../utils/errors');
 const queries = require('../../utils/queries');
 const Promise = require('bluebird');

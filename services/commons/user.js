@@ -1,4 +1,4 @@
-const User = require('../../models').User;
+const {User} = require('../../models');
 const errors = require('../../utils/errors');
 const queries = require('../../utils/queries');
 const Promise = require('bluebird');
@@ -43,9 +43,7 @@ exports.createUser = (app, data) => {
     user.app = app.id;
     user.registration_date = new Date();
     if (!user.first_name && !user.last_name) {
-      const names = _.split(randomName(), ' ');
-      user.first_name = names[0];
-      user.last_name = names[1];
+      [user.first_name, user.last_name] = _.split(randomName(), ' ');
     }
     return user.save();
   });

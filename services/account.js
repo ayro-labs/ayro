@@ -1,4 +1,4 @@
-const Account = require('../models').Account;
+const {Account} = require('../models');
 const settings = require('../configs/settings');
 const hash = require('../utils/hash');
 const errors = require('../utils/errors');

@@ -1,4 +1,4 @@
-const App = require('../models').App;
+const {App} = require('../models');
 const settings = require('../configs/settings');
 const hash = require('../utils/hash');
 const errors = require('../utils/errors');

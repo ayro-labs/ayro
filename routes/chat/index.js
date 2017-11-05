@@ -1,7 +1,7 @@
 const chatService = require('../../services/chat');
 const logger = require('../../utils/logger');
 const errors = require('../../utils/errors');
-const isUserAuthenticated = require('../../utils/middlewares').isUserAuthenticated;
+const {isUserAuthenticated} = require('../../utils/middlewares');
 
 module.exports = (router, app) => {
 

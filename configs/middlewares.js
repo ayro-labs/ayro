@@ -1,6 +1,4 @@
-const Account = require('../models').Account;
-const User = require('../models').User;
-const Device = require('../models').Device;
+const {Account, User, Device} = require('../models');
 const logger = require('../utils/logger');
 
 exports.configure = (app) => {

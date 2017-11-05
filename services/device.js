@@ -1,6 +1,4 @@
-const User = require('../models').User;
-const Device = require('../models').Device;
-const ChatMessage = require('../models').ChatMessage;
+const {User, Device, ChatMessage} = require('../models');
 const userCommons = require('./commons/user');
 const deviceCommons = require('./commons/device');
 const Promise = require('bluebird');

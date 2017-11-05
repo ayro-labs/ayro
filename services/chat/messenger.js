@@ -1,5 +1,4 @@
-const App = require('../../models').App;
-const Device = require('../../models').Device;
+const {App, Device} = require('../../models');
 const constants = require('../../utils/constants');
 const hash = require('../../utils/hash');
 const apis = require('../../utils/apis');

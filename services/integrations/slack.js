@@ -1,6 +1,6 @@
-const constants = require('../../utils/constants');
-const User = require('../../models').User;
+const {User} = require('../../models');
 const apis = require('../../utils/apis');
+const constants = require('../../utils/constants');
 const integrationCommons = require('../commons/integration');
 const userCommons = require('../commons/user');
 const Promise = require('bluebird');
@@ -251,13 +251,12 @@ exports.addIntegration = (app, accessToken) => {
     };
     return this.slackClient.channels.list({exclude_archived: true, exclude_members: true});
   }).then((result) => {
-    const configuration = this.configuration;
     _.each(result.channels, (channel) => {
       if (channel.is_general) {
-        configuration.channel = _.pick(channel, ['id', 'name']);
+        this.configuration.channel = _.pick(channel, ['id', 'name']);
       }
     });
-    return integrationCommons.addIntegration(app, constants.integration.channels.SLACK, constants.integration.types.BUSINESS, configuration);
+    return integrationCommons.addIntegration(app, constants.integration.channels.SLACK, constants.integration.types.BUSINESS, this.configuration);
   }).tap(() => {
     return postBotIntro(this.slackClient, this.configuration.user, this.configuration.channel);
   });

@@ -4,8 +4,7 @@ const userService = require('../services/user');
 const deviceService = require('../services/device');
 const logger = require('../utils/logger');
 const errors = require('../utils/errors');
-const isAccountAuthenticated = require('../utils/middlewares').isAccountAuthenticated;
-const isUserAuthenticated = require('../utils/middlewares').isUserAuthenticated;
+const {isAccountAuthenticated, isUserAuthenticated} = require('../utils/middlewares');
 const _ = require('lodash');
 
 module.exports = (router, app) => {

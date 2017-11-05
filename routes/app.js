@@ -1,11 +1,11 @@
-const App = require('../models').App;
+const {App} = require('../models');
 const appService = require('../services/app');
 const integrationService = require('../services/integration');
 const settings = require('../configs/settings');
 const constants = require('../utils/constants');
 const logger = require('../utils/logger');
 const errors = require('../utils/errors');
-const isAccountAuthenticated = require('../utils/middlewares').isAccountAuthenticated;
+const {isAccountAuthenticated} = require('../utils/middlewares');
 const multer = require('multer');
 
 const upload = multer({dest: settings.appIconPath});

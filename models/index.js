@@ -5,8 +5,8 @@ const mongoose = require('mongoose');
 const Promise = require('bluebird');
 const _ = require('lodash');
 
-const Schema = mongoose.Schema;
-const ObjectId = Schema.Types.ObjectId;
+const {Schema} = mongoose;
+const {ObjectId} = Schema.Types;
 
 mongoose.Promise = Promise;
 mongoose.set('debug', settings.database.debug);

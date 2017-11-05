@@ -1,8 +1,7 @@
-const App = require('../../models').App;
-const User = require('../../models').User;
-const ChatMessage = require('../../models').ChatMessage;
+const {App, User, ChatMessage} = require('../../models');
 const constants = require('../../utils/constants');
 const errors = require('../../utils/errors');
+const logger = require('../../utils/logger');
 const userCommons = require('../commons/user');
 const deviceCommons = require('../commons/device');
 const integrationCommons = require('../commons/integration');
@@ -98,10 +97,10 @@ exports.pushMessage = (channel, data) => {
     });
     return chatMessage.save();
   }).then((chatMessage) => {
-    this.chatMessage = chatMessage;
-    return push.message(this.user, EVENT_CHAT_MESSAGE, this.chatMessage);
-  }).then(() => {
-    return this.businessChannelApi.confirmMessage(this.businessIntegration.configuration, data, this.user, this.chatMessage);
+    push.message(this.user, EVENT_CHAT_MESSAGE, chatMessage).catch((err) => {
+      logger.warn('Could not send message %s to user %s', chatMessage.id, this.user.id, err);
+    });
+    return this.businessChannelApi.confirmMessage(this.businessIntegration.configuration, data, this.user, chatMessage);
   }).then(() => {
     return null;
   });

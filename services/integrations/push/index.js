@@ -1,4 +1,4 @@
-const App = require('../../../models').App;
+const {App} = require('../../../models');
 const constants = require('../../../utils/constants');
 const integrationCommons = require('../../commons/integration');
 const webPush = require('./web');

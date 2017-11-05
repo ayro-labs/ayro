@@ -2,7 +2,7 @@ const accountService = require('../services/account');
 const settings = require('../configs/settings');
 const logger = require('../utils/logger');
 const errors = require('../utils/errors');
-const isAccountAuthenticated = require('../utils/middlewares').isAccountAuthenticated;
+const {isAccountAuthenticated} = require('../utils/middlewares');
 const multer = require('multer');
 
 const upload = multer({dest: settings.accountLogoPath});
