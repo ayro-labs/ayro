@@ -23,11 +23,13 @@ exports.session = {
   maxAge: Number.MAX_SAFE_INTEGER,
 };
 
-exports.database = {
-  host: properties.getValue('database.host', 'localhost'),
-  port: properties.getValue('database.port', 27017),
-  schema: properties.getValue('database.schema', 'chatz'),
-  debug: properties.getValue('database.debug', false),
+exports.mongo = {
+  host: properties.getValue('mongo.host', 'localhost'),
+  port: properties.getValue('mongo.port', 27017),
+  debug: properties.getValue('mongo.debug', false),
+  schema: properties.getValue('mongo.schema', 'chatz'),
+  username: properties.getValue('mongo.username'),
+  password: properties.getValue('mongo.password'),
 };
 
 exports.redis = {

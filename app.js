@@ -32,15 +32,11 @@ app.use(morgan('tiny', {stream: loggerServer.stream}));
 app.use(cors());
 app.use(express.static(settings.publicPath));
 
-const redisClient = redis.createClient(settings.redis.port, settings.redis.host);
-if (settings.redis.password) {
-  redisClient.auth(settings.redis.password, (err) => {
-    if (err) {
-      logger.error('Could not authenticate to redis.', err);
-      process.exit(1);
-    }
-  });
-}
+const redisClient = redis.createClient({
+  host: settings.redis.host,
+  port: settings.redis.port,
+  password: settings.redis.password,
+});
 
 app.use(session({
   client: redisClient,

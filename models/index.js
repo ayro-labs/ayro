@@ -8,12 +8,16 @@ const _ = require('lodash');
 const {Schema} = mongoose;
 const {ObjectId} = Schema.Types;
 
+const options = {useMongoClient: true};
+if (settings.mongo.username && settings.mongo.password) {
+  options.user = settings.mongo.username;
+  options.pass = settings.mongo.password;
+}
+
 mongoose.Promise = Promise;
-mongoose.set('debug', settings.database.debug);
-mongoose.connect(`mongodb://${settings.database.host}:${settings.database.port}/${settings.database.schema}`, {
-  useMongoClient: true,
-}).catch((err) => {
-  logger.error('Could not connect to mongodb.', err);
+mongoose.set('debug', settings.mongo.debug);
+mongoose.connect(`mongodb://${settings.mongo.host}:${settings.mongo.port}/${settings.mongo.schema}`, options).catch((err) => {
+  logger.error('Could not connect to MongoDB.', err);
   process.exit(1);
 });
 
