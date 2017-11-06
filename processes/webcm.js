@@ -60,10 +60,10 @@ server.post('/push/:user', (req, res) => {
   res.send(200);
 });
 
-server.listen(settings.webcm.port, settings.webcm.host, null, () => {
+server.listen(settings.webcm.port, null, () => {
   logger.info('Web Cloud Messaging listening on port %s', settings.webcm.port);
 });
 
-pubSubServer.listen(settings.webcm.pubSub.port, settings.webcm.pubSub.host, null, () => {
+pubSubServer.listen(settings.webcm.pubSub.port, null, null, () => {
   logger.info('Web Cloud Messaging (Pub/Sub) listening on port %s', settings.webcm.pubSub.port);
 });
