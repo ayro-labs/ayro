@@ -12,6 +12,7 @@ const options = {useMongoClient: true};
 if (settings.mongo.username && settings.mongo.password) {
   options.user = settings.mongo.username;
   options.pass = settings.mongo.password;
+  options.authSource = 'admin';
 }
 
 mongoose.Promise = Promise;
