@@ -4,29 +4,27 @@ const deviceCommons = require('./commons/device');
 const Promise = require('bluebird');
 
 function removeDeviceIfNeeded(user, data) {
-  return Promise.all([
-    userCommons.getUser(user.id),
-    deviceCommons.findDevice({user: user.id, platform: data.platform}, {require: false}),
-  ]).spread((user, device) => {
+  return Promise.coroutine(function* () {
+    const [currentUser, device] = yield Promise.all([
+      userCommons.getUser(user.id),
+      deviceCommons.findDevice({user: user.id, platform: data.platform}, {require: false}),
+    ]);
     if (device && device.uid !== data.uid) {
-      return ChatMessage.remove({user: device.user}).then(() => {
-        return Device.remove({_id: device.id});
-      }).then(() => {
-        if (user.latest_device && user.latest_device.toString() === device.id) {
-          user.latest_device = device.id;
-          return User.updateOne({_id: user.id}, {$unset: ''});
-        }
-        return null;
-      });
+      yield ChatMessage.remove({currentUser: device.currentUser});
+      yield Device.remove({_id: device.id});
+      if (currentUser.latest_device && currentUser.latest_device.toString() === device.id) {
+        currentUser.latest_device = device.id;
+        yield User.updateOne({_id: currentUser.id}, {$unset: ''});
+      }
     }
     return null;
-  });
+  })();
 }
 
 exports.saveDevice = (user, data) => {
-  return removeDeviceIfNeeded(user, data).then(() => {
-    return deviceCommons.findDevice({uid: data.uid}, {require: false});
-  }).then((device) => {
+  return Promise.coroutine(function* () {
+    yield removeDeviceIfNeeded(user, data);
+    const device = yield deviceCommons.findDevice({uid: data.uid}, {require: false});
     if (!device) {
       return deviceCommons.createDevice(user, data);
     }
@@ -34,7 +32,7 @@ exports.saveDevice = (user, data) => {
       data.user = user.id;
     }
     return deviceCommons.updateDevice(device, data);
-  });
+  })();
 };
 
 exports.updateDevice = (device, data) => {

@@ -6,15 +6,11 @@ const URL_PROTOCOL = settings.env === 'production' ? 'https' : 'http';
 const URL = `${URL_PROTOCOL}://${settings.webcm.host}:${settings.webcm.port}`;
 
 const webcmClient = restify.createJsonClient(URL);
+const postAsync = Promise.promisify(webcmClient.post);
 
 exports.push = (configuration, user, device, event, message) => {
-  return new Promise((resolve, reject) => {
-    webcmClient.post(`/push/${user.id}`, {event, message}, (err) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(null);
-      }
-    });
-  });
+  return Promise.coroutine(function* () {
+    yield postAsync(`/push/${user.id}`, {event, message});
+    return null;
+  })();
 };

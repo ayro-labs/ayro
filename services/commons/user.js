@@ -12,25 +12,23 @@ function throwUserNotFoundIfNeeded(user, options) {
 }
 
 exports.getUser = (id, options) => {
-  return Promise.resolve().then(() => {
+  return Promise.coroutine(function* () {
     const promise = User.findById(id);
     queries.fillQuery(promise, options);
-    return promise.exec();
-  }).then((user) => {
+    const user = yield promise.exec();
     throwUserNotFoundIfNeeded(user, options);
     return user;
-  });
+  })();
 };
 
 exports.findUser = (query, options) => {
-  return Promise.resolve().then(() => {
+  return Promise.coroutine(function* () {
     const promise = User.findOne(query);
     queries.fillQuery(promise, options);
-    return promise.exec();
-  }).then((user) => {
+    const user = yield promise.exec();
     throwUserNotFoundIfNeeded(user, options);
     return user;
-  });
+  })();
 };
 
 exports.createUser = (app, data) => {

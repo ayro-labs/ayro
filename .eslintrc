@@ -12,7 +12,7 @@
     "padded-blocks": ["off"],
     "default-case": ["off"],
     "object-curly-newline": ["off"],
-    "func-names": ["warn", "as-needed"],
+    "func-names": ["off"],
     "prefer-arrow-callback": ["warn"],
     "max-len": ["error", {"code": 999, "tabWidth": 2}],
     "object-curly-spacing": ["error", "never"]

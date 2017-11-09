@@ -22,106 +22,87 @@ function getBusinessChannelApi(channel) {
 }
 
 exports.listMessages = (user, device) => {
-  return ChatMessage.find({user: user.id, device: device.id}).sort({date: 'desc'}).exec().then((chatMessages) => {
+  return Promise.coroutine(function* () {
+    const chatMessages = yield ChatMessage.find({user: user.id, device: device.id}).sort({date: 'desc'}).exec();
     return _.reverse(chatMessages);
-  });
+  })();
 };
 
 exports.postMessage = (user, device, message) => {
-  return Promise.all([userCommons.getUser(user.id), deviceCommons.getDevice(device.id)]).bind({}).spread((user, device) => {
-    if (String(user.id) !== String(device.user)) {
+  return Promise.coroutine(function* () {
+    const [currentUser, currentDevice] = yield Promise.all([
+      userCommons.getUser(user.id),
+      deviceCommons.getDevice(device.id),
+    ]);
+    if (String(currentUser.id) !== String(currentDevice.user)) {
       throw errors.chatzError('device.unknown', 'Unknown device');
     }
-    this.device = device;
-    if (!user.latest_device || user.latest_device.toString() !== device.id) {
-      return userCommons.updateUser(user, {latest_device: device.id});
+    let updatedUser = currentUser;
+    if (!updatedUser.latest_device || updatedUser.latest_device.toString() !== currentDevice.id) {
+      updatedUser = yield userCommons.updateUser(updatedUser, {latest_device: currentDevice.id});
     }
-    return user;
-  }).then((user) => {
-    return User.populate(user, 'app devices');
-  }).then((user) => {
-    this.user = user;
-    return integrationCommons.listIntegrations(user.app, constants.integration.types.BUSINESS);
-  }).then((integrations) => {
-    this.integrations = integrations;
-    const chatMessage = new ChatMessage({
-      user: this.user.id,
-      device: this.device.id,
+    updatedUser = yield User.populate(updatedUser, 'app devices');
+    const integrations = yield integrationCommons.findIntegrations(updatedUser.app, constants.integration.types.BUSINESS);
+    let chatMessage = new ChatMessage({
+      user: updatedUser.id,
+      device: currentDevice.id,
       text: message.text,
       direction: constants.chatMessage.directions.OUTGOING,
       date: new Date(),
     });
-    return chatMessage.save();
-  }).then((chatMessage) => {
-    this.chatMessage = chatMessage;
-    const context = this;
+    chatMessage = yield chatMessage.save();
     const promises = [];
-    this.integrations.forEach((integration) => {
-      const businessChannelApi = getBusinessChannelApi(integration.channel);
-      if (businessChannelApi) {
-        promises.push(businessChannelApi.postMessage(integration.configuration, context.user, chatMessage.text));
+    integrations.forEach((integration) => {
+      const channelApi = getBusinessChannelApi(integration.channel);
+      if (channelApi) {
+        promises.push(channelApi.postMessage(integration.configuration, updatedUser, chatMessage.text));
       }
     });
-    return Promise.all(promises);
-  }).then(() => {
-    return this.chatMessage;
-  });
+    yield Promise.all(promises);
+    return chatMessage;
+  })();
 };
 
 exports.pushMessage = (channel, data) => {
-  return Promise.bind({}).then(() => {
-    this.businessChannelApi = getBusinessChannelApi(channel);
-    if (!this.businessChannelApi) {
+  return Promise.coroutine(function* () {
+    const channelApi = getBusinessChannelApi(channel);
+    if (!channelApi) {
       throw errors.chatzError('channel.notSupported', 'Channel not supported');
     }
-    return this.businessChannelApi.extractUser(data);
-  }).then((user) => {
-    return User.populate(user, 'latest_device');
-  }).then((user) => {
-    this.user = user;
-    return integrationCommons.getIntegration(new App({id: user.app}), channel);
-  }).then((businessIntegration) => {
-    this.businessIntegration = businessIntegration;
-    return Promise.all([
-      this.businessChannelApi.extractAgent(businessIntegration.configuration, data),
-      this.businessChannelApi.extractText(data),
+    let user = yield channelApi.extractUser(data);
+    user = yield User.populate(user, 'latest_device');
+    const businessIntegration = yield integrationCommons.getIntegration(new App({id: user.app}), channel);
+    const [agent, text] = yield Promise.all([
+      channelApi.extractAgent(businessIntegration.configuration, data),
+      channelApi.extractText(data),
     ]);
-  }).spread((agent, text) => {
-    const chatMessage = new ChatMessage({
+    let chatMessage = new ChatMessage({
       agent,
       text,
-      user: this.user.id,
-      device: this.user.latest_device.id,
+      user: user.id,
+      device: user.latest_device.id,
       direction: constants.chatMessage.directions.INCOMING,
       date: new Date(),
     });
-    return chatMessage.save();
-  }).then((chatMessage) => {
-    push.message(this.user, EVENT_CHAT_MESSAGE, chatMessage).catch((err) => {
-      logger.warn('Could not send message %s to user %s', chatMessage.id, this.user.id, err);
+    chatMessage = yield chatMessage.save();
+    push.message(user, EVENT_CHAT_MESSAGE, chatMessage).catch((err) => {
+      logger.warn('Could not send message %s to user %s', chatMessage.id, user.id, err);
     });
-    return this.businessChannelApi.confirmMessage(this.businessIntegration.configuration, data, this.user, chatMessage);
-  }).then(() => {
+    yield channelApi.confirmMessage(businessIntegration.configuration, data, user, chatMessage);
     return null;
-  });
+  })();
 };
 
 exports.postProfile = (channel, data) => {
-  return Promise.bind({}).then(() => {
-    const businessChannelApi = getBusinessChannelApi(channel);
-    if (!businessChannelApi) {
+  return Promise.coroutine(function* () {
+    const channelApi = getBusinessChannelApi(channel);
+    if (!channelApi) {
       throw errors.chatzError('integration.notSupported', 'Integration not supported');
     }
-    this.businessChannelApi = businessChannelApi;
-    return businessChannelApi.extractUser(data);
-  }).then((user) => {
-    return userCommons.getUser(user.id, {populate: 'app devices'});
-  }).then((user) => {
-    this.user = user;
-    return integrationCommons.getIntegration(new App({id: user.app}), channel);
-  }).then((integration) => {
-    return this.businessChannelApi.postProfile(integration.configuration, this.user);
-  }).then(() => {
+    let user = yield channelApi.extractUser(data);
+    user = yield userCommons.getUser(user.id, {populate: 'app devices'});
+    const integration = yield integrationCommons.getIntegration(new App({id: user.app}), channel);
+    yield channelApi.postProfile(integration.configuration, user);
     return null;
-  });
+  })();
 };

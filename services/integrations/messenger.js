@@ -5,25 +5,27 @@ const Promise = require('bluebird');
 const _ = require('lodash');
 
 function subscribePage(configuration) {
-  return Promise.resolve().then(() => {
+  return Promise.coroutine(function* () {
     if (configuration.page) {
-      return apis.facebook(configuration, true).api(`${configuration.page.id}/subscribed_apps`, 'post');
+      yield apis.facebook(configuration, true).api(`${configuration.page.id}/subscribed_apps`, 'post');
     }
-    return Promise.resolve();
-  });
+    return null;
+  })();
 }
 
 function unsubscribePage(configuration) {
-  return Promise.resolve().then(() => {
+  return Promise.coroutine(function* () {
     if (configuration.page) {
-      return apis.facebook(configuration, true).api(`${configuration.page.id}/subscribed_apps`, 'delete').catch((err) => {
+      try {
+        yield apis.facebook(configuration, true).api(`${configuration.page.id}/subscribed_apps`, 'delete');
+      } catch (err) {
         if (err.response.error.code !== 100) {
           throw err;
         }
-      });
+      }
     }
     return null;
-  });
+  })();
 }
 
 exports.addIntegration = (app, profile) => {
@@ -40,11 +42,10 @@ exports.addIntegration = (app, profile) => {
 };
 
 exports.updateIntegration = (app, page) => {
-  return integrationCommons.getIntegration(app, constants.integration.channels.MESSENGER).bind({}).then((integration) => {
-    this.oldConfiguration = _.cloneDeep(integration.configuration);
-    this.configuration = integration.configuration;
-    return apis.facebook(integration.configuration).api(page.id, {fields: ['id', 'name', 'access_token']});
-  }).then((result) => {
+  return Promise.coroutine(function* () {
+    const integration = yield integrationCommons.getIntegration(app, constants.integration.channels.MESSENGER);
+    const oldConfiguration = _.cloneDeep(integration.configuration);
+    const result = yield apis.facebook(integration.configuration).api(page.id, {fields: ['id', 'name', 'access_token']});
     const configuration = {
       page: {
         id: result.id,
@@ -52,12 +53,10 @@ exports.updateIntegration = (app, page) => {
         access_token: result.access_token,
       },
     };
+    yield unsubscribePage(oldConfiguration);
+    yield subscribePage(configuration);
     return integrationCommons.updateIntegration(app, constants.integration.channels.MESSENGER, configuration);
-  }).tap(() => {
-    return unsubscribePage(this.oldConfiguration);
-  }).tap(() => {
-    return subscribePage(this.configuration);
-  });
+  })();
 };
 
 exports.removeIntegration = (app) => {
@@ -65,9 +64,9 @@ exports.removeIntegration = (app) => {
 };
 
 exports.listPages = (app) => {
-  return integrationCommons.getIntegration(app, constants.integration.channels.MESSENGER).then((integration) => {
-    return apis.facebook(integration.configuration).api('me/accounts');
-  }).then((result) => {
+  return Promise.coroutine(function* () {
+    const integration = yield integrationCommons.getIntegration(app, constants.integration.channels.MESSENGER);
+    const result = yield apis.facebook(integration.configuration).api('me/accounts');
     const pages = [];
     result.data.forEach((page) => {
       pages.push({
@@ -76,7 +75,7 @@ exports.listPages = (app) => {
       });
     });
     return pages;
-  });
+  })();
 };
 
 exports.extractUser = (data) => {

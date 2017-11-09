@@ -10,25 +10,23 @@ function throwAppNotFoundIfNeeded(app, options) {
 }
 
 exports.getApp = (id, options) => {
-  return Promise.resolve().then(() => {
+  return Promise.coroutine(function* () {
     const promise = App.findById(id);
     queries.fillQuery(promise, options);
-    return promise.exec();
-  }).then((app) => {
+    const app = yield promise.exec();
     throwAppNotFoundIfNeeded(app, options);
     return app;
-  });
+  })();
 };
 
 exports.findApp = (query, options) => {
-  return Promise.resolve().then(() => {
+  return Promise.coroutine(function* () {
     const promise = App.findOne(query);
     queries.fillQuery(promise, options);
-    return promise.exec();
-  }).then((app) => {
+    const app = yield promise.exec();
     throwAppNotFoundIfNeeded(app, options);
     return app;
-  });
+  })();
 };
 
 exports.findApps = (query, options) => {

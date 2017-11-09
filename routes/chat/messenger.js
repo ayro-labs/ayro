@@ -2,6 +2,7 @@ const messengerService = require('../../services/chat/messenger');
 const settings = require('../../configs/settings');
 const logger = require('../../utils/logger');
 const errors = require('../../utils/errors');
+const Promise = require('bluebird');
 
 const SUBSCRIBE_EVENT = 'subscribe';
 
@@ -17,12 +18,15 @@ module.exports = (router, app) => {
   }
 
   function postMessage(req, res) {
-    messengerService.postMessage(req.body.entry[0].messaging[0]).then(() => {
-      res.json({});
-    }).catch((err) => {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    });
+    Promise.coroutine(function* () {
+      try {
+        yield messengerService.postMessage(req.body.entry[0].messaging[0]);
+        res.json({});
+      } catch (err) {
+        logger.error(err);
+        errors.respondWithError(res, err);
+      }
+    })();
   }
 
   router.get('/', confirmSubscription);

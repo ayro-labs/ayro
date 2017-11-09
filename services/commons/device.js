@@ -10,25 +10,23 @@ function throwDeviceNotFoundIfNeeded(device, options) {
 }
 
 exports.getDevice = (id, options) => {
-  return Promise.resolve().then(() => {
+  return Promise.coroutine(function* () {
     const promise = Device.findById(id);
     queries.fillQuery(promise, options);
-    return promise.exec();
-  }).then((device) => {
+    const device = yield promise.exec();
     throwDeviceNotFoundIfNeeded(device, options);
     return device;
-  });
+  })();
 };
 
 exports.findDevice = (query, options) => {
-  return Promise.resolve().then(() => {
+  return Promise.coroutine(function* () {
     const promise = Device.findOne(query);
     queries.fillQuery(promise, options);
-    return promise.exec();
-  }).then((device) => {
+    const device = yield promise.exec();
     throwDeviceNotFoundIfNeeded(device, options);
     return device;
-  });
+  })();
 };
 
 exports.findDevices = (query, options) => {

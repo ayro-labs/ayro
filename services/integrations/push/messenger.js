@@ -2,7 +2,7 @@ const apis = require('../../../utils/apis');
 const Promise = require('bluebird');
 
 exports.push = (configuration, user, device, event, message) => {
-  return Promise.resolve().then(() => {
+  return Promise.coroutine(function* () {
     if (!device.info || !device.info.profile_id || !configuration.page) {
       return null;
     }
@@ -14,8 +14,7 @@ exports.push = (configuration, user, device, event, message) => {
         text: message.text,
       },
     };
-    return apis.facebook(configuration, true).api('me/messages', 'post', data);
-  }).then(() => {
+    yield apis.facebook(configuration, true).api('me/messages', 'post', data);
     return null;
-  });
+  })();
 };

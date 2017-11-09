@@ -5,12 +5,12 @@ const ORIGIN_CHATZ = 'chatz';
 const TIME_TO_LIVE = 600;
 
 const fcmClient = restify.createJsonClient('https://fcm.googleapis.com/fcm/send');
+const postAsync = Promise.promisify(fcmClient.post);
 
 exports.push = (configuration, user, device, event, message) => {
-  return new Promise((resolve, reject) => {
+  return Promise.coroutine(function* () {
     if (!device.push_token || !configuration.fcm || !configuration.fcm.server_key) {
-      resolve(null);
-      return;
+      return null;
     }
     const options = {
       headers: {
@@ -22,12 +22,7 @@ exports.push = (configuration, user, device, event, message) => {
       time_to_live: TIME_TO_LIVE,
       data: {origin: ORIGIN_CHATZ, event, message},
     };
-    fcmClient.post(options, data, (err) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(null);
-      }
-    });
-  });
+    yield postAsync(options, data);
+    return null;
+  })();
 };

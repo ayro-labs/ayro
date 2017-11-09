@@ -6,32 +6,30 @@ const uuid = require('uuid').v4;
 
 const $ = this;
 
+const randomBytesAsync = Promise.promisify(crypto.randomBytes);
+const hashAsync = Promise.promisify(bcrypt.hash);
+const compareAsync = Promise.promisify(bcrypt.compare);
+
 const ALGORITHM = 'aes-256-ctr';
 const ENCODING_UTF8 = 'utf8';
 const ENCODING_HEX = 'hex';
 
-exports.hash = (data) => {
-  return new Promise((resolve, reject) => {
-    bcrypt.hash(data, 10, (err, hash) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(hash);
-      }
-    });
+exports.uuid = () => {
+  return uuid().replace(/-/g, '');
+};
+
+exports.token = () => {
+  return randomBytesAsync(20).then((buffer) => {
+    return buffer.toString(ENCODING_HEX);
   });
 };
 
+exports.hash = (data) => {
+  return hashAsync(data, 10);
+};
+
 exports.compare = (data, hash) => {
-  return new Promise((resolve, reject) => {
-    bcrypt.compare(data, hash, (err, equals) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(equals);
-      }
-    });
-  });
+  return compareAsync(data, hash);
 };
 
 exports.encryptSync = (text) => {
@@ -54,20 +52,4 @@ exports.decrypt = (text) => {
     decrypted += decipher.final(ENCODING_UTF8);
     resolve(decrypted);
   });
-};
-
-exports.token = () => {
-  return new Promise((resolve, reject) => {
-    crypto.randomBytes(20, (err, buffer) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(buffer.toString(ENCODING_HEX));
-      }
-    });
-  });
-};
-
-exports.uuid = () => {
-  return uuid().replace(/-/g, '');
 };

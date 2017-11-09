@@ -10,23 +10,21 @@ function throwAccountNotFoundIfNeeded(account, options) {
 }
 
 exports.getAccount = (id, options) => {
-  return Promise.resolve().then(() => {
+  return Promise.coroutine(function* () {
     const promise = Account.findById(id);
     queries.fillQuery(promise, options);
-    return promise.exec();
-  }).then((account) => {
+    const account = yield promise.exec();
     throwAccountNotFoundIfNeeded(account, options);
     return account;
-  });
+  })();
 };
 
 exports.findAccount = (query, options) => {
-  return Promise.resolve().then(() => {
+  return Promise.coroutine(function* () {
     const promise = Account.findOne(query);
     queries.fillQuery(promise, options);
-    return promise.exec();
-  }).then((account) => {
+    const account = yield promise.exec();
     throwAccountNotFoundIfNeeded(account, options);
     return account;
-  });
+  })();
 };

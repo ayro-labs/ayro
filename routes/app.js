@@ -6,6 +6,7 @@ const constants = require('../utils/constants');
 const logger = require('../utils/logger');
 const errors = require('../utils/errors');
 const {isAccountAuthenticated} = require('../utils/middlewares');
+const Promise = require('bluebird');
 const multer = require('multer');
 
 const upload = multer({dest: settings.appIconPath});
@@ -13,235 +14,295 @@ const upload = multer({dest: settings.appIconPath});
 module.exports = (router, app) => {
 
   function listApps(req, res) {
-    appService.listApps(req.account, req.query.integrations === 'true').then((apps) => {
-      res.json(apps);
-    }).catch((err) => {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    });
+    Promise.coroutine(function* () {
+      try {
+        const apps = yield appService.listApps(req.account, req.query.integrations === 'true');
+        res.json(apps);
+      } catch (err) {
+        logger.error(err);
+        errors.respondWithError(res, err);
+      }
+    })();
   }
 
   function getApp(req, res) {
-    appService.getApp(req.account, req.params.app, req.query.integrations === 'true').then((app) => {
-      res.json(app);
-    }).catch((err) => {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    });
+    Promise.coroutine(function* () {
+      try {
+        const app = yield appService.getApp(req.account, req.params.app, req.query.integrations === 'true');
+        res.json(app);
+      } catch (err) {
+        logger.error(err);
+        errors.respondWithError(res, err);
+      }
+    })();
   }
 
   function createApp(req, res) {
-    appService.createApp(req.account, req.body.name).then((app) => {
-      res.json(app);
-    }).catch((err) => {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    });
+    Promise.coroutine(function* () {
+      try {
+        const app = yield appService.createApp(req.account, req.body.name);
+        res.json(app);
+      } catch (err) {
+        logger.error(err);
+        errors.respondWithError(res, err);
+      }
+    })();
   }
 
   function updateApp(req, res) {
-    const app = new App({id: req.params.app});
-    appService.updateApp(req.account, app, req.body.name).then((app) => {
-      res.json(app);
-    }).catch((err) => {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    });
+    Promise.coroutine(function* () {
+      try {
+        let app = new App({id: req.params.app});
+        app = yield appService.updateApp(req.account, app, req.body.name);
+        res.json(app);
+      } catch (err) {
+        logger.error(err);
+        errors.respondWithError(res, err);
+      }
+    })();
   }
 
-  function updateAppIcon(req, res) {
-    const app = new App({id: req.params.app});
-    appService.updateAppIcon(req.account, app, req.file).then((app) => {
-      res.json(app);
-    }).catch((err) => {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    });
+  function updateIcon(req, res) {
+    Promise.coroutine(function* () {
+      try {
+        let app = new App({id: req.params.app});
+        app = yield appService.updateIcon(req.account, app, req.file);
+        res.json(app);
+      } catch (err) {
+        logger.error(err);
+        errors.respondWithError(res, err);
+      }
+    })();
   }
 
   function deleteApp(req, res) {
-    const app = new App({id: req.params.app});
-    appService.deleteApp(req.account, app).then(() => {
-      res.json({});
-    }).catch((err) => {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    });
+    Promise.coroutine(function* () {
+      try {
+        const app = new App({id: req.params.app});
+        yield appService.deleteApp(req.account, app);
+        res.json({});
+      } catch (err) {
+        logger.error(err);
+        errors.respondWithError(res, err);
+      }
+    })();
   }
 
   function getIntegration(req, res) {
-    const app = new App({id: req.params.app});
-    integrationService.getIntegration(app, req.params.channel, {require: req.query.require ? req.query.require === 'true' : null}).then((integration) => {
-      res.json(integration);
-    }).catch((err) => {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    });
+    Promise.coroutine(function* () {
+      try {
+        const app = new App({id: req.params.app});
+        const integration = yield integrationService.getIntegration(app, req.params.channel, {require: req.query.require ? req.query.require === 'true' : null});
+        res.json(integration);
+      } catch (err) {
+        logger.error(err);
+        errors.respondWithError(res, err);
+      }
+    })();
   }
 
   function initWebsiteIntegration(req, res) {
-    appService.getAppByToken(req.body.app_token).bind({}).then((app) => {
-      this.app = app;
-      return integrationService.getIntegration(app, constants.integration.channels.WEBSITE, {require: false});
-    }).then((integration) => {
-      return integration || integrationService.addWebsiteIntegration(this.app);
-    }).then((integration) => {
-      res.json({app: this.app, integration});
-    }).catch((err) => {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    });
+    Promise.coroutine(function* () {
+      try {
+        const app = yield appService.getAppByToken(req.body.app_token);
+        let integration = yield integrationService.getIntegration(app, constants.integration.channels.WEBSITE, {require: false});
+        integration = integration || integrationService.addWebsiteIntegration(this.app);
+        res.json({app: this.app, integration});
+      } catch (err) {
+        logger.error(err);
+        errors.respondWithError(res, err);
+      }
+    })();
   }
 
   function updateWebsiteIntegration(req, res) {
-    const app = new App({id: req.params.app});
-    integrationService.updateWebsiteIntegration(app, req.body).then((integration) => {
-      res.json(integration);
-    }).catch((err) => {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    });
+    Promise.coroutine(function* () {
+      try {
+        const app = new App({id: req.params.app});
+        const integration = yield integrationService.updateWebsiteIntegration(app, req.body);
+        res.json(integration);
+      } catch (err) {
+        logger.error(err);
+        errors.respondWithError(res, err);
+      }
+    })();
   }
 
   function removeWebsiteIntegration(req, res) {
-    const app = new App({id: req.params.app});
-    integrationService.removeWebsiteIntegration(app).then(() => {
-      res.json({});
-    }).catch((err) => {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    });
+    Promise.coroutine(function* () {
+      try {
+        const app = new App({id: req.params.app});
+        yield integrationService.removeWebsiteIntegration(app);
+        res.json({});
+      } catch (err) {
+        logger.error(err);
+        errors.respondWithError(res, err);
+      }
+    })();
   }
 
   function initAndroidIntegration(req, res) {
-    appService.getAppByToken(req.body.app_token).bind({}).then((app) => {
-      this.app = app;
-      return integrationService.getIntegration(app, constants.integration.channels.ANDROID, {require: false});
-    }).then((integration) => {
-      return integration || integrationService.addAndroidIntegration(this.app);
-    }).then((integration) => {
-      res.json({app: this.app, integration});
-    }).catch((err) => {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    });
+    Promise.coroutine(function* () {
+      try {
+        const app = yield appService.getAppByToken(req.body.app_token);
+        let integration = yield integrationService.getIntegration(app, constants.integration.channels.ANDROID, {require: false});
+        integration = integration || integrationService.addAndroidIntegration(this.app);
+        res.json({app: this.app, integration});
+      } catch (err) {
+        logger.error(err);
+        errors.respondWithError(res, err);
+      }
+    })();
   }
 
   function updateAndroidIntegration(req, res) {
-    const app = new App({id: req.params.app});
-    integrationService.updateAndroidIntegration(app, req.body).then((integration) => {
-      res.json(integration);
-    }).catch((err) => {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    });
+    Promise.coroutine(function* () {
+      try {
+        const app = new App({id: req.params.app});
+        const integration = yield integrationService.updateAndroidIntegration(app, req.body);
+        res.json(integration);
+      } catch (err) {
+        logger.error(err);
+        errors.respondWithError(res, err);
+      }
+    })();
   }
 
   function removeAndroidIntegration(req, res) {
-    const app = new App({id: req.params.app});
-    integrationService.removeAndroidIntegration(app).then(() => {
-      res.json({});
-    }).catch((err) => {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    });
+    Promise.coroutine(function* () {
+      try {
+        const app = new App({id: req.params.app});
+        yield integrationService.removeAndroidIntegration(app);
+        res.json({});
+      } catch (err) {
+        logger.error(err);
+        errors.respondWithError(res, err);
+      }
+    })();
   }
 
   function addMessengerIntegration(req, res) {
-    const app = new App({id: req.params.app});
-    integrationService.addMessengerIntegration(app, req.body.profile).then((integration) => {
-      res.json(integration);
-    }).catch((err) => {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    });
+    Promise.coroutine(function* () {
+      try {
+        const app = new App({id: req.params.app});
+        const integration = yield integrationService.addMessengerIntegration(app, req.body.profile);
+        res.json(integration);
+      } catch (err) {
+        logger.error(err);
+        errors.respondWithError(res, err);
+      }
+    })();
   }
 
   function updateMessengerIntegration(req, res) {
-    const app = new App({id: req.params.app});
-    integrationService.updateMessengerIntegration(app, req.body.page).then((integration) => {
-      res.json(integration);
-    }).catch((err) => {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    });
+    Promise.coroutine(function* () {
+      try {
+        const app = new App({id: req.params.app});
+        const integration = yield integrationService.updateMessengerIntegration(app, req.body.page);
+        res.json(integration);
+      } catch (err) {
+        logger.error(err);
+        errors.respondWithError(res, err);
+      }
+    })();
   }
 
   function removeMessengerIntegration(req, res) {
-    const app = new App({id: req.params.app});
-    integrationService.removeMessengerIntegration(app).then(() => {
-      res.json({});
-    }).catch((err) => {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    });
+    Promise.coroutine(function* () {
+      try {
+        const app = new App({id: req.params.app});
+        yield integrationService.removeMessengerIntegration(app);
+        res.json({});
+      } catch (err) {
+        logger.error(err);
+        errors.respondWithError(res, err);
+      }
+    })();
   }
 
   function listMessengerPages(req, res) {
-    const app = new App({id: req.params.app});
-    integrationService.listMessengerPages(app).then((pages) => {
-      res.json(pages);
-    }).catch((err) => {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    });
+    Promise.coroutine(function* () {
+      try {
+        const app = new App({id: req.params.app});
+        const pages = yield integrationService.listMessengerPages(app);
+        res.json(pages);
+      } catch (err) {
+        logger.error(err);
+        errors.respondWithError(res, err);
+      }
+    })();
   }
 
   function addSlackIntegration(req, res) {
-    const app = new App({id: req.params.app});
-    integrationService.addSlackIntegration(app, req.body.access_token).then((integration) => {
-      res.json(integration);
-    }).catch((err) => {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    });
+    Promise.coroutine(function* () {
+      try {
+        const app = new App({id: req.params.app});
+        const integration = yield integrationService.addSlackIntegration(app, req.body.access_token);
+        res.json(integration);
+      } catch (err) {
+        logger.error(err);
+        errors.respondWithError(res, err);
+      }
+    })();
   }
 
   function updateSlackIntegration(req, res) {
-    const app = new App({id: req.params.app});
-    integrationService.updateSlackIntegration(app, req.body.channel).then((integration) => {
-      res.json(integration);
-    }).catch((err) => {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    });
+    Promise.coroutine(function* () {
+      try {
+        const app = new App({id: req.params.app});
+        const integration = yield integrationService.updateSlackIntegration(app, req.body.channel);
+        res.json(integration);
+      } catch (err) {
+        logger.error(err);
+        errors.respondWithError(res, err);
+      }
+    })();
   }
 
   function removeSlackIntegration(req, res) {
-    const app = new App({id: req.params.app});
-    integrationService.removeSlackIntegration(app).then(() => {
-      res.json({});
-    }).catch((err) => {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    });
+    Promise.coroutine(function* () {
+      try {
+        const app = new App({id: req.params.app});
+        yield integrationService.removeSlackIntegration(app);
+        res.json({});
+      } catch (err) {
+        logger.error(err);
+        errors.respondWithError(res, err);
+      }
+    })();
   }
 
   function listSlackChannels(req, res) {
-    const app = new App({id: req.params.app});
-    integrationService.listSlackChannels(app).then((channels) => {
-      res.json(channels);
-    }).catch((err) => {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    });
+    Promise.coroutine(function* () {
+      try {
+        const app = new App({id: req.params.app});
+        const channels = yield integrationService.listSlackChannels(app);
+        res.json(channels);
+      } catch (err) {
+        logger.error(err);
+        errors.respondWithError(res, err);
+      }
+    })();
   }
 
   function createSlackChannel(req, res) {
-    const app = new App({id: req.params.app});
-    integrationService.createSlackChannel(app, req.body.channel).then((channel) => {
-      res.json(channel);
-    }).catch((err) => {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    });
+    Promise.coroutine(function* () {
+      try {
+        const app = new App({id: req.params.app});
+        const channel = yield integrationService.createSlackChannel(app, req.body.channel);
+        res.json(channel);
+      } catch (err) {
+        logger.error(err);
+        errors.respondWithError(res, err);
+      }
+    })();
   }
 
   router.get('/', isAccountAuthenticated, listApps);
   router.get('/:app', isAccountAuthenticated, getApp);
   router.post('/', isAccountAuthenticated, createApp);
   router.put('/:app', isAccountAuthenticated, updateApp);
-  router.put('/:app/icon', [isAccountAuthenticated, upload.single('icon')], updateAppIcon);
+  router.put('/:app/icon', [isAccountAuthenticated, upload.single('icon')], updateIcon);
   router.delete('/:app', isAccountAuthenticated, deleteApp);
 
   router.get('/:app/integrations/:channel', getIntegration);

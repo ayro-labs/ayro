@@ -8,51 +8,53 @@ const integrationCommons = require('../commons/integration');
 const chatService = require('.');
 const _ = require('lodash');
 
+function getUserData(profile) {
+  return {
+    first_name: profile.first_name,
+    last_name: profile.last_name,
+    uid: hash.uuid(),
+    identified: false,
+  };
+}
+
+function getDeviceData(user, profile, data) {
+  return {
+    uid: hash.uuid(),
+    platform: constants.device.platforms.MESSENGER.id,
+    info: {
+      profile_id: data.sender.id,
+      profile_name: user.getFullName(),
+      profile_picture: profile.profile_pic,
+      profile_gender: profile.gender ? _.toLower(profile.gender) : null,
+      profile_locale: profile.locale,
+      profile_timezone: profile.timezone,
+    },
+  };
+}
+
+function createDevice(integration, data) {
+  return Promise.coroutine(function* () {
+    const profile = yield apis.facebook(integration.configuration, true).api(data.sender.id);
+    const user = yield userCommons.createUser(new App({id: integration.app}), getUserData(profile));
+    const device = yield deviceCommons.createDevice(user, getDeviceData(user, profile, data));
+    return Device.populate(device, 'user');
+  })();
+}
+
 exports.postMessage = (data) => {
-  return Promise.resolve().then(() => {
+  return Promise.coroutine(function* () {
     if (!data.message.text) {
       return null;
     }
-    return integrationCommons.findIntegration({channel: constants.integration.channels.MESSENGER, 'configuration.page.id': data.recipient.id}, {require: false}).bind({}).then((integration) => {
-      if (!integration) {
-        return null;
-      }
-      this.integration = integration;
-      return deviceCommons.findDevices({'info.profile_id': data.sender.id}, {populate: 'user'});
-    }).then((devices) => {
-      const device = devices.find((device) => {
-        return device.user.app.toString() === this.integration.app.toString();
-      });
-      if (!device) {
-        return apis.facebook(this.integration.configuration, true).api(data.sender.id).then((result) => {
-          const userData = {
-            first_name: result.first_name,
-            last_name: result.last_name,
-            uid: hash.uuid(),
-            identified: false,
-          };
-          return userCommons.createUser(new App({id: this.integration.app}), userData).then((user) => {
-            const deviceData = {
-              uid: hash.uuid(),
-              platform: constants.device.platforms.MESSENGER.id,
-              info: {
-                profile_id: data.sender.id,
-                profile_name: user.getFullName(),
-                profile_picture: result.profile_pic,
-                profile_gender: result.gender ? _.toLower(result.gender) : null,
-                profile_locale: result.locale,
-                profile_timezone: result.timezone,
-              },
-            };
-            return deviceCommons.createDevice(user, deviceData);
-          }).then((device) => {
-            return Device.populate(device, 'user');
-          });
-        });
-      }
-      return device;
-    }).then((device) => {
-      return chatService.postMessage(device.user, device, {text: data.message.text});
-    });
-  });
+    const integration = yield integrationCommons.findIntegration({channel: constants.integration.channels.MESSENGER, 'configuration.page.id': data.recipient.id}, {require: false});
+    if (!integration) {
+      return null;
+    }
+    const devices = yield deviceCommons.findDevices({'info.profile_id': data.sender.id}, {populate: 'user'});
+    let device = devices.find(device => device.user.app.toString() === integration.app.toString());
+    if (!device) {
+      device = yield createDevice(integration, data);
+    }
+    return chatService.postMessage(device.user, device, {text: data.message.text});
+  })();
 };

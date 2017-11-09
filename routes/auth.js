@@ -5,6 +5,7 @@ const deviceService = require('../services/device');
 const logger = require('../utils/logger');
 const errors = require('../utils/errors');
 const {isAccountAuthenticated, isUserAuthenticated} = require('../utils/middlewares');
+const Promise = require('bluebird');
 const _ = require('lodash');
 
 module.exports = (router, app) => {
@@ -23,15 +24,16 @@ module.exports = (router, app) => {
   }
 
   function accountSignIn(req, res) {
-    accountService.authenticate(req.body.email, req.body.password).bind({}).then((account) => {
-      this.account = account;
-      return createSession(req, {account: {id: account.id}});
-    }).then((token) => {
-      res.json({token, account: this.account});
-    }).catch((err) => {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    });
+    Promise.coroutine(function* () {
+      try {
+        const account = yield accountService.authenticate(req.body.email, req.body.password);
+        const token = yield createSession(req, {account: {id: account.id}});
+        res.json({token, account: this.account});
+      } catch (err) {
+        logger.error(err);
+        errors.respondWithError(res, err);
+      }
+    })();
   }
 
   function accountSignOut(req, res) {
@@ -46,19 +48,18 @@ module.exports = (router, app) => {
   }
 
   function userSignIn(req, res) {
-    appService.getAppByToken(req.body.app_token).bind({}).then((app) => {
-      return userService.saveUser(app, req.body.user);
-    }).then((user) => {
-      this.user = user;
-      return deviceService.saveDevice(user, req.body.device);
-    }).then((device) => {
-      return createSession(req, {user: {id: this.user.id}, device: {id: device.id}});
-    }).then((token) => {
-      res.json({token, user: this.user});
-    }).catch((err) => {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    });
+    Promise.coroutine(function* () {
+      try {
+        const app = yield appService.getAppByToken(req.body.app_token);
+        const user = yield userService.saveUser(app, req.body.user);
+        const device = yield deviceService.saveDevice(user, req.body.device);
+        const token = yield createSession(req, {user: {id: this.user.id}, device: {id: device.id}});
+        res.json({token, user: this.user});
+      } catch (err) {
+        logger.error(err);
+        errors.respondWithError(res, err);
+      }
+    })();
   }
 
 
