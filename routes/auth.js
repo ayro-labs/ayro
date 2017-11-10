@@ -28,7 +28,7 @@ module.exports = (router, app) => {
       try {
         const account = yield accountService.authenticate(req.body.email, req.body.password);
         const token = yield createSession(req, {account: {id: account.id}});
-        res.json({token, account: this.account});
+        res.json({token, account});
       } catch (err) {
         logger.error(err);
         errors.respondWithError(res, err);
@@ -53,8 +53,8 @@ module.exports = (router, app) => {
         const app = yield appService.getAppByToken(req.body.app_token);
         const user = yield userService.saveUser(app, req.body.user);
         const device = yield deviceService.saveDevice(user, req.body.device);
-        const token = yield createSession(req, {user: {id: this.user.id}, device: {id: device.id}});
-        res.json({token, user: this.user});
+        const token = yield createSession(req, {user: {id: user.id}, device: {id: device.id}});
+        res.json({token, user});
       } catch (err) {
         logger.error(err);
         errors.respondWithError(res, err);
