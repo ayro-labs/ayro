@@ -34,7 +34,8 @@ const authentication = {
       } else {
         emitAuthError(message, callback);
       }
-    }).catch(() => {
+    }).catch((err) => {
+      logger.error('Could not get user from session', err);
       emitAuthError(message, callback);
     });
   },

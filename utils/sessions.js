@@ -16,33 +16,21 @@ const redisClient = redis.createClient({
 
 const verifyAsync = Promise.promisify(jwt.verify);
 
-function createErrorGettingUserError(cause) {
-  return errors.chatzError('session.user.errorGetting', 'Couldn\'t get session user', cause);
-}
-
-function createUserNotFoundError() {
-  return errors.chatzError('session.user.notFound', 'Session user not found');
-}
-
 exports.getUser = (token) => {
   return Promise.coroutine(function* () {
-    const decoded = yield verifyAsync(token, settings.session.secret).catch((err) => {
-      throw createErrorGettingUserError(err);
-    });
+    const decoded = yield verifyAsync(token, settings.session.secret);
     if (!decoded.jti) {
-      throw createErrorGettingUserError();
+      throw errors.chatzError('session.user.invalid', 'Invalid session');
     }
-    const session = yield redisClient.getAsync(settings.session.prefix + decoded.jti).catch((err) => {
-      throw createErrorGettingUserError(err);
-    });
+    const session = yield redisClient.getAsync(settings.session.prefix + decoded.jti);
     if (!session) {
-      throw createUserNotFoundError();
+      throw errors.chatzError('session.user.notFound', 'Session user not found');
     }
     try {
       const sessionData = JSON.parse(session);
       return new User(sessionData.user);
     } catch (err) {
-      throw createErrorGettingUserError(err);
+      throw errors.chatzError('session.user.parseError', 'Could not parse user data', err);
     }
   })();
 };
