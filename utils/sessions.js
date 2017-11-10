@@ -42,5 +42,5 @@ exports.getUser = (token) => {
     } catch (err) {
       throw createErrorGettingUserError(err);
     }
-  });
+  })();
 };
