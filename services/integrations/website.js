@@ -3,7 +3,7 @@ const integrationCommons = require('../commons/integration');
 const _ = require('lodash');
 
 const CONFIG_WEBSITE = ['primary_color', 'conversation_color'];
-const DEFAULT_PRIMARY_COLOR = '#007bff';
+const DEFAULT_PRIMARY_COLOR = '#186aa5';
 const DEFAULT_CONVERSATION_COLOR = '#007bff';
 
 exports.addIntegration = (app) => {
