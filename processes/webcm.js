@@ -19,18 +19,20 @@ function emitAuthError(message, callback) {
 
 const authentication = {
   incoming: (message, callback) => {
-    if (message.channel !== SUBSCRIBE_CHANNEL) {
-      callback(message);
-      return;
-    }
     if (!message.ext || !message.ext.api_token) {
       emitAuthError(message, callback);
       return;
     }
     sessions.getUser(message.ext.api_token).then((user) => {
+      if (message.channel !== SUBSCRIBE_CHANNEL) {
+        callback(message);
+        return;
+      }
       if (util.format(SUBSCRIPTION_PATTERN, user.id) === message.subscription) {
         logger.info('Subscribing user %s', user.id);
         callback(message);
+      } else {
+        emitAuthError(message, callback);
       }
     }).catch(() => {
       emitAuthError(message, callback);

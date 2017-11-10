@@ -5,6 +5,9 @@ const redis = require('redis');
 const jwt = require('jsonwebtoken');
 const Promise = require('bluebird');
 
+Promise.promisifyAll(redis.RedisClient.prototype);
+Promise.promisifyAll(redis.Multi.prototype);
+
 const redisClient = redis.createClient({
   host: settings.redis.host,
   port: settings.redis.port,
@@ -12,7 +15,6 @@ const redisClient = redis.createClient({
 });
 
 const verifyAsync = Promise.promisify(jwt.verify);
-const getAsync = Promise.promisify(redisClient.get);
 
 function createErrorGettingUserError(cause) {
   return errors.chatzError('session.user.errorGetting', 'Couldn\'t get session user', cause);
@@ -30,7 +32,7 @@ exports.getUser = (token) => {
     if (!decoded.jti) {
       throw createErrorGettingUserError();
     }
-    const session = yield getAsync(settings.session.prefix + decoded.jti).catch((err) => {
+    const session = yield redisClient.getAsync(settings.session.prefix + decoded.jti).catch((err) => {
       throw createErrorGettingUserError(err);
     });
     if (!session) {
