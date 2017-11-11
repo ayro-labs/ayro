@@ -21,7 +21,7 @@ module.exports = (router, app) => {
     Promise.coroutine(function* () {
       try {
         yield messengerService.postMessage(req.body.entry[0].messaging[0]);
-        res.json({});
+        res.end();
       } catch (err) {
         logger.error(err);
         errors.respondWithError(res, err);

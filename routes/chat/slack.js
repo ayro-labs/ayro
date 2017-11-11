@@ -10,7 +10,7 @@ module.exports = (router, app) => {
     Promise.coroutine(function* () {
       try {
         yield chatService.pushMessage(constants.integration.channels.SLACK, req.body);
-        res.json({});
+        res.end();
       } catch (err) {
         logger.error(err);
         errors.respondWithError(res, err);
@@ -22,7 +22,7 @@ module.exports = (router, app) => {
     Promise.coroutine(function* () {
       try {
         yield chatService.postProfile(constants.integration.channels.SLACK, req.body);
-        res.json({});
+        res.end();
       } catch (err) {
         logger.error(err);
         errors.respondWithError(res, err);

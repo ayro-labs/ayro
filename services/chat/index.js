@@ -50,7 +50,6 @@ exports.postMessage = (user, device, message) => {
       direction: constants.chatMessage.directions.OUTGOING,
       date: new Date(),
     });
-    chatMessage = yield chatMessage.save();
     const promises = [];
     integrations.forEach((integration) => {
       const channelApi = getBusinessChannelApi(integration.channel);
@@ -59,6 +58,7 @@ exports.postMessage = (user, device, message) => {
       }
     });
     yield Promise.all(promises);
+    chatMessage = yield chatMessage.save();
     return chatMessage;
   })();
 };
@@ -84,10 +84,8 @@ exports.pushMessage = (channel, data) => {
       direction: constants.chatMessage.directions.INCOMING,
       date: new Date(),
     });
+    yield push.message(user, EVENT_CHAT_MESSAGE, chatMessage);
     chatMessage = yield chatMessage.save();
-    push.message(user, EVENT_CHAT_MESSAGE, chatMessage).catch((err) => {
-      logger.warn('Could not send message %s to user %s', chatMessage.id, user.id, err);
-    });
     yield channelApi.confirmMessage(businessIntegration.configuration, data, user, chatMessage);
     return null;
   })();
