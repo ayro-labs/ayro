@@ -106,8 +106,10 @@ module.exports = (router, app) => {
       try {
         const app = yield appService.getAppByToken(req.body.app_token);
         let integration = yield integrationService.getIntegration(app, constants.integration.channels.WEBSITE, {require: false});
-        integration = integration || integrationService.addWebsiteIntegration(app);
-        res.json({app, integration});
+        integration = integration || (yield integrationService.addWebsiteIntegration(app));
+        const appJSON = app.toJSON();
+        delete appJSON.integrations;
+        res.json({app: appJSON, integration});
       } catch (err) {
         logger.error(err);
         errors.respondWithError(res, err);
@@ -146,8 +148,10 @@ module.exports = (router, app) => {
       try {
         const app = yield appService.getAppByToken(req.body.app_token);
         let integration = yield integrationService.getIntegration(app, constants.integration.channels.ANDROID, {require: false});
-        integration = integration || integrationService.addAndroidIntegration(app);
-        res.json({app, integration});
+        integration = integration || (yield integrationService.addAndroidIntegration(app));
+        const appJSON = app.toJSON();
+        delete appJSON.integrations;
+        res.json({app: appJSON, integration});
       } catch (err) {
         logger.error(err);
         errors.respondWithError(res, err);
