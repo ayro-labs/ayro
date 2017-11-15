@@ -1,4 +1,5 @@
 const userService = require('../services/user');
+const deviceService = require('../services/device');
 const logger = require('../utils/logger');
 const errors = require('../utils/errors');
 const {isUserAuthenticated} = require('../utils/middlewares');
@@ -21,7 +22,7 @@ module.exports = (router, app) => {
   function updateDevice(req, res) {
     Promise.coroutine(function* () {
       try {
-        const device = yield userService.updateDevice(req.device, req.body);
+        const device = yield deviceService.updateDevice(req.device, req.body);
         res.json(device);
       } catch (err) {
         logger.error(err);

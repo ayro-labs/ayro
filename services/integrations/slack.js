@@ -6,7 +6,7 @@ const userCommons = require('../commons/user');
 const Promise = require('bluebird');
 const _ = require('lodash');
 
-const CHATZ_BOT_USERNAME = 'Chatz Bot';
+const CHATZ_BOT_USERNAME = 'Chatz';
 
 function getFallbackText(text) {
   let fallback = _.replace(text, /\*/g, '');
@@ -39,7 +39,7 @@ function getUserInfoAttachment(user) {
     information.push(`ID: ${user.uid}`);
   }
   if (user.getFullName()) {
-    information.push(`Nome: ${user.getFullName()}`);
+    information.push(`Nome: ${user.getFullName()}${user.generated_name ? ' (Gerado automaticamente)' : ''}`);
   }
   if (user.email) {
     information.push(`Email: ${user.email}`);

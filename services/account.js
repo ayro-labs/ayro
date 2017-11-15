@@ -8,9 +8,9 @@ const fs = require('fs');
 const Promise = require('bluebird');
 const _ = require('lodash');
 
-const renameAsync = Promise.promisify(fs.rename);
+const ALLOWED_ACCOUNT_ATTRS = ['name', 'email'];
 
-const ACCOUNT_UPDATE = ['name', 'email'];
+const renameAsync = Promise.promisify(fs.rename);
 
 exports.getAccount = (id) => {
   return accountCommons.getAccount(id);
@@ -18,14 +18,14 @@ exports.getAccount = (id) => {
 
 exports.createAccount = (name, email, password) => {
   return Promise.coroutine(function* () {
-    const passwordHash = yield hash.hash(password);
-    const account = new Account({name, email, password: passwordHash, registration_date: new Date()});
+    const passHash = yield hash.hash(password);
+    const account = new Account({name, email, password: passHash, registration_date: new Date()});
     return account.save();
   })();
 };
 
 exports.updateAccount = (account, data) => {
-  return Account.findByIdAndUpdate(account.id, _.pick(data, ACCOUNT_UPDATE), {new: true, runValidators: true}).exec();
+  return Account.findByIdAndUpdate(account.id, _.pick(data, ALLOWED_ACCOUNT_ATTRS), {new: true, runValidators: true}).exec();
 };
 
 exports.updateLogo = (account, logo) => {

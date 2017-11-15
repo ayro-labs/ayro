@@ -5,6 +5,8 @@ const Promise = require('bluebird');
 const randomName = require('node-random-name');
 const _ = require('lodash');
 
+const UNALLOWED_USER_ATTRS = ['_id', 'app', 'generated_name', 'extra', 'latest_device', 'registration_date'];
+
 function throwUserNotFoundIfNeeded(user, options) {
   if (!user && (!options || options.require)) {
     throw errors.notFoundError('user.doesNotExist', 'User does not exist');
@@ -36,12 +38,13 @@ exports.createUser = (app, data) => {
     if (!data.uid) {
       throw errors.chatzError('user.uid.required', 'User unique id is required');
     }
-    delete data._id;
-    const user = new User(data);
+    const user = new User(_.omit(data, UNALLOWED_USER_ATTRS));
     user.app = app.id;
     user.registration_date = new Date();
+    user.generated_name = false;
     if (!user.first_name && !user.last_name) {
       [user.first_name, user.last_name] = _.split(randomName(), ' ');
+      user.generated_name = true;
     }
     return user.save();
   });
@@ -49,7 +52,10 @@ exports.createUser = (app, data) => {
 
 exports.updateUser = (user, data) => {
   return Promise.resolve().then(() => {
-    delete data._id;
-    return User.findByIdAndUpdate(user.id, data, {new: true, runValidators: true}).exec();
+    const allowedData = _.omit(data, UNALLOWED_USER_ATTRS);
+    if (user.first_name || user.last_name) {
+      allowedData.generated_name = false;
+    }
+    return User.findByIdAndUpdate(user.id, allowedData, {new: true, runValidators: true}).exec();
   });
 };

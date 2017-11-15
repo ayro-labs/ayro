@@ -90,6 +90,7 @@ const User = new Schema({
   email: {type: String, required: false, trim: true},
   photo_url: {type: String, required: false},
   identified: {type: Boolean, required: true},
+  generated_name: {type: Boolean, required: true},
   properties: {type: Object, required: false},
   extra: {type: Object, required: false},
   sign_up_date: {type: Date, required: false},
