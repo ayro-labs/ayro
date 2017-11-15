@@ -258,7 +258,12 @@ exports.addIntegration = (app, accessToken) => {
         configuration.channel = _.pick(channel, ['id', 'name']);
       }
     });
-    const integration = yield integrationCommons.addIntegration(app, constants.integration.channels.SLACK, constants.integration.types.BUSINESS, configuration);
+    let integration = yield integrationCommons.getIntegration(app, constants.integration.channels.SLACK, {require: false});
+    if (!integration) {
+      integration = yield integrationCommons.addIntegration(app, constants.integration.channels.SLACK, constants.integration.types.BUSINESS, configuration);
+    } else {
+      integration = yield integrationCommons.updateIntegration(app, constants.integration.channels.SLACK, configuration);
+    }
     yield postBotIntro(slackApi, configuration.user, configuration.channel);
     return integration;
   })();
