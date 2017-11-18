@@ -73,6 +73,5 @@ exports.removeIntegration = (app, channel) => {
   return Promise.coroutine(function* () {
     const integration = yield $.getIntegration(app, channel);
     yield Integration.remove({_id: integration.id});
-    return null;
   })();
 };

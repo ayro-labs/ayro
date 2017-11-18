@@ -1,11 +1,27 @@
 const {Device} = require('../../models');
+const constants = require('../../utils/constants');
 const errors = require('../../utils/errors');
 const queries = require('../../utils/queries');
 const Promise = require('bluebird');
+const detectBrowser = require('detect-browser');
 
 function throwDeviceNotFoundIfNeeded(device, options) {
   if (!device && (!options || options.require)) {
     throw errors.notFoundError('device.doesNotExist', 'Device does not exist');
+  }
+}
+
+function fixDeviceData(data) {
+  delete data._id;
+  if (data.platform === constants.device.platforms.WEB.id && data.info) {
+    if (data.info.user_agent) {
+      const browser = detectBrowser.parseUserAgent(data.info.user_agent);
+      if (browser) {
+        data.info.browser_name = browser.name;
+        data.info.browser_version = browser.version;
+        data.info.operating_system = browser.os;
+      }
+    }
   }
 }
 
@@ -42,7 +58,7 @@ exports.createDevice = (user, data) => {
     if (!data.uid) {
       throw errors.chatzError('device.uid.required', 'Device unique id is required');
     }
-    delete data._id;
+    fixDeviceData(data);
     const device = new Device(data);
     device.user = user.id;
     device.registration_date = new Date();
@@ -51,5 +67,8 @@ exports.createDevice = (user, data) => {
 };
 
 exports.updateDevice = (device, data) => {
-  return Device.findByIdAndUpdate(device.id, data, {new: true, runValidators: true}).exec();
+  return Promise.resolve().then(() => {
+    fixDeviceData(data);
+    return Device.findByIdAndUpdate(device.id, data, {new: true, runValidators: true}).exec();
+  });
 };

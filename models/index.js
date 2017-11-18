@@ -118,14 +118,13 @@ const DeviceInfo = new Schema({
   // Android
   app_id: {type: String, required: false},
   app_version: {type: String, required: false},
-  os_name: {type: String, required: false},
-  os_version: {type: String, required: false},
   manufacturer: {type: String, required: false},
   model: {type: String, required: false},
   carrier: {type: String, required: false},
   // Web
   browser_name: {type: String, required: false},
   browser_version: {type: String, required: false},
+  location: {type: String, required: false},
   // Messenger
   profile_id: {type: String, required: false},
   profile_name: {type: String, required: false},
@@ -133,6 +132,8 @@ const DeviceInfo = new Schema({
   profile_picture: {type: String, required: false},
   profile_locale: {type: String, required: false},
   profile_timezone: {type: String, required: false},
+  // Common
+  operating_system: {type: String, required: false},
 });
 
 const Device = new Schema({

@@ -12,6 +12,5 @@ const webcmClient = restify.createJsonClient(URL);
 exports.push = (configuration, user, device, event, message) => {
   return Promise.coroutine(function* () {
     yield webcmClient.postAsync(`/push/${user.id}`, {event, message});
-    return null;
   })();
 };

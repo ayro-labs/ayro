@@ -9,7 +9,6 @@ function subscribePage(configuration) {
     if (configuration.page) {
       yield apis.facebook(configuration, true).api(`${configuration.page.id}/subscribed_apps`, 'post');
     }
-    return null;
   })();
 }
 
@@ -24,7 +23,6 @@ function unsubscribePage(configuration) {
         }
       }
     }
-    return null;
   })();
 }
 

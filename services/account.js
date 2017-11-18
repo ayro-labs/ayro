@@ -8,7 +8,7 @@ const fs = require('fs');
 const Promise = require('bluebird');
 const _ = require('lodash');
 
-const ALLOWED_ACCOUNT_ATTRS = ['name', 'email'];
+const ALLOWED_ATTRS = ['name', 'email'];
 
 const renameAsync = Promise.promisify(fs.rename);
 
@@ -25,7 +25,7 @@ exports.createAccount = (name, email, password) => {
 };
 
 exports.updateAccount = (account, data) => {
-  return Account.findByIdAndUpdate(account.id, _.pick(data, ALLOWED_ACCOUNT_ATTRS), {new: true, runValidators: true}).exec();
+  return Account.findByIdAndUpdate(account.id, _.pick(data, ALLOWED_ATTRS), {new: true, runValidators: true}).exec();
 };
 
 exports.updateLogo = (account, logo) => {

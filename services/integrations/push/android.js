@@ -11,7 +11,7 @@ const fcmClient = restify.createJsonClient('https://fcm.googleapis.com/fcm/send'
 exports.push = (configuration, user, device, event, message) => {
   return Promise.coroutine(function* () {
     if (!device.push_token || !configuration.fcm || !configuration.fcm.server_key) {
-      return null;
+      return;
     }
     const options = {
       headers: {
@@ -24,6 +24,5 @@ exports.push = (configuration, user, device, event, message) => {
       data: {origin: ORIGIN_CHATZ, event, message},
     };
     yield fcmClient.postAsync(options, data);
-    return null;
   })();
 };

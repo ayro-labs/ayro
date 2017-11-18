@@ -1,7 +1,6 @@
 const {App, User, ChatMessage} = require('../../models');
 const constants = require('../../utils/constants');
 const errors = require('../../utils/errors');
-const logger = require('../../utils/logger');
 const userCommons = require('../commons/user');
 const deviceCommons = require('../commons/device');
 const integrationCommons = require('../commons/integration');
@@ -34,14 +33,14 @@ exports.postMessage = (user, device, message) => {
       userCommons.getUser(user.id),
       deviceCommons.getDevice(device.id),
     ]);
-    if (String(currentUser.id) !== String(currentDevice.user)) {
-      throw errors.chatzError('device.unknown', 'Unknown device');
+    if (currentUser.id !== currentDevice.user.toString()) {
+      throw errors.chatzError('user.deviceNotOwned', 'This device is not owned by the user');
     }
     let updatedUser = currentUser;
     if (!updatedUser.latest_device || updatedUser.latest_device.toString() !== currentDevice.id) {
       updatedUser = yield userCommons.updateUser(updatedUser, {latest_device: currentDevice.id});
     }
-    updatedUser = yield User.populate(updatedUser, 'app devices');
+    yield User.populate(updatedUser, 'app devices');
     const integrations = yield integrationCommons.findIntegrations(updatedUser.app, constants.integration.types.BUSINESS);
     let chatMessage = new ChatMessage({
       user: updatedUser.id,
@@ -69,14 +68,14 @@ exports.pushMessage = (channel, data) => {
     if (!channelApi) {
       throw errors.chatzError('channel.notSupported', 'Channel not supported');
     }
-    let user = yield channelApi.extractUser(data);
-    user = yield User.populate(user, 'latest_device');
+    const user = yield channelApi.extractUser(data);
+    yield User.populate(user, 'latest_device');
     const businessIntegration = yield integrationCommons.getIntegration(new App({id: user.app}), channel);
     const [agent, text] = yield Promise.all([
       channelApi.extractAgent(businessIntegration.configuration, data),
       channelApi.extractText(data),
     ]);
-    let chatMessage = new ChatMessage({
+    const chatMessage = new ChatMessage({
       agent,
       text,
       user: user.id,
@@ -85,9 +84,8 @@ exports.pushMessage = (channel, data) => {
       date: new Date(),
     });
     yield push.message(user, EVENT_CHAT_MESSAGE, chatMessage);
-    chatMessage = yield chatMessage.save();
+    yield chatMessage.save();
     yield channelApi.confirmMessage(businessIntegration.configuration, data, user, chatMessage);
-    return null;
   })();
 };
 
@@ -97,10 +95,9 @@ exports.postProfile = (channel, data) => {
     if (!channelApi) {
       throw errors.chatzError('integration.notSupported', 'Integration not supported');
     }
-    let user = yield channelApi.extractUser(data);
-    user = yield userCommons.getUser(user.id, {populate: 'app devices'});
-    const integration = yield integrationCommons.getIntegration(new App({id: user.app}), channel);
+    const user = yield channelApi.extractUser(data);
+    yield User.populate(user, 'app devices');
+    const integration = yield integrationCommons.getIntegration(new App({_id: user.app.id}), channel);
     yield channelApi.postProfile(integration.configuration, user);
-    return null;
   })();
 };

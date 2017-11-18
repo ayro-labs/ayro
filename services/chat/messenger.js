@@ -44,17 +44,17 @@ function createDevice(integration, data) {
 exports.postMessage = (data) => {
   return Promise.coroutine(function* () {
     if (!data.message.text) {
-      return null;
+      return;
     }
     const integration = yield integrationCommons.findIntegration({channel: constants.integration.channels.MESSENGER, 'configuration.page.id': data.recipient.id}, {require: false});
     if (!integration) {
-      return null;
+      return;
     }
     const devices = yield deviceCommons.findDevices({'info.profile_id': data.sender.id}, {populate: 'user'});
     let device = devices.find(device => device.user.app.toString() === integration.app.toString());
     if (!device) {
       device = yield createDevice(integration, data);
     }
-    return chatService.postMessage(device.user, device, {text: data.message.text});
+    yield chatService.postMessage(device.user, device, {text: data.message.text});
   })();
 };

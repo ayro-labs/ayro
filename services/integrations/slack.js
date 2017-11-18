@@ -1,4 +1,3 @@
-const {User} = require('../../models');
 const apis = require('../../utils/apis');
 const constants = require('../../utils/constants');
 const integrationCommons = require('../commons/integration');
@@ -46,7 +45,7 @@ function getUserInfoAttachment(user) {
     information.push(`Email: ${user.email}`);
   }
   if (user.sign_up_date) {
-    information.push(`Data de cadastro: ${user.sign_up_date}`);
+    information.push(`Cadastro: ${user.sign_up_date}`);
   }
   if (user.properties) {
     _.each(user.properties, (value, key) => {
@@ -64,19 +63,17 @@ function getUserInfoAttachment(user) {
 }
 
 function getDeviceInfoAttachments(user) {
-  const information = [];
-  const fields = [];
   const attachments = [];
   user.devices.forEach((device) => {
     const deviceInfo = device.info;
-    information.push(`*${device.getPlatformName()}*`);
+    const information = [];
     if (deviceInfo) {
       if (device.isSmartphone()) {
         if (deviceInfo.app_id && deviceInfo.app_version) {
           information.push(`Versão do app: ${deviceInfo.app_version} (${deviceInfo.app_id})`);
         }
-        if (deviceInfo.os_name && deviceInfo.os_version) {
-          information.push(`OS: ${deviceInfo.os_name} ${deviceInfo.os_version}`);
+        if (deviceInfo.operating_system) {
+          information.push(`OS: ${deviceInfo.operating_system}`);
         }
         if (deviceInfo.manufacturer && deviceInfo.model) {
           information.push(`Smartphone: ${_.capitalize(deviceInfo.manufacturer)} ${deviceInfo.model}`);
@@ -86,7 +83,13 @@ function getDeviceInfoAttachments(user) {
         }
       } else if (device.isWeb()) {
         if (deviceInfo.browser_name && deviceInfo.browser_version) {
-          information.push(`Browser: ${deviceInfo.browser_name} ${deviceInfo.browser_version}`);
+          information.push(`Browser: ${_.capitalize(deviceInfo.browser_name)} ${deviceInfo.browser_version}`);
+        }
+        if (deviceInfo.operating_system) {
+          information.push(`OS: ${deviceInfo.operating_system}`);
+        }
+        if (deviceInfo.location) {
+          information.push(`Location: ${deviceInfo.location}`);
         }
       } else if (device.isMessenger()) {
         if (deviceInfo.profile_name) {
@@ -107,7 +110,7 @@ function getDeviceInfoAttachments(user) {
       }
     }
     attachments.push({
-      fields,
+      title: device.getPlatformName(),
       fallback: device.getPlatformName(),
       text: information.join('\n'),
       mrkdwn_in: ['text', 'pretext'],
@@ -127,7 +130,6 @@ function postBotIntro(slackApi, user, channel) {
       username: CHATZ_BOT_USERNAME,
       as_user: false,
     });
-    return null;
   })();
 }
 
@@ -139,7 +141,6 @@ function postChannelIntro(slackApi, user, channel) {
       as_user: false,
       attachments: getCommandsInfoAttachments(),
     });
-    return null;
   })();
 }
 
@@ -150,7 +151,6 @@ function postProfile(slackApi, user, channel) {
       as_user: false,
       attachments: _.concat(getUserInfoAttachment(user), getDeviceInfoAttachments(user)),
     });
-    return null;
   })();
 }
 
@@ -193,7 +193,6 @@ function introduceUser(slackApi, user, message, supportChannel, userChannel) {
     });
     yield postChannelIntro(slackApi, user, userChannel);
     yield postProfile(slackApi, user, userChannel);
-    return null;
   })();
 }
 
@@ -201,7 +200,7 @@ function createChannelIntroducingUser(slackApi, user, message, supportChannel) {
   return Promise.coroutine(function* () {
     const userChannel = yield createChannel(slackApi, user);
     yield introduceUser(slackApi, user, message, supportChannel, userChannel);
-    yield User.update({_id: user.id}, {extra: _.assign(user.extra || {}, {slack_channel: userChannel})}).exec();
+    yield userCommons.updateUser(user, {extra: _.assign(user.extra || {}, {slack_channel: userChannel})});
     return userChannel;
   })();
 }
@@ -320,7 +319,6 @@ exports.postMessage = (configuration, user, message) => {
       as_user: false,
       icon_url: user.photo_url,
     });
-    return null;
   })();
 };
 
@@ -330,7 +328,6 @@ exports.postProfile = (configuration, user) => {
     if (user.extra && user.extra.slack_channel) {
       yield postProfile(slackApi, user, user.extra.slack_channel);
     }
-    return null;
   })();
 };
 
@@ -362,6 +359,5 @@ exports.confirmMessage = (configuration, data, user, chatMessage) => {
       as_user: false,
       icon_url: chatMessage.agent.photo_url,
     });
-    return null;
   })();
 };

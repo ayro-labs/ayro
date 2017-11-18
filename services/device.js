@@ -1,4 +1,4 @@
-const {User, Device, ChatMessage} = require('../models');
+const {Device, ChatMessage} = require('../models');
 const userCommons = require('./commons/user');
 const deviceCommons = require('./commons/device');
 const Promise = require('bluebird');
@@ -14,10 +14,9 @@ function removeDeviceIfNeeded(user, data) {
       yield Device.remove({_id: device.id});
       if (currentUser.latest_device && currentUser.latest_device.toString() === device.id) {
         currentUser.latest_device = device.id;
-        yield User.updateOne({_id: currentUser.id}, {$unset: ''});
+        yield userCommons.updateUser(currentUser, {$unset: ''});
       }
     }
-    return null;
   })();
 }
 

@@ -4,7 +4,7 @@ const Promise = require('bluebird');
 exports.push = (configuration, user, device, event, message) => {
   return Promise.coroutine(function* () {
     if (!device.info || !device.info.profile_id || !configuration.page) {
-      return null;
+      return;
     }
     const data = {
       recipient: {
@@ -15,6 +15,5 @@ exports.push = (configuration, user, device, event, message) => {
       },
     };
     yield apis.facebook(configuration, true).api('me/messages', 'post', data);
-    return null;
   })();
 };

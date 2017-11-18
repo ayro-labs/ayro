@@ -5,7 +5,7 @@ const Promise = require('bluebird');
 const randomName = require('node-random-name');
 const _ = require('lodash');
 
-const UNALLOWED_USER_ATTRS = ['_id', 'app', 'generated_name', 'extra', 'latest_device', 'registration_date'];
+const UNALLOWED_ATTRS = ['_id', 'app', 'generated_name', 'registration_date'];
 
 function throwUserNotFoundIfNeeded(user, options) {
   if (!user && (!options || options.require)) {
@@ -38,7 +38,7 @@ exports.createUser = (app, data) => {
     if (!data.uid) {
       throw errors.chatzError('user.uid.required', 'User unique id is required');
     }
-    const user = new User(_.omit(data, UNALLOWED_USER_ATTRS));
+    const user = new User(_.omit(data, UNALLOWED_ATTRS));
     user.app = app.id;
     user.registration_date = new Date();
     user.generated_name = false;
@@ -52,7 +52,7 @@ exports.createUser = (app, data) => {
 
 exports.updateUser = (user, data) => {
   return Promise.resolve().then(() => {
-    const allowedData = _.omit(data, UNALLOWED_USER_ATTRS);
+    const allowedData = _.omit(data, UNALLOWED_ATTRS);
     if (user.first_name || user.last_name) {
       allowedData.generated_name = false;
     }
