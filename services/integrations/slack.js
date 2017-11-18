@@ -6,6 +6,7 @@ const userCommons = require('../commons/user');
 const Promise = require('bluebird');
 const _ = require('lodash');
 
+const CHANNEL_PREFIX = 'chz';
 const CHATZ_BOT_USERNAME = 'Chatz';
 
 function getFallbackText(text) {
@@ -157,15 +158,13 @@ function createChannel(slackApi, user, conflicts) {
   return Promise.coroutine(function* () {
     let channel;
     if (!conflicts) {
-      channel = user.getFullName();
-    } else if (conflicts === 1) {
-      channel = _.truncate(user.getFullName(), {length: 13, omission: ''});
-      channel += `-${user.uid}`;
+      channel = `${CHANNEL_PREFIX} ${user.getFullName()}`;
+      channel = _.truncate(channel, {length: 21, omission: ''});
     } else {
-      channel = user.id;
+      const charsRemaining = 21 - (CHANNEL_PREFIX.length + String(conflicts).length + 2);
+      channel = _.truncate(user.getFullName(), {length: charsRemaining, omission: ''});
+      channel = `${CHANNEL_PREFIX} ${channel} ${conflicts}`;
     }
-    channel = _.replace(`chz-${channel}`, /\s+/g);
-    channel = _.truncate(channel, {length: 21, omission: ''});
     channel = _.deburr(channel);
     try {
       const result = yield slackApi.channels.create(channel);
