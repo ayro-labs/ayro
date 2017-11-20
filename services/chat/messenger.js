@@ -6,6 +6,7 @@ const userCommons = require('../commons/user');
 const deviceCommons = require('../commons/device');
 const integrationCommons = require('../commons/integration');
 const chatService = require('.');
+const Promise = require('bluebird');
 const _ = require('lodash');
 
 function getUserData(profile) {
