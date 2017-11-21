@@ -180,7 +180,7 @@ const ChatMessage = new Schema({
   date: {type: Date, required: true},
 }, {collection: 'chat_messages'});
 ChatMessage.plugin(ttl, {
-  ttl: '3m',
+  ttl: '90d',
   interval: 86400000,
 });
 
