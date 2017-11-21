@@ -1,6 +1,8 @@
 const {App} = require('../models');
 const settings = require('../configs/settings');
+const logger = require('../utils/logger');
 const hash = require('../utils/hash');
+const files = require('../utils/files');
 const appCommons = require('./commons/app');
 const path = require('path');
 const fs = require('fs');
@@ -40,10 +42,15 @@ exports.updateApp = (account, app, name) => {
 exports.updateIcon = (account, app, icon) => {
   return Promise.coroutine(function* () {
     const currentApp = yield $.getApp(account, app.id);
-    const iconName = currentApp.id + path.extname(icon.originalname);
-    const iconPath = path.join(settings.appIconPath, iconName);
-    renameAsync(icon.path, iconPath);
-    return App.findByIdAndUpdate(currentApp.id, {icon: iconName}, {new: true, runValidators: true}).exec();
+    const iconPath = path.join(settings.appIconPath, currentApp.id);
+    yield renameAsync(icon.path, iconPath);
+    try {
+      currentApp.icon = currentApp.id;
+      currentApp.icon = yield files.fixAppIcon(currentApp);
+    } catch (err) {
+      logger.debug('Could not fix icon of app %s: %s.', currentApp.id, err.message);
+    }
+    return App.findByIdAndUpdate(currentApp.id, {icon: currentApp.icon}, {new: true, runValidators: true}).exec();
   })();
 };
 

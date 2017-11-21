@@ -1,11 +1,17 @@
 const {User} = require('../../models');
+const settings = require('../../configs/settings');
+const logger = require('../../utils/logger');
 const errors = require('../../utils/errors');
 const queries = require('../../utils/queries');
+const files = require('../../utils/files');
+const path = require('path');
 const Promise = require('bluebird');
 const randomName = require('node-random-name');
 const _ = require('lodash');
 
-const UNALLOWED_ATTRS = ['_id', 'app', 'generated_name', 'registration_date'];
+const $ = this;
+
+const UNALLOWED_ATTRS = ['_id', 'app', 'photo', 'generated_name', 'registration_date'];
 
 function throwUserNotFoundIfNeeded(user, options) {
   if (!user && (!options || options.require)) {
@@ -34,7 +40,7 @@ exports.findUser = (query, options) => {
 };
 
 exports.createUser = (app, data) => {
-  return Promise.resolve().then(() => {
+  return Promise.coroutine(function* () {
     if (!data.uid) {
       throw errors.chatzError('user.uid.required', 'User unique id is required');
     }
@@ -46,16 +52,30 @@ exports.createUser = (app, data) => {
       [user.first_name, user.last_name] = _.split(randomName(), ' ');
       user.generated_name = true;
     }
+    try {
+      user.photo = yield files.downloadUserPhoto(user);
+    } catch (err) {
+      logger.debug('Could not download photo of user %s: %s.', user.id, err.message);
+    }
     return user.save();
-  });
+  })();
 };
 
 exports.updateUser = (user, data) => {
-  return Promise.resolve().then(() => {
+  return Promise.coroutine(function* () {
+    const currentUser = yield $.getUser(user.id);
     const allowedData = _.omit(data, UNALLOWED_ATTRS);
     if (user.first_name || user.last_name) {
       allowedData.generated_name = false;
     }
-    return User.findByIdAndUpdate(user.id, allowedData, {new: true, runValidators: true}).exec();
-  });
+    if (allowedData.photo_url && allowedData.photo_url !== currentUser.photo_url) {
+      try {
+        currentUser.set(allowedData);
+        allowedData.photo = yield files.downloadUserPhoto(currentUser);
+      } catch (err) {
+        logger.debug('Could not download photo of user %s: %s.', currentUser.id, err.message);
+      }
+    }
+    return User.findByIdAndUpdate(currentUser.id, allowedData, {new: true, runValidators: true}).exec();
+  })();
 };

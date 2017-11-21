@@ -6,13 +6,13 @@ const uuid = require('uuid').v4;
 
 const $ = this;
 
-const randomBytesAsync = Promise.promisify(crypto.randomBytes);
-const hashAsync = Promise.promisify(bcrypt.hash);
-const compareAsync = Promise.promisify(bcrypt.compare);
-
 const ALGORITHM = 'aes-256-ctr';
 const ENCODING_UTF8 = 'utf8';
 const ENCODING_HEX = 'hex';
+
+const randomBytesAsync = Promise.promisify(crypto.randomBytes);
+const hashAsync = Promise.promisify(bcrypt.hash);
+const compareAsync = Promise.promisify(bcrypt.compare);
 
 exports.uuid = () => {
   return uuid().replace(/-/g, '');

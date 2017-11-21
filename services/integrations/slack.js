@@ -1,4 +1,5 @@
 const apis = require('../../utils/apis');
+const files = require('../../utils/files');
 const constants = require('../../utils/constants');
 const integrationCommons = require('../commons/integration');
 const userCommons = require('../commons/user');
@@ -317,7 +318,7 @@ exports.postMessage = (configuration, user, message) => {
     yield slackApi.chat.postMessage(userChannel.id, message, {
       username: user.getFullName(),
       as_user: false,
-      icon_url: user.photo_url,
+      icon_url: files.getUserPhoto(user),
     });
   })();
 };

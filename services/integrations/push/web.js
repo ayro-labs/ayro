@@ -1,16 +1,16 @@
 const settings = require('../../../configs/settings');
-const restify = require('restify-clients');
+const axios = require('axios');
 const Promise = require('bluebird');
 
-Promise.promisifyAll(restify.JsonClient.prototype);
+const webcmUrlProtocol = settings.env === 'production' ? 'https' : 'http';
+const webcmUrl = `${webcmUrlProtocol}://${settings.webcm.host}:${settings.webcm.port}`;
 
-const URL_PROTOCOL = settings.env === 'production' ? 'https' : 'http';
-const URL = `${URL_PROTOCOL}://${settings.webcm.host}:${settings.webcm.port}`;
-
-const webcmClient = restify.createJsonClient(URL);
+const webcmClient = axios.create({
+  baseURL: webcmUrl,
+});
 
 exports.push = (configuration, user, device, event, message) => {
   return Promise.coroutine(function* () {
-    yield webcmClient.postAsync(`/push/${user.id}`, {event, message});
+    yield webcmClient.post(`/push/${user.id}`, {event, message});
   })();
 };

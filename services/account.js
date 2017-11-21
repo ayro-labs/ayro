@@ -1,12 +1,16 @@
 const {Account} = require('../models');
 const settings = require('../configs/settings');
+const logger = require('../utils/logger');
 const hash = require('../utils/hash');
+const files = require('../utils/files');
 const errors = require('../utils/errors');
 const accountCommons = require('./commons/account');
 const path = require('path');
 const fs = require('fs');
 const Promise = require('bluebird');
 const _ = require('lodash');
+
+const $ = this;
 
 const ALLOWED_ATTRS = ['name', 'email'];
 
@@ -30,10 +34,16 @@ exports.updateAccount = (account, data) => {
 
 exports.updateLogo = (account, logo) => {
   return Promise.coroutine(function* () {
-    const logoName = account.id + path.extname(logo.originalname);
-    const logoPath = path.join(settings.accountLogoPath, logoName);
+    const currentAccount = yield $.getAccount(account.id);
+    const logoPath = path.join(settings.accountLogoPath, currentAccount.id);
     yield renameAsync(logo.path, logoPath);
-    return Account.findByIdAndUpdate(account.id, {logo: logoName}, {new: true, runValidators: true}).exec();
+    try {
+      currentAccount.logo = currentAccount.id;
+      currentAccount.logo = yield files.fixAccountLogo(currentAccount);
+    } catch (err) {
+      logger.debug('Could not fix logo of account %s: %s.', currentAccount.id, err.message);
+    }
+    return Account.findByIdAndUpdate(currentAccount.id, {logo: currentAccount.logo}, {new: true, runValidators: true}).exec();
   })();
 };
 

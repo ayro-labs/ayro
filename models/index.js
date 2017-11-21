@@ -90,6 +90,7 @@ const User = new Schema({
   last_name: {type: String, required: false, trim: true},
   email: {type: String, required: false, trim: true},
   photo_url: {type: String, required: false},
+  photo: {type: String, required: false},
   identified: {type: Boolean, required: true},
   generated_name: {type: Boolean, required: true},
   properties: {type: Object, required: false},
@@ -178,7 +179,10 @@ const ChatMessage = new Schema({
   direction: {type: String, required: true, enum: _.values(constants.chatMessage.directions)},
   date: {type: Date, required: true},
 }, {collection: 'chat_messages'});
-ChatMessage.plugin(ttl, {ttl: '3m'});
+ChatMessage.plugin(ttl, {
+  ttl: '3m',
+  interval: 86400000,
+});
 
 exports.Account = mongoose.model('Account', customize(Account, ['password']));
 exports.App = mongoose.model('App', customize(App));
