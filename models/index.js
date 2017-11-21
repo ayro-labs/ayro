@@ -2,7 +2,6 @@ const settings = require('../configs/settings');
 const constants = require('../utils/constants');
 const logger = require('../utils/logger');
 const mongoose = require('mongoose');
-const ttl = require('mongoose-ttl');
 const Promise = require('bluebird');
 const _ = require('lodash');
 
@@ -179,10 +178,7 @@ const ChatMessage = new Schema({
   direction: {type: String, required: true, enum: _.values(constants.chatMessage.directions)},
   date: {type: Date, required: true},
 }, {collection: 'chat_messages'});
-ChatMessage.plugin(ttl, {
-  ttl: 7776000000, // 90 days
-  interval: 86400000, // 24 hours
-});
+ChatMessage.index({date: 1}, {expireAfterSeconds: 7776000});
 
 exports.Account = mongoose.model('Account', customize(Account, ['password']));
 exports.App = mongoose.model('App', customize(App));
