@@ -180,8 +180,8 @@ const ChatMessage = new Schema({
   date: {type: Date, required: true},
 }, {collection: 'chat_messages'});
 ChatMessage.plugin(ttl, {
-  ttl: '90d',
-  interval: 86400000,
+  ttl: 7776000000, // 90 days
+  interval: 86400000, // 24 hours
 });
 
 exports.Account = mongoose.model('Account', customize(Account, ['password']));
