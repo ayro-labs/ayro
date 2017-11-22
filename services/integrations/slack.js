@@ -343,7 +343,7 @@ exports.extractAgent = (configuration, data) => {
     return {
       id: data.user_id,
       name: result.user.profile.real_name,
-      photo_url: result.user.profile.image_48,
+      photo_url: result.user.profile.image_72,
     };
   })();
 };

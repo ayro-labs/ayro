@@ -21,8 +21,8 @@ exports.push = (configuration, user, device, event, message) => {
     const data = {
       registration_ids: [device.push_token],
       time_to_live: TIME_TO_LIVE,
-      data: {origin: ORIGIN_CHATZ, event, message},
+      data: {event, message, origin: ORIGIN_CHATZ},
     };
-    yield fcmClient.post('/', data, options);
+    yield fcmClient.post('', data, options);
   })();
 };
