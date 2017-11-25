@@ -44,7 +44,7 @@ exports.addIntegration = (app, channel, type, configuration) => {
   return Promise.coroutine(function* () {
     let integration = yield $.getIntegration(app, channel, {require: false});
     if (integration) {
-      throw errors.chatzError('integration.alreadyExists', 'Integration already exists');
+      throw errors.ayroError('integration.alreadyExists', 'Integration already exists');
     }
     integration = new Integration({
       channel,

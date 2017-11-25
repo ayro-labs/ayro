@@ -56,7 +56,7 @@ exports.findDevices = (query, options) => {
 exports.createDevice = (user, data) => {
   return Promise.resolve().then(() => {
     if (!data.uid) {
-      throw errors.chatzError('device.uid.required', 'Device unique id is required');
+      throw errors.ayroError('device.uid.required', 'Device unique id is required');
     }
     fixDeviceData(data);
     const device = new Device(data);

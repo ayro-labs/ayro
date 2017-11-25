@@ -14,7 +14,7 @@ const logger = new (winston.Logger)({
     }),
     new (winston.transports.File)({
       level,
-      filename: path.join(__dirname, '../chatz.log'),
+      filename: path.join(__dirname, '../ayro.log'),
     }),
   ],
 });

@@ -168,7 +168,7 @@ const Agent = new Schema({
   id: {type: String, required: false},
   name: {type: String, required: false},
   photo_url: {type: String, required: false},
-});
+}, {_id: false});
 
 const ChatMessage = new Schema({
   user: {type: ObjectId, ref: 'User', required: true},

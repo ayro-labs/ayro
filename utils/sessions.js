@@ -20,17 +20,17 @@ exports.getUser = (token) => {
   return Promise.coroutine(function* () {
     const decoded = yield verifyAsync(token, settings.session.secret);
     if (!decoded.jti) {
-      throw errors.chatzError('session.user.invalid', 'Invalid session');
+      throw errors.ayroError('session.user.invalid', 'Invalid session');
     }
     const session = yield redisClient.getAsync(settings.session.prefix + decoded.jti);
     if (!session) {
-      throw errors.chatzError('session.user.notFound', 'Session user not found');
+      throw errors.ayroError('session.user.notFound', 'Session user not found');
     }
     try {
       const sessionData = JSON.parse(session);
       return new User(sessionData.user);
     } catch (err) {
-      throw errors.chatzError('session.user.parseError', 'Could not parse user data', err);
+      throw errors.ayroError('session.user.parseError', 'Could not parse user data', err);
     }
   })();
 };

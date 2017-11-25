@@ -7,7 +7,7 @@ const Promise = require('bluebird');
 const _ = require('lodash');
 
 const CHANNEL_PREFIX = 'chz';
-const CHATZ_BOT_USERNAME = 'Chatz';
+const AYRO_BOT_USERNAME = 'Ayro';
 
 function getFallbackText(text) {
   let fallback = _.replace(text, /\*/g, '');
@@ -126,9 +126,9 @@ function getDeviceInfoAttachments(user) {
 
 function postBotIntro(slackApi, user, channel) {
   return Promise.coroutine(function* () {
-    const message = `Olá, eu sou o Chatz Bot!\n<@${user.id}> acabou de integrar este Workspace com o <https://chatz.io|Chatz>. Agora você pode conversar com seus clientes em tempo real, direto do Slack.`;
+    const message = `Olá, eu sou o Ayro Bot!\n<@${user.id}> acabou de integrar este Workspace com o <https://ayro.io|Ayro>. Agora você pode conversar com seus clientes em tempo real, direto do Slack.`;
     yield slackApi.chat.postMessage(channel.id, message, {
-      username: CHATZ_BOT_USERNAME,
+      username: AYRO_BOT_USERNAME,
       as_user: false,
     });
   })();
@@ -138,7 +138,7 @@ function postChannelIntro(slackApi, user, channel) {
   return Promise.coroutine(function* () {
     const message = `Este é o canal exclusivo para conversar com *${user.getFullName()}*.\nNeste canal você pode utilizar os seguintes comandos:`;
     yield slackApi.chat.postMessage(channel.id, message, {
-      username: CHATZ_BOT_USERNAME,
+      username: AYRO_BOT_USERNAME,
       as_user: false,
       attachments: getCommandsInfoAttachments(),
     });
@@ -148,7 +148,7 @@ function postChannelIntro(slackApi, user, channel) {
 function postProfile(slackApi, user, channel) {
   return Promise.coroutine(function* () {
     yield slackApi.chat.postMessage(channel.id, '', {
-      username: CHATZ_BOT_USERNAME,
+      username: AYRO_BOT_USERNAME,
       as_user: false,
       attachments: _.concat(getUserInfoAttachment(user), getDeviceInfoAttachments(user)),
     });
@@ -184,7 +184,7 @@ function introduceUser(slackApi, user, message, supportChannel, userChannel) {
   return Promise.coroutine(function* () {
     const introMessage = `*${user.getFullName()}* quer conversar com o seu time no canal <#${userChannel.id}|${userChannel.name}>`;
     yield slackApi.chat.postMessage(supportChannel.id, introMessage, {
-      username: CHATZ_BOT_USERNAME,
+      username: AYRO_BOT_USERNAME,
       as_user: false,
       attachments: [{
         fallback: getFallbackText(introMessage),

@@ -1,9 +1,9 @@
 const settings = require('../configs/settings');
 const util = require('util');
 
-function ChatzError(status, code, message, cause) {
-  if (!cause && ChatzError.super_.captureStackTrace) {
-    ChatzError.super_.captureStackTrace(this, this.constructor);
+function AyroError(status, code, message, cause) {
+  if (!cause && AyroError.super_.captureStackTrace) {
+    AyroError.super_.captureStackTrace(this, this.constructor);
   } else if (cause) {
     this.stack = cause.stack;
   }
@@ -21,26 +21,26 @@ function ChatzError(status, code, message, cause) {
   };
   this.toString = () => this.message;
 }
-util.inherits(ChatzError, Error);
+util.inherits(AyroError, Error);
 
-exports.chatzError = (code, message, cause) => {
-  return new ChatzError(400, code, message, cause);
+exports.ayroError = (code, message, cause) => {
+  return new AyroError(400, code, message, cause);
 };
 
 exports.permissionError = (code, message, cause) => {
-  return new ChatzError(401, code, message, cause);
+  return new AyroError(401, code, message, cause);
 };
 
 exports.notFoundError = (code, message, cause) => {
-  return new ChatzError(404, code, message, cause);
+  return new AyroError(404, code, message, cause);
 };
 
 exports.internalError = (message, cause) => {
-  return new ChatzError(500, 'internalError', message, cause);
+  return new AyroError(500, 'internalError', message, cause);
 };
 
 exports.respondWithError = (res, err) => {
-  if (err instanceof ChatzError) {
+  if (err instanceof AyroError) {
     res.status(err.status).json(err.json());
   } else {
     const internal = this.internalError(err.message, err);

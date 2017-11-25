@@ -42,7 +42,7 @@ exports.findUser = (query, options) => {
 exports.createUser = (app, data) => {
   return Promise.coroutine(function* () {
     if (!data.uid) {
-      throw errors.chatzError('user.uid.required', 'User unique id is required');
+      throw errors.ayroError('user.uid.required', 'User unique id is required');
     }
     const user = new User(_.omit(data, UNALLOWED_ATTRS));
     user.app = app.id;

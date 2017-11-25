@@ -52,7 +52,7 @@ exports.authenticate = (email, password) => {
     const account = yield accountCommons.findAccount({email});
     const match = yield hash.compare(password, account.password);
     if (!match) {
-      throw errors.chatzError('account.auth.wrongPassword', 'Wrong account password');
+      throw errors.ayroError('account.auth.wrongPassword', 'Wrong account password');
     }
     return account;
   })();

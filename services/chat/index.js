@@ -34,7 +34,7 @@ exports.postMessage = (user, device, message) => {
       deviceCommons.getDevice(device.id),
     ]);
     if (currentUser.id !== currentDevice.user.toString()) {
-      throw errors.chatzError('user.deviceNotOwned', 'This device is not owned by the user');
+      throw errors.ayroError('user.deviceNotOwned', 'This device is not owned by the user');
     }
     let updatedUser = currentUser;
     if (!updatedUser.latest_device || updatedUser.latest_device.toString() !== currentDevice.id) {
@@ -66,7 +66,7 @@ exports.pushMessage = (channel, data) => {
   return Promise.coroutine(function* () {
     const channelApi = getBusinessChannelApi(channel);
     if (!channelApi) {
-      throw errors.chatzError('channel.notSupported', 'Channel not supported');
+      throw errors.ayroError('channel.notSupported', 'Channel not supported');
     }
     const user = yield channelApi.extractUser(data);
     yield User.populate(user, 'latest_device');
@@ -93,7 +93,7 @@ exports.postProfile = (channel, data) => {
   return Promise.coroutine(function* () {
     const channelApi = getBusinessChannelApi(channel);
     if (!channelApi) {
-      throw errors.chatzError('integration.notSupported', 'Integration not supported');
+      throw errors.ayroError('integration.notSupported', 'Integration not supported');
     }
     const user = yield channelApi.extractUser(data);
     yield User.populate(user, 'app devices');

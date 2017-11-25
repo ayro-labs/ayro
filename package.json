@@ -1,14 +1,14 @@
 {
-  "name": "chatz",
-  "description": "Chatz backend",
+  "name": "ayro",
+  "description": "Ayro backend",
   "version": "1.0.0",
   "private": true,
   "author": {
-    "name": "Chatz team",
-    "email": "team@chatz.io",
-    "url": "https://chatz.io"
+    "name": "Ayro team",
+    "email": "team@ayro.io",
+    "url": "https://ayro.io"
   },
-  "homepage": "https://chatz.io",
+  "homepage": "https://ayro.io",
   "scripts": {
     "lint": "eslint '**/*.js'",
     "start": "node app.js",

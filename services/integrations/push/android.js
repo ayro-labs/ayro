@@ -1,7 +1,7 @@
 const axios = require('axios');
 const Promise = require('bluebird');
 
-const ORIGIN_CHATZ = 'chatz';
+const ORIGIN_AYRO = 'ayro';
 const TIME_TO_LIVE = 600;
 
 const fcmClient = axios.create({
@@ -21,7 +21,7 @@ exports.push = (configuration, user, device, event, message) => {
     const data = {
       registration_ids: [device.push_token],
       time_to_live: TIME_TO_LIVE,
-      data: {event, message, origin: ORIGIN_CHATZ},
+      data: {event, message, origin: ORIGIN_AYRO},
     };
     yield fcmClient.post('', data, options);
   })();

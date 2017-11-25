@@ -8,7 +8,7 @@ exports.port = properties.getValue('app.port', 3000);
 exports.debug = properties.getValue('app.debug', false);
 
 exports.publicPath = properties.getValue('app.publicPath', path.join(__dirname, '../public'));
-exports.publicUrl = this.env === 'production' ? 'https://api.chatz.io' : `http://localhost:${this.port}`;
+exports.publicUrl = this.env === 'production' ? 'https://api.ayro.io' : `http://localhost:${this.port}`;
 
 exports.appIconPath = properties.getValue('app.appIconPath', path.join(this.publicPath, 'img/apps'));
 exports.appIconUrl = `${this.publicUrl}/img/apps`;
@@ -19,10 +19,10 @@ exports.accountLogoUrl = `${this.publicUrl}/img/accounts`;
 exports.userPhotoPath = properties.getValue('app.userPhotoPath', path.join(this.publicPath, 'img/users'));
 exports.userPhotoUrl = `${this.publicUrl}/img/users`;
 
-exports.domain = 'chatz.io';
+exports.domain = 'ayro.io';
 
 exports.session = {
-  secret: 'chatz.io',
+  secret: 'ayro.io',
   prefix: 'session:',
   requestHeader: 'token',
   maxAge: Number.MAX_SAFE_INTEGER,
@@ -32,7 +32,7 @@ exports.mongo = {
   host: properties.getValue('mongo.host', 'localhost'),
   port: properties.getValue('mongo.port', 27017),
   debug: properties.getValue('mongo.debug', false),
-  schema: properties.getValue('mongo.schema', 'chatz'),
+  schema: properties.getValue('mongo.schema', 'ayro'),
   username: properties.getValue('mongo.username'),
   password: properties.getValue('mongo.password'),
 };
