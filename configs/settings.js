@@ -53,12 +53,12 @@ exports.webcm = {
 };
 
 exports.facebook = {
-  appId: '1577343385621250',
-  appSecret: '28a2b0321aec6799be5f0e884431f626',
+  appId: '2149355741952296',
+  appSecret: 'ddd354f9a28d85876bda6a03594aae7b',
 };
 
 exports.messenger = {
-  pageToken: 'EAAWaleAwUwIBANNlqHDrZA7xZA2gu4bXEjtvwqC33k3NU6QzcZANwXUiOuqynPZBBq8JnEZCEwhUIYye4oKbEsodU5XwcsmwGR9ikZAISV7G0BNVNDsRDhRAgfa52a3YvJPGwHLq7aiGzCabdxDh5TnnlIqJAwUrajsNnWDEhRxAZDZD',
+  pageToken: 'EAAei0ZBFZBuSgBABnjH355XjzZAY1YagKBsSAfjDF85TXrvtZBwnKZCr5OTSQuHCmS4dfv8OZAzJnqNvlYuMDp1HRN0ylvJOVKzDGAqnbcr1pAgz6Y2a9k65QrDnMuW4jtHgqBMcQE7m1zeKduzUbNESXGRhxhqEziGnhJT92eBAZDZD',
   verificationToken: '36e7c68cd97b9290475365ff8aef950f0dc0fd62',
 };
 
