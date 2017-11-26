@@ -10,13 +10,13 @@ exports.debug = properties.getValue('app.debug', false);
 exports.publicPath = properties.getValue('app.publicPath', path.join(__dirname, '../public'));
 exports.publicUrl = this.env === 'production' ? 'https://api.ayro.io' : `http://localhost:${this.port}`;
 
-exports.appIconPath = properties.getValue('app.appIconPath', path.join(this.publicPath, 'img/apps'));
+exports.appIconPath = path.join(this.publicPath, 'img/apps');
 exports.appIconUrl = `${this.publicUrl}/img/apps`;
 
-exports.accountLogoPath = properties.getValue('app.accountLogoPath', path.join(this.publicPath, 'img/accounts'));
+exports.accountLogoPath = path.join(this.publicPath, 'img/accounts');
 exports.accountLogoUrl = `${this.publicUrl}/img/accounts`;
 
-exports.userPhotoPath = properties.getValue('app.userPhotoPath', path.join(this.publicPath, 'img/users'));
+exports.userPhotoPath = path.join(this.publicPath, 'img/users');
 exports.userPhotoUrl = `${this.publicUrl}/img/users`;
 
 exports.domain = 'ayro.io';
@@ -33,7 +33,7 @@ exports.mongo = {
   port: properties.getValue('mongo.port', 27017),
   debug: properties.getValue('mongo.debug', false),
   schema: properties.getValue('mongo.schema', 'ayro'),
-  username: properties.getValue('mongo.username'),
+  username: properties.getValue('mongo.username', 'ayro'),
   password: properties.getValue('mongo.password'),
 };
 
