@@ -59,7 +59,7 @@ exports.facebook = {
 
 exports.messenger = {
   pageToken: 'EAAWaleAwUwIBANNlqHDrZA7xZA2gu4bXEjtvwqC33k3NU6QzcZANwXUiOuqynPZBBq8JnEZCEwhUIYye4oKbEsodU5XwcsmwGR9ikZAISV7G0BNVNDsRDhRAgfa52a3YvJPGwHLq7aiGzCabdxDh5TnnlIqJAwUrajsNnWDEhRxAZDZD',
-  verificationToken: '9f28f2cff653df1e950f4808213b800d7acd9fe0',
+  verificationToken: '36e7c68cd97b9290475365ff8aef950f0dc0fd62',
 };
 
 exports.slack = {
