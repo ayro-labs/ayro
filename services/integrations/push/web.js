@@ -2,11 +2,8 @@ const settings = require('../../../configs/settings');
 const axios = require('axios');
 const Promise = require('bluebird');
 
-const webcmUrlProtocol = settings.env === 'production' ? 'https' : 'http';
-const webcmUrl = `${webcmUrlProtocol}://${settings.webcm.host}:${settings.webcm.port}`;
-
 const webcmClient = axios.create({
-  baseURL: webcmUrl,
+  baseURL: settings.webcmUrl,
 });
 
 exports.push = (configuration, user, device, event, message) => {

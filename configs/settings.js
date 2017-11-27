@@ -7,17 +7,19 @@ exports.env = properties.getValue('app.env', 'development');
 exports.port = properties.getValue('app.port', 3000);
 exports.debug = properties.getValue('app.debug', false);
 
-exports.publicPath = properties.getValue('app.publicPath', path.join(__dirname, '../public'));
 exports.publicUrl = this.env === 'production' ? 'https://api.ayro.io' : `http://localhost:${this.port}`;
+exports.publicPath = properties.getValue('app.publicPath', path.join(__dirname, '../public'));
 
-exports.appIconPath = path.join(this.publicPath, 'img/apps');
 exports.appIconUrl = `${this.publicUrl}/img/apps`;
+exports.appIconPath = path.join(this.publicPath, 'img/apps');
 
-exports.accountLogoPath = path.join(this.publicPath, 'img/accounts');
 exports.accountLogoUrl = `${this.publicUrl}/img/accounts`;
+exports.accountLogoPath = path.join(this.publicPath, 'img/accounts');
 
-exports.userPhotoPath = path.join(this.publicPath, 'img/users');
 exports.userPhotoUrl = `${this.publicUrl}/img/users`;
+exports.userPhotoPath = path.join(this.publicPath, 'img/users');
+
+exports.webcmUrl = this.env === 'production' ? 'https://webcm.ayro.io:3100' : properties.getValue('webcm.url', 'http://localhost:3100');
 
 exports.domain = 'ayro.io';
 
@@ -41,15 +43,6 @@ exports.redis = {
   host: properties.getValue('redis.host', 'localhost'),
   port: properties.getValue('redis.port', 6379),
   password: properties.getValue('redis.password'),
-};
-
-exports.webcm = {
-  host: properties.getValue('webcm.host', 'localhost'),
-  port: properties.getValue('webcm.port', 3100),
-  pubSub: {
-    host: properties.getValue('webcm.pubSub.host', 'localhost'),
-    port: properties.getValue('webcm.pubSub.port', 3102),
-  },
 };
 
 exports.facebook = {
