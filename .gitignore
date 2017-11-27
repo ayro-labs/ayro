@@ -1,6 +1,5 @@
 node_modules
+public
 npm-debug.log
-newrelic_agent.log
 ayro.log
 config.properties
-public/img
