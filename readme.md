@@ -7,7 +7,7 @@ npm install
 
 ## Defining required hostnames ##
 
-Define the following hostnames in your /etc/hosts:
+Define the following hostnames in your hosts file:
 ````
 ayro       <IP>
 ayro-webcm <IP>
