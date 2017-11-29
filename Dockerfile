@@ -1,6 +1,6 @@
 FROM node:carbon
 WORKDIR /usr/src/ayro
-COPY ./package.json .
+COPY ./package*.json .
 RUN npm install
 COPY . .
 EXPOSE 3000
