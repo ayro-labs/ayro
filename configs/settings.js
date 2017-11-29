@@ -7,7 +7,7 @@ exports.env = properties.getValue('app.env', 'development');
 exports.port = properties.getValue('app.port', 3000);
 exports.debug = properties.getValue('app.debug', false);
 
-exports.publicUrl = this.env === 'production' ? 'https://api.ayro.io' : `http://ayro:${this.port}`;
+exports.publicUrl = this.env === 'production' ? 'https://api.ayro.io' : `http://localhost:${this.port}`;
 exports.publicPath = properties.getValue('app.publicPath', path.join(__dirname, '../public'));
 
 exports.appIconUrl = `${this.publicUrl}/img/apps`;
@@ -19,7 +19,7 @@ exports.accountLogoPath = path.join(this.publicPath, 'img/accounts');
 exports.userPhotoUrl = `${this.publicUrl}/img/users`;
 exports.userPhotoPath = path.join(this.publicPath, 'img/users');
 
-exports.webcmUrl = properties.getValue('webcm.url', this.env === 'production' ? 'https://webcm.ayro.io:3100' : 'http://ayro-webcm:3100');
+exports.webcmUrl = properties.getValue('webcm.url', this.env === 'production' ? 'https://webcm.ayro.io:3100' : 'http://localhost:3100');
 
 exports.domain = 'ayro.io';
 
@@ -31,7 +31,7 @@ exports.session = {
 };
 
 exports.mongo = {
-  host: properties.getValue('mongo.host', 'ayro-mongo'),
+  host: properties.getValue('mongo.host', 'localhost'),
   port: properties.getValue('mongo.port', 27017),
   debug: properties.getValue('mongo.debug', false),
   schema: properties.getValue('mongo.schema', 'ayro'),
@@ -40,7 +40,7 @@ exports.mongo = {
 };
 
 exports.redis = {
-  host: properties.getValue('redis.host', 'ayro-redis'),
+  host: properties.getValue('redis.host', 'localhost'),
   port: properties.getValue('redis.port', 6379),
   password: properties.getValue('redis.password'),
 };
