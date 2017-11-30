@@ -1,7 +1,7 @@
 {
   "name": "ayro",
   "description": "Ayro backend",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "private": true,
   "author": {
     "name": "Ayro team",
@@ -11,12 +11,15 @@
   "homepage": "https://ayro.io",
   "scripts": {
     "lint": "eslint '**/*.js'",
-    "start": "node app.js"
+    "start": "node app.js",
+    "release-project": "node tasks/release.js",
+    "publish-project": "node tasks/publish.js"
   },
   "devDependencies": {
     "eslint": "4.9.0",
     "eslint-config-airbnb-base": "12.1.0",
-    "eslint-plugin-import": "2.7.0"
+    "eslint-plugin-import": "2.7.0",
+    "semver": "5.4.1"
   },
   "dependencies": {
     "@slack/client": "3.14.1",
