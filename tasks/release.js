@@ -37,6 +37,13 @@ function updateVersion(versionType, versionNumber) {
   })();
 }
 
+function lintProject() {
+  return Promise.coroutine(function* () {
+    console.log('Linting project...');
+    yield exec('npm run lint');
+  })();
+}
+
 function commitFiles(version) {
   return Promise.coroutine(function* () {
     console.log('Committing files...');
@@ -86,6 +93,7 @@ if (require.main === module) {
       yield updateMaster();
       const version = yield updateVersion(versionType, versionNumber);
       console.log(`Releasing version ${version} to remote...`);
+      yield lintProject();
       yield commitFiles(version);
       yield pushFiles();
       yield createTag(version);

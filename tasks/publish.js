@@ -17,6 +17,13 @@ function checkoutTag(version) {
   })();
 }
 
+function lintProject() {
+  return Promise.coroutine(function* () {
+    console.log('Linting project...');
+    yield exec('npm run lint');
+  })();
+}
+
 function buildImage() {
   return Promise.coroutine(function* () {
     console.log('Building image...');
@@ -40,6 +47,7 @@ if (require.main === module) {
       const {version} = projectPackage;
       console.log(`Publishing version ${version} to Amazon ECR...`);
       yield checkoutTag(version);
+      yield lintProject();
       yield buildImage();
       yield publishToRegistry();
       yield checkoutTag('master');
