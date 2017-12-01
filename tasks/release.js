@@ -1,6 +1,6 @@
+const utils = require('./utils');
 const fs = require('fs');
 const path = require('path');
-const childProcess = require('child_process');
 const semver = require('semver');
 const Promise = require('bluebird');
 const _ = require('lodash');
@@ -10,10 +10,9 @@ const PACKAGE_FILE = path.join(WORKING_DIR, 'package.json');
 
 const readFileAsync = Promise.promisify(fs.readFile);
 const writeFileAsync = Promise.promisify(fs.writeFile);
-const execAsync = Promise.promisify(childProcess.exec);
 
-function exec(command, options) {
-  return execAsync(command, options || {cwd: WORKING_DIR});
+function exec(command, dir) {
+  return utils.exec(command, dir || WORKING_DIR);
 }
 
 function updateMaster() {
