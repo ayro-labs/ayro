@@ -11,3 +11,15 @@ Just run the following command:
 ````
 npm start
 ````
+
+## Releasing a new version ##
+
+Just run the following command:
+````
+npm run release-lib -- major|minor|patch|version <version>
+````
+
+## Publishing the new version to private docker registry ##
+````
+npm run publish-lib
+````
