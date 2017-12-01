@@ -1,15 +1,13 @@
 const projectPackage = require('../package');
+const utils = require('./utils');
 const path = require('path');
-const childProcess = require('child_process');
 const Promise = require('bluebird');
 
 const REPOSITORY_URL = '554511234717.dkr.ecr.us-west-1.amazonaws.com';
 const WORKING_DIR = path.resolve(__dirname, '../');
 
-const execAsync = Promise.promisify(childProcess.exec);
-
-function exec(command, options) {
-  return execAsync(command, options || {cwd: WORKING_DIR});
+function exec(command, dir) {
+  return utils.exec(command, dir || WORKING_DIR);
 }
 
 function checkoutTag(version) {
@@ -40,7 +38,7 @@ if (require.main === module) {
   Promise.coroutine(function* () {
     try {
       const {version} = projectPackage;
-      console.log(`Publishing version ${version} to Registry...`);
+      console.log(`Publishing version ${version} to Amazon ECR...`);
       yield checkoutTag(version);
       yield buildImage();
       yield publishToRegistry();

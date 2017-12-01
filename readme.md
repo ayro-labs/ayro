@@ -19,7 +19,7 @@ Just run the following command:
 npm run release-lib -- major|minor|patch|version <version>
 ````
 
-## Publishing the new version to private docker registry ##
+## Publishing the new version to Amazon ECR ##
 ````
 npm run publish-lib
 ````
