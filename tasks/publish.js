@@ -6,6 +6,8 @@ const Promise = require('bluebird');
 const REPOSITORY_URL = 'docker.ayro.io';
 const REPOSITORY_OWNER = 'ayro';
 const REPOSITORY_NAME = `${REPOSITORY_OWNER}/${projectPackage.name}`;
+const REGISTRY_USERNAME = process.env.DOCKER_REGISTRY_USERNAME;
+const REGISTRY_PASSWORD = process.env.DOCKER_REGISTRY_PASSWORD;
 const WORKING_DIR = path.resolve(__dirname, '../');
 
 const execAsync = Promise.promisify(childProcess.exec);
@@ -24,7 +26,7 @@ function checkoutTag(version) {
 function buildImage() {
   return Promise.coroutine(function* () {
     console.log('Building image...');
-    yield exec(`docker build -t ${REPOSITORY_NAME}`);
+    yield exec(`docker build -t ${REPOSITORY_NAME} .`);
     console.log('Tagging image...');
     yield exec(`docker tag ${REPOSITORY_NAME} ${REPOSITORY_URL}/${REPOSITORY_NAME}`);
   })();
@@ -33,8 +35,8 @@ function buildImage() {
 function publishToRegistry() {
   return Promise.coroutine(function* () {
     console.log('Publishing to Registry...');
-    yield exec(`docker login ${REPOSITORY_URL}`);
-    yield exec(`docker push ${REPOSITORY_NAME} ${REPOSITORY_URL}`);
+    yield exec(`docker login ${REPOSITORY_URL} -u ${REGISTRY_USERNAME} -p ${REGISTRY_PASSWORD}`);
+    yield exec(`docker push ${REPOSITORY_URL}/${REPOSITORY_NAME}`);
   })();
 }
 
