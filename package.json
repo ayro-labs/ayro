@@ -12,8 +12,8 @@
   "scripts": {
     "lint": "eslint '**/*.js'",
     "start": "node app.js",
-    "release-project": "node tasks/release.js",
-    "publish-project": "node tasks/publish.js"
+    "release-dist": "node tasks/release.js",
+    "publish-dist": "node tasks/publish.js"
   },
   "devDependencies": {
     "eslint": "4.9.0",
