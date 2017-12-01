@@ -1,12 +1,14 @@
 const childProcess = require('child_process');
 const Promise = require('bluebird');
 
-function log(data, buffer) {
+const $ = this;
+
+function logBuffer(data, buffer) {
   buffer += data.toString();
   const lines = buffer.split('\n');
   for (let i = 0; i < lines.length - 1; i += 1) {
     const line = lines[i];
-    console.log(line);
+    $.log(line);
   }
   return lines[lines.length - 1];
 }
@@ -20,10 +22,10 @@ exports.exec = (command, dir) => {
     let outBuffer = '';
     let errBuffer = '';
     child.stdout.on('data', (data) => {
-      outBuffer = log(data, outBuffer);
+      outBuffer = logBuffer(data, outBuffer);
     });
     child.stderr.on('data', (data) => {
-      errBuffer = log(data, errBuffer);
+      errBuffer = logBuffer(data, errBuffer);
     });
     child.on('exit', (code) => {
       if (code === 0) {
@@ -33,4 +35,12 @@ exports.exec = (command, dir) => {
       }
     });
   });
+};
+
+exports.log = (...args) => {
+  console.info(...args);
+};
+
+exports.logError = (...args) => {
+  console.error(...args);
 };

@@ -12,30 +12,30 @@ function exec(command, dir) {
 
 function checkoutTag(version) {
   return Promise.coroutine(function* () {
-    console.log(`Checking out the tag ${version}...`);
+    utils.log(`Checking out the tag ${version}...`);
     yield exec(`git checkout ${version}`);
   })();
 }
 
 function lintProject() {
   return Promise.coroutine(function* () {
-    console.log('Linting project...');
+    utils.log('Linting project...');
     yield exec('npm run lint');
   })();
 }
 
 function buildImage() {
   return Promise.coroutine(function* () {
-    console.log('Building image...');
+    utils.log('Building image...');
     yield exec(`docker build -t ${projectPackage.name} .`);
-    console.log('Tagging image...');
+    utils.log('Tagging image...');
     yield exec(`docker tag ${projectPackage.name}:latest ${REPOSITORY_URL}/${projectPackage.name}:latest`);
   })();
 }
 
 function publishToRegistry() {
   return Promise.coroutine(function* () {
-    console.log('Publishing to Registry...');
+    utils.log('Publishing to Registry...');
     yield exec(`docker push ${REPOSITORY_URL}/${projectPackage.name}:latest`);
   })();
 }
@@ -45,15 +45,15 @@ if (require.main === module) {
   Promise.coroutine(function* () {
     try {
       const {version} = projectPackage;
-      console.log(`Publishing version ${version} to Amazon ECR...`);
+      utils.log(`Publishing version ${version} to Amazon ECR...`);
       yield checkoutTag(version);
       yield lintProject();
       yield buildImage();
       yield publishToRegistry();
       yield checkoutTag('master');
-      console.log(`Version ${version} published with success!`);
+      utils.log(`Version ${version} published with success!`);
     } catch (err) {
-      console.error(err);
+      utils.logError(err);
       process.exit(1);
     }
   })();
