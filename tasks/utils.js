@@ -1,4 +1,5 @@
 const childProcess = require('child_process');
+const colors = require('colors/safe');
 const Promise = require('bluebird');
 
 const $ = this;
@@ -8,7 +9,7 @@ function logBuffer(data, buffer) {
   const lines = buffer.split('\n');
   for (let i = 0; i < lines.length - 1; i += 1) {
     const line = lines[i];
-    $.log(line);
+    $.log(line, false);
   }
   return lines[lines.length - 1];
 }
@@ -31,16 +32,16 @@ exports.exec = (command, dir) => {
       if (code === 0) {
         resolve();
       } else {
-        reject(new Error(`Error executing command: ${command}`));
+        reject(new Error(`Command "${command}" returned error`));
       }
     });
   });
 };
 
-exports.log = (...args) => {
-  console.info(...args);
+exports.log = (text, colored) => {
+  console.info(colored === false ? text : colors.green(text));
 };
 
-exports.logError = (...args) => {
-  console.error(...args);
+exports.logError = (text, colored) => {
+  console.error(colored === false ? text : colors.red(text));
 };
