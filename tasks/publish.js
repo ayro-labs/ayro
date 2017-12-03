@@ -34,9 +34,9 @@ function buildImage() {
   })();
 }
 
-function publishToRegistry() {
+function publishToECR() {
   return Promise.coroutine(function* () {
-    utils.log('Publishing to Registry...');
+    utils.log('Publishing to Amazon ECR...');
     yield exec(`docker push ${REPOSITORY_URL}/${REPOSITORY_NAMESPACE}/${projectPackage.name}:latest`);
   })();
 }
@@ -50,7 +50,7 @@ if (require.main === module) {
       yield checkoutTag(version);
       yield lintProject();
       yield buildImage();
-      yield publishToRegistry();
+      yield publishToECR();
       yield checkoutTag('master');
       utils.log(`Version ${version} published with success!`);
     } catch (err) {
