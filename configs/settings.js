@@ -61,17 +61,6 @@ exports.slack = {
   verificationToken: 'BVUOTnQlEn5vBZQG6AaACegL',
 };
 
-if (properties.getValue('https')) {
-  exports.https = {
-    key: properties.getValue('https.key'),
-    cert: properties.getValue('https.cert'),
-  };
-}
-
-if (this.env === 'production' && !this.https) {
-  throw new Error('Https is required when running in production environment');
-}
-
 files.createDir(this.publicPath);
 files.createDir(this.appIconPath);
 files.createDir(this.accountLogoPath);

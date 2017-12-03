@@ -3,9 +3,6 @@ const middlewares = require('./configs/middlewares');
 const routes = require('./configs/routes');
 const logger = require('./utils/logger');
 const loggerServer = require('./utils/logger-server');
-const fs = require('fs');
-const http = require('http');
-const https = require('https');
 const express = require('express');
 const cors = require('cors');
 const compression = require('compression');
@@ -50,10 +47,6 @@ app.use(session({
 middlewares.configure(app);
 routes.configure(express, app);
 
-const cert = settings.https ? fs.readFileSync(settings.https.cert) : null;
-const key = settings.https ? fs.readFileSync(settings.https.key) : null;
-
-const server = cert && key ? https.createServer({cert, key}, app) : http.createServer(app);
-server.listen(app.get('port'), () => {
+app.listen(app.get('port'), () => {
   logger.info('Ayro server is listening on port %s', app.get('port'));
 });
