@@ -36,6 +36,8 @@ function buildImage() {
 
 function publishToECR() {
   return Promise.coroutine(function* () {
+    utils.log('Signing in to Amazon ECR...');
+    yield exec('eval $(aws ecr get-login --no-include-email --region us-west-1)');
     utils.log('Publishing to Amazon ECR...');
     yield exec(`docker push ${REPOSITORY_URL}/${REPOSITORY_NAMESPACE}/${projectPackage.name}:latest`);
   })();
