@@ -1,5 +1,6 @@
 node_modules
 public
+tasks
 npm-debug.log
 ayro.log
 config.properties
