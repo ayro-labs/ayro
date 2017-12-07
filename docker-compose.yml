@@ -1,0 +1,9 @@
+version: "3.4"
+services:
+  ayro:
+    image: "ayro/ayro:latest"
+    container_name: "ayro"
+    hostname: "ayro"
+    network_mode: "host"
+    volumes:
+      - "./config.properties:/usr/src/ayro/config.properties"
