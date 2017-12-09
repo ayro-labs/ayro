@@ -2,9 +2,9 @@ const accountService = require('../services/account');
 const appService = require('../services/app');
 const userService = require('../services/user');
 const deviceService = require('../services/device');
-const logger = require('../utils/logger');
 const errors = require('../utils/errors');
 const {isAccountAuthenticated, isUserAuthenticated} = require('../utils/middlewares');
+const {logger} = require('@ayro/commons');
 const Promise = require('bluebird');
 const _ = require('lodash');
 

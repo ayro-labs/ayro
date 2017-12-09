@@ -1,4 +1,3 @@
-const logger = require('../utils/logger');
 const authRoutes = require('../routes/auth');
 const accountRoutes = require('../routes/account');
 const appRoutes = require('../routes/app');
@@ -6,6 +5,7 @@ const userRoutes = require('../routes/user');
 const slackChatRoutes = require('../routes/chat/slack');
 const messengerChatRoutes = require('../routes/chat/messenger');
 const chatRoutes = require('../routes/chat');
+const {logger} = require('@ayro/commons');
 
 exports.configure = (express, app) => {
 

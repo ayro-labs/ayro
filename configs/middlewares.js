@@ -1,5 +1,5 @@
 const {Account, User, Device} = require('../models');
-const logger = require('../utils/logger');
+const {logger} = require('@ayro/commons');
 
 exports.configure = (app) => {
 

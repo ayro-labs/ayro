@@ -1,7 +1,7 @@
 const chatService = require('../../services/chat');
-const logger = require('../../utils/logger');
 const errors = require('../../utils/errors');
 const {isUserAuthenticated} = require('../../utils/middlewares');
+const logger = require('@ayro/commons');
 const Promise = require('bluebird');
 
 module.exports = (router, app) => {

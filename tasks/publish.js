@@ -1,5 +1,5 @@
 const projectPackage = require('../package');
-const utils = require('./utils');
+const {commands} = require('@ayro/commons');
 const path = require('path');
 const Promise = require('bluebird');
 
@@ -9,37 +9,37 @@ const ECR_REPOSITORY_REGION = 'us-west-1';
 const WORKING_DIR = path.resolve(__dirname, '../');
 
 function exec(command, dir) {
-  return utils.exec(command, dir || WORKING_DIR);
+  return commands.exec(command, dir || WORKING_DIR);
 }
 
 function checkoutTag(version) {
   return Promise.coroutine(function* () {
-    utils.log(`Checking out the tag ${version}...`);
+    commands.log(`Checking out the tag ${version}...`);
     yield exec(`git checkout ${version}`);
   })();
 }
 
 function lintProject() {
   return Promise.coroutine(function* () {
-    utils.log('Linting project...');
+    commands.log('Linting project...');
     yield exec('npm run lint');
   })();
 }
 
 function buildImage() {
   return Promise.coroutine(function* () {
-    utils.log('Building image...');
+    commands.log('Building image...');
     yield exec(`docker build -t ${ECR_REPOSITORY_NAMESPACE}/${projectPackage.name} .`);
-    utils.log('Tagging image...');
+    commands.log('Tagging image...');
     yield exec(`docker tag ${ECR_REPOSITORY_NAMESPACE}/${projectPackage.name}:latest ${ECR_REPOSITORY_URL}/${ECR_REPOSITORY_NAMESPACE}/${projectPackage.name}:latest`);
   })();
 }
 
 function publishToECR() {
   return Promise.coroutine(function* () {
-    utils.log('Signing in to Amazon ECR...');
+    commands.log('Signing in to Amazon ECR...');
     yield exec(`eval $(aws ecr get-login --no-include-email --region ${ECR_REPOSITORY_REGION})`);
-    utils.log('Publishing to Amazon ECR...');
+    commands.log('Publishing to Amazon ECR...');
     yield exec(`docker push ${ECR_REPOSITORY_URL}/${ECR_REPOSITORY_NAMESPACE}/${projectPackage.name}:latest`);
   })();
 }
@@ -49,15 +49,15 @@ if (require.main === module) {
   Promise.coroutine(function* () {
     try {
       const {version} = projectPackage;
-      utils.log(`Publishing version ${version} to Amazon ECR...`);
+      commands.log(`Publishing version ${version} to Amazon ECR...`);
       yield checkoutTag(version);
       yield lintProject();
       yield buildImage();
       yield publishToECR();
       yield checkoutTag('master');
-      utils.log(`Version ${version} published with success!`);
+      commands.log(`Version ${version} published with success!`);
     } catch (err) {
-      utils.logError(err);
+      commands.logError(err);
       process.exit(1);
     }
   })();

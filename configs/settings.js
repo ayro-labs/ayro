@@ -1,14 +1,13 @@
-const properties = require('./properties');
-const logger = require('../utils/logger');
 const files = require('../utils/files');
+const {properties, logger} = require('@ayro/commons');
 const path = require('path');
 
-exports.env = properties.getValue('app.env', 'development');
-exports.port = properties.getValue('app.port', 3000);
-exports.debug = properties.getValue('app.debug', false);
+exports.env = properties.get('app.env', 'development');
+exports.port = properties.get('app.port', 3000);
+exports.debug = properties.get('app.debug', false);
 
 exports.publicUrl = this.env === 'production' ? 'https://api.ayro.io' : `http://localhost:${this.port}`;
-exports.publicPath = properties.getValue('app.publicPath', path.join(__dirname, '../public'));
+exports.publicPath = properties.get('app.publicPath', path.join(__dirname, '../public'));
 
 exports.appIconUrl = `${this.publicUrl}/img/apps`;
 exports.appIconPath = path.join(this.publicPath, 'img/apps');
@@ -19,7 +18,7 @@ exports.accountLogoPath = path.join(this.publicPath, 'img/accounts');
 exports.userPhotoUrl = `${this.publicUrl}/img/users`;
 exports.userPhotoPath = path.join(this.publicPath, 'img/users');
 
-exports.webcmUrl = properties.getValue('webcm.url', this.env === 'production' ? 'https://webcm.ayro.io:3100' : 'http://localhost:3100');
+exports.webcmUrl = properties.get('webcm.url', this.env === 'production' ? 'https://webcm.ayro.io:3100' : 'http://localhost:3100');
 
 exports.domain = 'ayro.io';
 
@@ -31,18 +30,18 @@ exports.session = {
 };
 
 exports.mongo = {
-  host: properties.getValue('mongo.host', 'localhost'),
-  port: properties.getValue('mongo.port', 27017),
-  debug: properties.getValue('mongo.debug', false),
-  schema: properties.getValue('mongo.schema', 'ayro'),
-  username: properties.getValue('mongo.username', 'ayro'),
-  password: properties.getValue('mongo.password'),
+  host: properties.get('mongo.host', 'localhost'),
+  port: properties.get('mongo.port', 27017),
+  debug: properties.get('mongo.debug', false),
+  schema: properties.get('mongo.schema', 'ayro'),
+  username: properties.get('mongo.username', 'ayro'),
+  password: properties.get('mongo.password'),
 };
 
 exports.redis = {
-  host: properties.getValue('redis.host', 'localhost'),
-  port: properties.getValue('redis.port', 6379),
-  password: properties.getValue('redis.password'),
+  host: properties.get('redis.host', 'localhost'),
+  port: properties.get('redis.port', 6379),
+  password: properties.get('redis.password'),
 };
 
 exports.facebook = {

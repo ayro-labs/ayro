@@ -1,7 +1,7 @@
 const messengerService = require('../../services/chat/messenger');
 const settings = require('../../configs/settings');
-const logger = require('../../utils/logger');
 const errors = require('../../utils/errors');
+const logger = require('@ayro/commons');
 const Promise = require('bluebird');
 
 const SUBSCRIBE_EVENT = 'subscribe';

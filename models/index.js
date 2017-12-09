@@ -1,6 +1,6 @@
 const settings = require('../configs/settings');
 const constants = require('../utils/constants');
-const logger = require('../utils/logger');
+const {logger} = require('@ayro/commons');
 const mongoose = require('mongoose');
 const Promise = require('bluebird');
 const _ = require('lodash');

@@ -3,9 +3,9 @@ const appService = require('../services/app');
 const integrationService = require('../services/integration');
 const settings = require('../configs/settings');
 const constants = require('../utils/constants');
-const logger = require('../utils/logger');
 const errors = require('../utils/errors');
 const {isAccountAuthenticated} = require('../utils/middlewares');
+const {logger} = require('@ayro/commons');
 const Promise = require('bluebird');
 const multer = require('multer');
 
