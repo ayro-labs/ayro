@@ -15,5 +15,5 @@ function lintProject() {
 if (require.main === module) {
   releaseTask.withWorkingDir(WORKING_DIR);
   releaseTask.withBuildTask(lintProject);
-  releaseTask.run(process.argv);
+  releaseTask.run(process.argv[2], process.argv[3]);
 }
