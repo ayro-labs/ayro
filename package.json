@@ -1,7 +1,7 @@
 {
   "name": "ayro",
   "description": "Ayro Backend",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "private": true,
   "author": {
     "name": "Ayro team",
@@ -21,7 +21,7 @@
     "eslint-plugin-import": "2.7.0"
   },
   "dependencies": {
-    "@ayro/commons": "0.0.2",
+    "@ayro/commons": "0.0.4",
     "@slack/client": "3.14.1",
     "axios": "0.17.1",
     "bcrypt": "1.0.3",
