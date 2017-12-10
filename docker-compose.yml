@@ -1,7 +1,7 @@
 version: "3.4"
 services:
   ayro:
-    image: "ayro/ayro:latest"
+    image: "ayro:latest"
     container_name: "ayro"
     hostname: "ayro"
     network_mode: "host"

@@ -1,0 +1,10 @@
+{
+  "apps": [
+    {
+      "name": "Ayro",
+      "script": "app.js",
+      "exec_mode": "cluster",
+      "instances": 0
+    }
+  ]
+}
