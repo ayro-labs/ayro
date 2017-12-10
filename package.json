@@ -1,7 +1,7 @@
 {
   "name": "ayro",
   "description": "Ayro Backend",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "private": true,
   "author": {
     "name": "Ayro team",
@@ -18,8 +18,7 @@
   "devDependencies": {
     "eslint": "4.9.0",
     "eslint-config-airbnb-base": "12.1.0",
-    "eslint-plugin-import": "2.7.0",
-    "semver": "5.4.1"
+    "eslint-plugin-import": "2.7.0"
   },
   "dependencies": {
     "@ayro/commons": "0.0.2",

@@ -1,4 +1,4 @@
-const {publishTask, commands} = require('@ayro/commons');
+const {releaseTask, commands} = require('@ayro/commons');
 const path = require('path');
 const Promise = require('bluebird');
 
@@ -13,8 +13,7 @@ function lintProject() {
 
 // Run this if call directly from command line
 if (require.main === module) {
-  publishTask.withWorkingDir(WORKING_DIR);
-  publishTask.withBuildTask(lintProject);
-  publishTask.isDockerProject(true);
-  publishTask.run();
+  releaseTask.withWorkingDir(WORKING_DIR);
+  releaseTask.withBuildTask(lintProject);
+  releaseTask.run(process.argv[2], process.argv[3]);
 }
