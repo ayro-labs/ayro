@@ -6,7 +6,7 @@ const userCommons = require('../commons/user');
 const Promise = require('bluebird');
 const _ = require('lodash');
 
-const CHANNEL_PREFIX = 'chz';
+const CHANNEL_PREFIX = 'ch';
 const AYRO_BOT_USERNAME = 'Ayro';
 
 function getFallbackText(text) {
@@ -18,9 +18,9 @@ function getFallbackText(text) {
 function getCommandsInfoAttachments() {
   return [
     {
-      fallback: 'Comando /chz - Envie mensagens para o usuário',
+      fallback: 'Comando /send - Envie mensagens para o usuário',
       title: 'Envie mensagens para o usuário',
-      text: 'Comando: /chz [mensagem]',
+      text: 'Comando: /send [mensagem]',
       color: '#007bff',
     },
     {
