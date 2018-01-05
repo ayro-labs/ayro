@@ -81,6 +81,7 @@ const Integration = new Schema({
 });
 Integration.index({app: 1, channel: 1}, {unique: true});
 Integration.index({channel: 1, 'configuration.page.id': 1});
+Integration.index({channel: 1, 'configuration.team.id': 1});
 
 const User = new Schema({
   app: {type: ObjectId, ref: 'App', required: true},

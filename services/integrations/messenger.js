@@ -76,7 +76,7 @@ exports.listPages = (app) => {
   })();
 };
 
-exports.extractUser = (data) => {
+exports.getUser = (data) => {
   return Promise.resolve(data);
 };
 

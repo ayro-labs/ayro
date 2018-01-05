@@ -27,6 +27,41 @@ exports.listMessages = (user, device) => {
   })();
 };
 
+exports.pushMessage = (channel, data) => {
+  return Promise.coroutine(function* () {
+    const channelApi = getBusinessChannelApi(channel);
+    if (!channelApi) {
+      throw errors.ayroError('channel.notSupported', 'Channel not supported');
+    }
+    const integration = yield channelApi.getIntegration(data);
+    try {
+      const user = yield channelApi.getUser(data);
+      yield User.populate(user, 'latest_device');
+      const [agent, text] = yield Promise.all([
+        channelApi.getAgent(integration.configuration, data),
+        channelApi.extractText(data),
+      ]);
+      const chatMessage = new ChatMessage({
+        agent,
+        text,
+        user: user.id,
+        device: user.latest_device.id,
+        direction: constants.chatMessage.directions.INCOMING,
+        date: new Date(),
+      });
+      yield push.message(user, EVENT_CHAT_MESSAGE, chatMessage);
+      yield chatMessage.save();
+      yield channelApi.confirmMessage(integration.configuration, data, user, chatMessage);
+    } catch (err) {
+      if (err.code === 'user.doesNotExist') {
+        yield channelApi.postUserNotFound(integration.configuration, data);
+      } else {
+        yield channelApi.postMessageError(integration.configuration, data);
+      }
+    }
+  })();
+};
+
 exports.postMessage = (user, device, message) => {
   return Promise.coroutine(function* () {
     const [currentUser, currentDevice] = yield Promise.all([
@@ -62,42 +97,34 @@ exports.postMessage = (user, device, message) => {
   })();
 };
 
-exports.pushMessage = (channel, data) => {
-  return Promise.coroutine(function* () {
-    const channelApi = getBusinessChannelApi(channel);
-    if (!channelApi) {
-      throw errors.ayroError('channel.notSupported', 'Channel not supported');
-    }
-    const user = yield channelApi.extractUser(data);
-    yield User.populate(user, 'latest_device');
-    const businessIntegration = yield integrationCommons.getIntegration(new App({id: user.app}), channel);
-    const [agent, text] = yield Promise.all([
-      channelApi.extractAgent(businessIntegration.configuration, data),
-      channelApi.extractText(data),
-    ]);
-    const chatMessage = new ChatMessage({
-      agent,
-      text,
-      user: user.id,
-      device: user.latest_device.id,
-      direction: constants.chatMessage.directions.INCOMING,
-      date: new Date(),
-    });
-    yield push.message(user, EVENT_CHAT_MESSAGE, chatMessage);
-    yield chatMessage.save();
-    yield channelApi.confirmMessage(businessIntegration.configuration, data, user, chatMessage);
-  })();
-};
-
 exports.postProfile = (channel, data) => {
   return Promise.coroutine(function* () {
     const channelApi = getBusinessChannelApi(channel);
     if (!channelApi) {
       throw errors.ayroError('integration.notSupported', 'Integration not supported');
     }
-    const user = yield channelApi.extractUser(data);
-    yield User.populate(user, 'app devices');
-    const integration = yield integrationCommons.getIntegration(new App({_id: user.app.id}), channel);
-    yield channelApi.postProfile(integration.configuration, user);
+    const integration = yield channelApi.getIntegration(data);
+    try {
+      const user = yield channelApi.getUser(data);
+      yield User.populate(user, 'app devices');
+      yield channelApi.postProfile(integration.configuration, user);
+    } catch (err) {
+      if (err.code === 'user.doesNotExist') {
+        yield channelApi.postUserNotFound(integration.configuration, data);
+      } else {
+        yield channelApi.postProfileError(integration.configuration, data);
+      }
+    }
+  })();
+};
+
+exports.postHelp = (channel, data) => {
+  return Promise.coroutine(function* () {
+    const channelApi = getBusinessChannelApi(channel);
+    if (!channelApi) {
+      throw errors.ayroError('integration.notSupported', 'Integration not supported');
+    }
+    const integration = yield channelApi.getIntegration(data);
+    yield channelApi.postHelp(integration.configuration, data);
   })();
 };

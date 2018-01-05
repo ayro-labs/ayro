@@ -15,9 +15,16 @@ function getFallbackText(text) {
   return fallback;
 }
 
-function getCommandsInfoAttachments() {
+function getCommandsInfoAttachments(insideChannel) {
+  let pretext;
+  if (insideChannel) {
+    pretext = 'Neste canal você pode utilizar os seguintes comandos:';
+  } else {
+    pretext = 'Nos canais você pode utilizar os seguintes comandos:';
+  }
   return [
     {
+      pretext,
       fallback: 'Comando /send - Envie mensagens para o usuário',
       title: 'Envie mensagens para o usuário',
       text: 'Comando: /send [mensagem]',
@@ -136,11 +143,11 @@ function postBotIntro(slackApi, user, channel) {
 
 function postChannelIntro(slackApi, user, channel) {
   return Promise.coroutine(function* () {
-    const message = `Este é o canal exclusivo para conversar com *${user.getFullName()}*.\nNeste canal você pode utilizar os seguintes comandos:`;
+    const message = `Este é o canal exclusivo para conversar com *${user.getFullName()}*.`;
     yield slackApi.chat.postMessage(channel.id, message, {
       username: AYRO_BOT_USERNAME,
       as_user: false,
-      attachments: getCommandsInfoAttachments(),
+      attachments: getCommandsInfoAttachments(true),
     });
   })();
 }
@@ -332,11 +339,60 @@ exports.postProfile = (configuration, user) => {
   })();
 };
 
-exports.extractUser = (data) => {
-  return userCommons.findUser({'extra.slack_channel.id': data.channel_id}, {require: true});
+exports.postHelp = (configuration, data) => {
+  return Promise.coroutine(function* () {
+    const slackApi = apis.slack(configuration);
+    const message = 'Ayro é uma ferramenta de suporte ao cliente totalmente integrado ao Slack. Converse com seus clientes em tempo real através dos canais com prefixo "ch".';
+    yield slackApi.chat.postEphemeral(data.channel_id, message, data.user_id, {
+      username: AYRO_BOT_USERNAME,
+      as_user: false,
+      attachments: getCommandsInfoAttachments(false),
+    });
+  })();
 };
 
-exports.extractAgent = (configuration, data) => {
+exports.postUserNotFound = (configuration, data) => {
+  return Promise.coroutine(function* () {
+    const slackApi = apis.slack(configuration);
+    const message = 'Este canal não está associado a nenhum usuário. Lembre-se, os canais dos usuários possuem o prefixo "ch".';
+    yield slackApi.chat.postEphemeral(data.channel_id, message, data.user_id, {
+      username: AYRO_BOT_USERNAME,
+      as_user: false,
+    });
+  })();
+};
+
+exports.postMessageError = (configuration, data) => {
+  return Promise.coroutine(function* () {
+    const slackApi = apis.slack(configuration);
+    const message = 'Não foi possível enviar a mensagem, por favor tente novamente em alguns instantes.';
+    yield slackApi.chat.postEphemeral(data.channel_id, message, data.user_id, {
+      username: AYRO_BOT_USERNAME,
+      as_user: false,
+    });
+  })();
+};
+
+exports.postProfileError = (configuration, data) => {
+  return Promise.coroutine(function* () {
+    const slackApi = apis.slack(configuration);
+    const message = 'Não foi possível obter o perfil do usuário, por favor tente novamente em alguns instantes.';
+    yield slackApi.chat.postEphemeral(data.channel_id, message, data.user_id, {
+      username: AYRO_BOT_USERNAME,
+      as_user: false,
+    });
+  })();
+};
+
+exports.getIntegration = (data) => {
+  return integrationCommons.findIntegration({channel: constants.integration.channels.SLACK, 'configuration.team.id': data.team_id});
+};
+
+exports.getUser = (data) => {
+  return userCommons.findUser({'extra.slack_channel.id': data.channel_id});
+};
+
+exports.getAgent = (configuration, data) => {
   return Promise.coroutine(function* () {
     const slackApi = apis.slack(configuration);
     const result = yield slackApi.users.info(data.user_id);
