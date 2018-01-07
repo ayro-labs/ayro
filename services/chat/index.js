@@ -1,4 +1,4 @@
-const {App, User, ChatMessage} = require('../../models');
+const {User, ChatMessage} = require('../../models');
 const constants = require('../../utils/constants');
 const errors = require('../../utils/errors');
 const userCommons = require('../commons/user');
