@@ -44,6 +44,12 @@ exports.redis = {
   password: properties.get('redis.password'),
 };
 
+exports.slack = {
+  clientId: '277516112707.277074206417',
+  clientSecret: '62026310b3b8841342854eb14f65ae70',
+  verificationToken: 'BVUOTnQlEn5vBZQG6AaACegL',
+};
+
 exports.facebook = {
   appId: '2149355741952296',
   appSecret: 'ddd354f9a28d85876bda6a03594aae7b',
@@ -54,10 +60,12 @@ exports.messenger = {
   verificationToken: '36e7c68cd97b9290475365ff8aef950f0dc0fd62',
 };
 
-exports.slack = {
-  clientId: '277516112707.277074206417',
-  clientSecret: '62026310b3b8841342854eb14f65ae70',
-  verificationToken: 'BVUOTnQlEn5vBZQG6AaACegL',
+exports.twitter = {
+  ownerId: '934445643715743744',
+  consumerKey: 'M9R9T29D1Zv4naUC3R08QAfea',
+  consumerSecret: 'PaTTnBsvgZ4onzpiazBu2cYpPue4uGTH6pVEKHynxdITl4M5dC',
+  accessTokenKey: '934445643715743744-3bPkKGv91Q23hWpIdse7GdUUhExhZRk',
+  accessTokenSecret: 'obabRF6A2gABknDN0WvkKac7F1HjA899SjKqDgGUPZhbS',
 };
 
 files.createDir(this.publicPath);
