@@ -56,6 +56,6 @@ exports.postMessage = (data) => {
     if (!device) {
       device = yield createDevice(integration, data);
     }
-    yield chatService.postMessage(device.user, device, {text: data.message.text});
+    yield chatService.postMessage(device.user, device, constants.integration.channels.MESSENGER, {text: data.message.text});
   })();
 };

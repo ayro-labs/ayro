@@ -5,6 +5,7 @@ exports.integration = Object.freeze({
   }),
   channels: Object.freeze({
     WEBSITE: 'website',
+    WORDPRESS: 'wordpress',
     ANDROID: 'android',
     MESSENGER: 'messenger',
     SLACK: 'slack',

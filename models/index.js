@@ -74,8 +74,8 @@ App.virtual('integrations', {
 
 const Integration = new Schema({
   app: {type: ObjectId, ref: 'App', required: true},
-  type: {type: String, required: true, enum: _.values(constants.integration.types)},
-  channel: {type: String, required: true, enum: _.values(constants.integration.channels)},
+  type: {type: String, enum: _.values(constants.integration.types), required: true},
+  channel: {type: String, enum: _.values(constants.integration.channels), required: true},
   configuration: {type: Object, required: false},
   registration_date: {type: Date, required: true},
 });
@@ -97,6 +97,7 @@ const User = new Schema({
   extra: {type: Object, required: false},
   sign_up_date: {type: Date, required: false},
   latest_device: {type: ObjectId, ref: 'Device', required: false},
+  latest_channel: {type: String, enum: _.values(constants.integration.channels), required: false},
   registration_date: {type: Date, required: true},
 });
 User.index({app: 1, uid: 1}, {unique: true});
@@ -176,7 +177,7 @@ const ChatMessage = new Schema({
   device: {type: ObjectId, ref: 'Device', required: true},
   agent: {type: Agent, required: false},
   text: {type: String, required: true},
-  direction: {type: String, required: true, enum: _.values(constants.chatMessage.directions)},
+  direction: {type: String, enum: _.values(constants.chatMessage.directions), required: true},
   date: {type: Date, required: true},
 }, {collection: 'chat_messages'});
 ChatMessage.index({date: 1}, {expireAfterSeconds: 7776000});

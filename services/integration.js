@@ -1,5 +1,6 @@
 const integrationCommons = require('./commons/integration');
 const websiteIntegration = require('./integrations/website');
+const wordPressIntegration = require('./integrations/wordpress');
 const androidIntegration = require('./integrations/android');
 const messengerIntegration = require('./integrations/messenger');
 const slackIntegration = require('./integrations/slack');
@@ -18,6 +19,18 @@ exports.updateWebsiteIntegration = (app, configuration) => {
 
 exports.removeWebsiteIntegration = (app) => {
   return websiteIntegration.removeIntegration(app);
+};
+
+exports.addWordPressIntegration = (app) => {
+  return wordPressIntegration.addIntegration(app);
+};
+
+exports.updateWordPressIntegration = (app, configuration) => {
+  return wordPressIntegration.updateIntegration(app, configuration);
+};
+
+exports.removeWordPressIntegration = (app) => {
+  return wordPressIntegration.removeIntegration(app);
 };
 
 exports.addAndroidIntegration = (app) => {

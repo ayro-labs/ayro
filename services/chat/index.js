@@ -62,7 +62,7 @@ exports.pushMessage = (channel, data) => {
   })();
 };
 
-exports.postMessage = (user, device, message) => {
+exports.postMessage = (user, device, channel, message) => {
   return Promise.coroutine(function* () {
     const [currentUser, currentDevice] = yield Promise.all([
       userCommons.getUser(user.id),
@@ -71,9 +71,16 @@ exports.postMessage = (user, device, message) => {
     if (currentUser.id !== currentDevice.user.toString()) {
       throw errors.ayroError('user.deviceNotOwned', 'This device is not owned by the user');
     }
+    const updatedUserData = {};
     let updatedUser = currentUser;
+    if (channel !== updatedUser.latest_channel) {
+      updatedUserData.latest_channel = channel;
+    }
     if (!updatedUser.latest_device || updatedUser.latest_device.toString() !== currentDevice.id) {
-      updatedUser = yield userCommons.updateUser(updatedUser, {latest_device: currentDevice.id});
+      updatedUserData.latest_device = currentDevice.id;
+    }
+    if (!_.isEmpty(updatedUserData)) {
+      updatedUser = yield userCommons.updateUser(updatedUser, updatedUserData);
     }
     yield User.populate(updatedUser, 'app devices');
     const integrations = yield integrationCommons.findIntegrations(updatedUser.app, constants.integration.types.BUSINESS);

@@ -21,7 +21,7 @@ module.exports = (router, app) => {
   function postMessage(req, res) {
     Promise.coroutine(function* () {
       try {
-        const chatMessage = yield chatService.postMessage(req.user, req.device, req.body);
+        const chatMessage = yield chatService.postMessage(req.user, req.device, req.params.channel, req.body);
         res.json(chatMessage);
       } catch (err) {
         logger.error(err);
@@ -31,7 +31,7 @@ module.exports = (router, app) => {
   }
 
   router.get('/', isUserAuthenticated, listMessages);
-  router.post('/:platform', isUserAuthenticated, postMessage);
+  router.post('/:channel', isUserAuthenticated, postMessage);
 
   app.use('/chat', router);
 
