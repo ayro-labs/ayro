@@ -2,7 +2,7 @@ const constants = require('../../utils/constants');
 const integrationCommons = require('../commons/integration');
 const _ = require('lodash');
 
-const CONFIG_ANDROID = ['primary_color', 'conversation_color', 'fcm.server_key', 'fcm.sender_id'];
+const CONFIG_ANDROID = ['primary_color', 'conversation_color', 'fcm', 'fcm.server_key', 'fcm.sender_id'];
 const DEFAULT_PRIMARY_COLOR = '#5c7382';
 const DEFAULT_CONVERSATION_COLOR = '#007bff';
 
