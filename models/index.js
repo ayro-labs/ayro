@@ -22,30 +22,30 @@ mongoose.connect(`mongodb://${settings.mongo.host}:${settings.mongo.port}/${sett
   process.exit(1);
 });
 
-function transform(ret, excludes) {
-  ret.id = ret._id;
-  _.forEach(excludes, (exclude) => {
-    delete ret[exclude];
-  });
-  delete ret._id;
-  delete ret.__v;
-  return ret;
+function transform(obj, customTransform) {
+  obj.id = obj._id;
+  delete obj._id;
+  delete obj.__v;
+  if (customTransform) {
+    customTransform(obj);
+  }
+  return obj;
 }
 
-function customize(schema, excludes) {
+function normalizeSchema(schema, customTransform) {
   schema.virtual('id').set(function(id) {
     this.set('_id', id);
   });
   schema.set('toJSON', {
     virtuals: true,
-    transform: (doc, ret) => {
-      return transform(ret, excludes);
+    transform: (doc, obj) => {
+      return transform(obj, customTransform);
     },
   });
   schema.set('toObject', {
     virtuals: true,
-    transform: (doc, ret) => {
-      return transform(ret, excludes);
+    transform: (doc, obj) => {
+      return transform(obj, customTransform);
     },
   });
   return schema;
@@ -182,9 +182,17 @@ const ChatMessage = new Schema({
 }, {collection: 'chat_messages'});
 ChatMessage.index({date: 1}, {expireAfterSeconds: 7776000});
 
-exports.Account = mongoose.model('Account', customize(Account, ['password']));
-exports.App = mongoose.model('App', customize(App));
-exports.Integration = mongoose.model('Integration', customize(Integration));
-exports.User = mongoose.model('User', customize(User));
-exports.Device = mongoose.model('Device', customize(Device));
-exports.ChatMessage = mongoose.model('ChatMessage', customize(ChatMessage));
+exports.Account = mongoose.model('Account', normalizeSchema(Account, (obj) => {
+  delete obj['password'];
+}));
+exports.App = mongoose.model('App', normalizeSchema(App));
+exports.Integration = mongoose.model('Integration', normalizeSchema(Integration, (obj) => {
+  if (_.has(obj, 'configuration.fcm.server_key')) {
+    const serverKey = obj.configuration.fcm.server_key;
+    const hiddenKey = '*************';
+    obj.configuration.fcm.server_key = serverKey.length > 10 ? hiddenKey + serverKey.slice(-5) : hiddenKey;
+  }
+}));
+exports.User = mongoose.model('User', normalizeSchema(User));
+exports.Device = mongoose.model('Device', normalizeSchema(Device));
+exports.ChatMessage = mongoose.model('ChatMessage', normalizeSchema(ChatMessage));
