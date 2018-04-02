@@ -65,7 +65,7 @@ exports.updateIntegration = (app, channel, configuration) => {
     }
     _.assign(integration.configuration, configuration);
     if (configuration.fcm && _.isEmpty(configuration.fcm)) {
-      delete integration.configuration['fcm'];
+      delete integration.configuration.fcm;
     }
     yield Integration.update({_id: integration.id}, {configuration: integration.configuration}).exec();
     return integration;

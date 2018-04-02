@@ -183,7 +183,7 @@ const ChatMessage = new Schema({
 ChatMessage.index({date: 1}, {expireAfterSeconds: 7776000});
 
 exports.Account = mongoose.model('Account', normalizeSchema(Account, (obj) => {
-  delete obj['password'];
+  delete obj.password;
 }));
 exports.App = mongoose.model('App', normalizeSchema(App));
 exports.Integration = mongoose.model('Integration', normalizeSchema(Integration, (obj) => {
