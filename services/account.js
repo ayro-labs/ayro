@@ -22,6 +22,10 @@ exports.getAccount = (id) => {
 
 exports.createAccount = (name, email, password) => {
   return Promise.coroutine(function* () {
+    const accountWithEmail = yield accountCommons.findAccount({email}, {require: false});
+    if (accountWithEmail) {
+      throw errors.ayroError('account.alreadyExists', 'Account already exists');
+    }
     const passHash = yield hash.hash(password);
     const account = new Account({name, email, password: passHash, registration_date: new Date()});
     return account.save();
