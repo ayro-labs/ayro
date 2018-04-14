@@ -15,6 +15,14 @@ function getFallbackText(text) {
   return fallback;
 }
 
+function generatedNameAlertAttachment(user) {
+  return user.generated_name ? null : {
+    fallback: 'Nome gerado randomicamente',
+    text: `O nome deste usuário foi gerado randomicamente porque não foi atribuído nenhum nome para ele.\nSaiba mais em https://www.ayro.io/guides/user-information.`,
+    color: '#ffc800',
+  };
+}
+
 function getCommandsInfoAttachments(insideChannel) {
   let pretext;
   if (insideChannel) {
@@ -62,7 +70,7 @@ function getUserInfoAttachment(user) {
   }
   return {
     fields,
-    pretext: `Estas são as informações que nós temos até agora sobre *${user.getFullName()}*.`,
+    pretext: `Estas são as informações que nós temos até agora sobre *${user.getFullName()}*:`,
     fallback: 'Informações do usuário',
     text: information.join('\n'),
     mrkdwn_in: ['text', 'pretext'],
@@ -126,7 +134,7 @@ function getDeviceInfoAttachments(user) {
     });
   });
   if (attachments.length > 0) {
-    attachments[0].pretext = 'Estes são os últimos dispositivos utilizados.';
+    attachments[0].pretext = 'Estes são os últimos dispositivos utilizados:';
   }
   return attachments;
 }
@@ -144,10 +152,13 @@ function postBotIntro(slackApi, user, channel) {
 function postChannelIntro(slackApi, user, channel) {
   return Promise.coroutine(function* () {
     const message = `Este é o canal exclusivo para conversar com *${user.getFullName()}*.`;
+    const alertAttachment = generatedNameAlertAttachment(user);
+    const commandsAttachments = getCommandsInfoAttachments(true);
+    const attachments = alertAttachment ? [alertAttachment, ...commandsAttachments] : commandsAttachments;
     yield slackApi.chat.postMessage(channel.id, message, {
       username: AYRO_BOT_USERNAME,
       as_user: false,
-      attachments: getCommandsInfoAttachments(true),
+      attachments: attachments,
     });
   })();
 }
@@ -227,11 +238,11 @@ function getChannel(slackApi, user) {
   })();
 }
 
-function unarchiveChannelIntroducingUser(slackApi, user, device, message, supportChannel, userChannel) {
+function unarchiveChannelIntroducingUser(slackApi, user, message, supportChannel, userChannel) {
   return Promise.coroutine(function* () {
     try {
       yield slackApi.channels.unarchive(userChannel.id);
-      yield introduceUser(slackApi, user, device, message, supportChannel, userChannel);
+      yield introduceUser(slackApi, user, message, supportChannel, userChannel);
       return userChannel;
     } catch (err) {
       if (err.message === 'not_archived') {

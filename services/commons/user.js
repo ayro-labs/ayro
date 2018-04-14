@@ -63,7 +63,7 @@ exports.updateUser = (user, data) => {
   return Promise.coroutine(function* () {
     const currentUser = yield $.getUser(user.id);
     const allowedData = _.omit(data, UNALLOWED_ATTRS);
-    if (user.first_name || user.last_name) {
+    if (allowedData.first_name || allowedData.last_name) {
       allowedData.generated_name = false;
     }
     if (allowedData.photo_url && allowedData.photo_url !== currentUser.photo_url) {
