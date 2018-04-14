@@ -18,7 +18,7 @@ function getFallbackText(text) {
 function generatedNameAlertAttachment(user) {
   return user.generated_name ? null : {
     fallback: 'Nome gerado randomicamente',
-    text: `O nome deste usuário foi gerado randomicamente porque não foi atribuído nenhum nome para ele.\nSaiba mais em https://www.ayro.io/guides/user-information.`,
+    text: 'O nome deste usuário foi gerado randomicamente porque não foi atribuído nenhum nome para ele.\nSaiba mais em https://www.ayro.io/guides/user-information.',
     color: '#ffc800',
   };
 }
@@ -156,9 +156,9 @@ function postChannelIntro(slackApi, user, channel) {
     const commandsAttachments = getCommandsInfoAttachments(true);
     const attachments = alertAttachment ? [alertAttachment, ...commandsAttachments] : commandsAttachments;
     yield slackApi.chat.postMessage(channel.id, message, {
+      attachments,
       username: AYRO_BOT_USERNAME,
       as_user: false,
-      attachments: attachments,
     });
   })();
 }
