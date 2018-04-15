@@ -16,11 +16,11 @@ function getFallbackText(text) {
 }
 
 function generatedNameAlertAttachment(user) {
-  return user.generated_name ? null : {
+  return user.generated_name ? {
     fallback: 'Nome gerado randomicamente',
     text: 'O nome deste usuário foi gerado randomicamente porque não foi atribuído nenhum nome para ele.\nSaiba mais em https://www.ayro.io/guides/user-information.',
-    color: '#ffc800',
-  };
+    color: 'warning',
+  } : null;
 }
 
 function getCommandsInfoAttachments(insideChannel) {
@@ -55,7 +55,7 @@ function getUserInfoAttachment(user) {
     information.push(`ID: ${user.uid}`);
   }
   if (user.getFullName()) {
-    information.push(`Nome: ${user.getFullName()}${user.generated_name ? ' (Gerado automaticamente)' : ''}`);
+    information.push(`Nome: ${user.getFullName()}${user.generated_name ? ' (Gerado randomicamente)' : ''}`);
   }
   if (user.email) {
     information.push(`Email: ${user.email}`);
