@@ -8,6 +8,7 @@ const _ = require('lodash');
 
 const CHANNEL_PREFIX = 'ch';
 const AYRO_BOT_USERNAME = 'Ayro';
+const PRIMARY_COLOR = '#7c00bd';
 
 function getFallbackText(text) {
   let fallback = _.replace(text, /\*/g, '');
@@ -36,13 +37,13 @@ function getCommandsInfoAttachments(insideChannel) {
       fallback: 'Comando /send - Envie mensagens para o usuário',
       title: 'Envie mensagens para o usuário',
       text: 'Comando: /send [mensagem]',
-      color: '#007bff',
+      color: PRIMARY_COLOR,
     },
     {
       fallback: 'Comando /profile - Veja o perfil do usuário',
       title: 'Veja o perfil do usuário',
       text: 'Comando: /profile',
-      color: '#007bff',
+      color: PRIMARY_COLOR,
     },
   ];
 }
@@ -74,7 +75,7 @@ function getUserInfoAttachment(user) {
     fallback: 'Informações do usuário',
     text: information.join('\n'),
     mrkdwn_in: ['text', 'pretext'],
-    color: '#007bff',
+    color: PRIMARY_COLOR,
   };
 }
 
@@ -130,7 +131,7 @@ function getDeviceInfoAttachments(user) {
       fallback: device.getPlatformName(),
       text: information.join('\n'),
       mrkdwn_in: ['text', 'pretext'],
-      color: '#007bff',
+      color: PRIMARY_COLOR,
     });
   });
   if (attachments.length > 0) {
@@ -207,7 +208,7 @@ function introduceUser(slackApi, user, message, supportChannel, userChannel) {
       attachments: [{
         fallback: getFallbackText(introMessage),
         text: message,
-        color: '#007bff',
+        color: PRIMARY_COLOR,
       }],
     });
     yield postChannelIntro(slackApi, user, userChannel);
