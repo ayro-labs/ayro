@@ -1,3 +1,5 @@
+require('newrelic');
+
 const {properties, logger, loggerServer} = require('@ayro/commons');
 const path = require('path');
 

@@ -3,4 +3,12 @@ public
 tasks
 npm-debug.log
 ayro.log
+newrelic_agent.log
 config.properties
+docker-compose.yml
+Dockerfile
+.dockerignore
+.eslintignore
+.eslintrc
+.gitignore
+.git
