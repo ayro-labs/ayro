@@ -9,6 +9,10 @@ const CHANNEL_PREFIX = 'ch';
 const AYRO_BOT_USERNAME = 'Ayro';
 const PRIMARY_COLOR = '#7c00bd';
 
+const CHANNEL_NOT_FOUND = 'channel_not_found';
+const CHANNEL_NOT_ARCHIVED = 'not_archived';
+const CHANNEL_NAME_TAKEN = 'name_taken';
+
 function getFallbackText(text) {
   let fallback = _.replace(text, /\*/g, '');
   fallback = _.replace(fallback, /<(#|@)(\w|\d)+(\|((\w|\d)+)?)>/g, '#$2');
@@ -187,7 +191,7 @@ async function createChannel(slackApi, user, conflicts) {
     const result = await slackApi.channels.create({name: channel});
     return {id: result.channel.id, name: result.channel.name};
   } catch (err) {
-    if (err.message === 'name_taken') {
+    if (err.data.error === CHANNEL_NAME_TAKEN) {
       conflicts = conflicts ? conflicts + 1 : 1;
       return createChannel(slackApi, user, conflicts);
     }
@@ -224,7 +228,7 @@ async function getChannel(slackApi, user) {
     const result = await slackApi.channels.info({channel: user.extra.slack_channel.id});
     return {id: result.channel.id, name: result.channel.name, archived: result.channel.is_archived};
   } catch (err) {
-    if (err.message === 'channel_not_found') {
+    if (err.data.error === CHANNEL_NOT_FOUND) {
       return null;
     }
     throw err;
@@ -237,7 +241,7 @@ async function unarchiveChannelIntroducingUser(slackApi, user, message, supportC
     await introduceUser(slackApi, user, message, supportChannel, userChannel);
     return userChannel;
   } catch (err) {
-    if (err.message === 'not_archived') {
+    if (err.data.error === CHANNEL_NOT_ARCHIVED) {
       return userChannel;
     }
     throw err;
