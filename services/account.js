@@ -39,13 +39,13 @@ exports.updateAccount = async (account, data) => {
 };
 
 exports.updateLogo = async (account, logo) => {
-  const currentAccount = await $.getAccount(account.id);
-  const oldLogoPath = currentAccount.logo ? path.join(settings.accountLogoPath, currentAccount.logo) : null;
-  currentAccount.logo = await files.fixAccountLogo(currentAccount, logo.path);
+  const loadedAccount = await $.getAccount(account.id);
+  const oldLogoPath = loadedAccount.logo ? path.join(settings.accountLogoPath, loadedAccount.logo) : null;
+  loadedAccount.logo = await files.fixAccountLogo(loadedAccount, logo.path);
   if (oldLogoPath) {
     await unlinkAsync(oldLogoPath);
   }
-  return Account.findByIdAndUpdate(currentAccount.id, {logo: currentAccount.logo}, {new: true, runValidators: true}).exec();
+  return Account.findByIdAndUpdate(loadedAccount.id, {logo: loadedAccount.logo}, {new: true, runValidators: true}).exec();
 };
 
 exports.authenticate = async (email, password) => {

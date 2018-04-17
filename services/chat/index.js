@@ -34,10 +34,8 @@ exports.pushMessage = async (channel, data) => {
   try {
     const user = await channelApi.getUser(data);
     await User.populate(user, 'latest_device');
-    const [agent, text] = await Promise.all([
-      channelApi.getAgent(integration.configuration, data),
-      channelApi.extractText(data),
-    ]);
+    const agent = await channelApi.getAgent(integration.configuration, data);
+    const text = await channelApi.extractText(data);
     const chatMessage = new ChatMessage({
       agent,
       text,
@@ -59,29 +57,26 @@ exports.pushMessage = async (channel, data) => {
 };
 
 exports.postMessage = async (user, device, channel, message) => {
-  const [currentUser, currentDevice] = await Promise.all([
-    userCommons.getUser(user.id),
-    deviceCommons.getDevice(device.id),
-  ]);
-  if (currentUser.id !== currentDevice.user.toString()) {
+  let loadedUser = await userCommons.getUser(user.id);
+  const loadedDevice = await deviceCommons.getDevice(device.id);
+  if (loadedUser.id !== loadedDevice.user.toString()) {
     throw errors.ayroError('user.deviceNotOwned', 'This device is not owned by the user');
   }
   const updatedUserData = {};
-  let updatedUser = currentUser;
-  if (channel !== updatedUser.latest_channel) {
+  if (channel !== loadedUser.latest_channel) {
     updatedUserData.latest_channel = channel;
   }
-  if (!updatedUser.latest_device || updatedUser.latest_device.toString() !== currentDevice.id) {
-    updatedUserData.latest_device = currentDevice.id;
+  if (!loadedUser.latest_device || loadedUser.latest_device.toString() !== loadedDevice.id) {
+    updatedUserData.latest_device = loadedDevice.id;
   }
   if (!_.isEmpty(updatedUserData)) {
-    updatedUser = await userCommons.updateUser(updatedUser, updatedUserData);
+    loadedUser = await userCommons.updateUser(loadedUser, updatedUserData);
   }
-  await User.populate(updatedUser, 'app devices');
-  const integrations = await integrationCommons.findIntegrations(updatedUser.app, constants.integration.types.BUSINESS);
+  await User.populate(loadedUser, 'app devices');
+  const integrations = await integrationCommons.findIntegrations(loadedUser.app, constants.integration.types.BUSINESS);
   const chatMessage = new ChatMessage({
-    user: updatedUser.id,
-    device: currentDevice.id,
+    user: loadedUser.id,
+    device: loadedDevice.id,
     text: message.text,
     direction: constants.chatMessage.directions.OUTGOING,
     date: new Date(),
@@ -90,7 +85,7 @@ exports.postMessage = async (user, device, channel, message) => {
   integrations.forEach((integration) => {
     const channelApi = getBusinessChannelApi(integration.channel);
     if (channelApi) {
-      promises.push(channelApi.postMessage(integration.configuration, updatedUser, chatMessage.text));
+      promises.push(channelApi.postMessage(integration.configuration, loadedUser, chatMessage.text));
     }
   });
   await Promise.all(promises);

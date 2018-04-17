@@ -53,18 +53,18 @@ exports.createUser = async (app, data) => {
 };
 
 exports.updateUser = async (user, data) => {
-  const currentUser = await $.getUser(user.id);
+  const loadedUser = await $.getUser(user.id);
   const allowedData = _.omit(data, UNALLOWED_ATTRS);
   if (allowedData.first_name || allowedData.last_name) {
     allowedData.generated_name = false;
   }
-  if (allowedData.photo_url && allowedData.photo_url !== currentUser.photo_url) {
+  if (allowedData.photo_url && allowedData.photo_url !== loadedUser.photo_url) {
     try {
-      currentUser.set(allowedData);
-      allowedData.photo = await files.downloadUserPhoto(currentUser);
+      loadedUser.set(allowedData);
+      allowedData.photo = await files.downloadUserPhoto(loadedUser);
     } catch (err) {
-      logger.debug('Could not download photo of user %s: %s.', currentUser.id, err.message);
+      logger.debug('Could not download photo of user %s: %s.', loadedUser.id, err.message);
     }
   }
-  return User.findByIdAndUpdate(currentUser.id, allowedData, {new: true, runValidators: true}).exec();
+  return User.findByIdAndUpdate(loadedUser.id, allowedData, {new: true, runValidators: true}).exec();
 };

@@ -30,21 +30,21 @@ exports.createApp = async (account, name) => {
 };
 
 exports.updateApp = async (account, app, name) => {
-  const currentApp = await $.getApp(account, app.id);
-  return App.findByIdAndUpdate(currentApp.id, {name}, {new: true, runValidators: true}).exec();
+  const loadedApp = await $.getApp(account, app.id);
+  return App.findByIdAndUpdate(loadedApp.id, {name}, {new: true, runValidators: true}).exec();
 };
 
 exports.updateIcon = async (account, app, icon) => {
-  const currentApp = await $.getApp(account, app.id);
-  const oldIconPath = currentApp.icon ? path.join(settings.appIconPath, currentApp.icon) : null;
-  currentApp.icon = await files.fixAppIcon(currentApp, icon.path);
+  const loadedApp = await $.getApp(account, app.id);
+  const oldIconPath = loadedApp.icon ? path.join(settings.appIconPath, loadedApp.icon) : null;
+  loadedApp.icon = await files.fixAppIcon(loadedApp, icon.path);
   if (oldIconPath) {
     await unlinkAsync(oldIconPath);
   }
-  return App.findByIdAndUpdate(currentApp.id, {icon: currentApp.icon}, {new: true, runValidators: true}).exec();
+  return App.findByIdAndUpdate(loadedApp.id, {icon: loadedApp.icon}, {new: true, runValidators: true}).exec();
 };
 
 exports.deleteApp = async (account, app) => {
-  const currentApp = await $.getApp(account, app.id);
-  return App.remove({_id: currentApp.id});
+  const loadedApp = await $.getApp(account, app.id);
+  return App.remove({_id: loadedApp.id});
 };

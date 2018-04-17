@@ -64,11 +64,3 @@ exports.listPages = async (app) => {
   });
   return pages;
 };
-
-exports.getUser = async (data) => {
-  return data;
-};
-
-exports.extractText = async (data) => {
-  return data;
-};
