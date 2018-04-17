@@ -4,7 +4,6 @@ const hash = require('../utils/hash');
 const files = require('../utils/files');
 const errors = require('../utils/errors');
 const accountCommons = require('./commons/account');
-const {logger} = require('@ayro/commons');
 const path = require('path');
 const fs = require('fs');
 const Promise = require('bluebird');
@@ -14,50 +13,46 @@ const $ = this;
 
 const ALLOWED_ATTRS = ['name', 'email'];
 
-const renameAsync = Promise.promisify(fs.rename);
+const unlinkAsync = Promise.promisify(fs.unlink);
 
-exports.getAccount = (id) => {
+exports.getAccount = async (id) => {
   return accountCommons.getAccount(id);
 };
 
-exports.createAccount = (name, email, password) => {
-  return Promise.coroutine(function* () {
-    const accountWithEmail = yield accountCommons.findAccount({email}, {require: false});
-    if (accountWithEmail) {
-      throw errors.ayroError('account.alreadyExists', 'Account already exists');
-    }
-    const passHash = yield hash.hash(password);
-    const account = new Account({name, email, password: passHash, registration_date: new Date()});
-    return account.save();
-  })();
+exports.createAccount = async (name, email, password) => {
+  const accountWithEmail = await accountCommons.findAccount({email}, {require: false});
+  if (accountWithEmail) {
+    throw errors.ayroError('account.alreadyExists', 'Account already exists');
+  }
+  const passHash = await hash.hash(password);
+  const account = new Account({
+    name,
+    email,
+    password: passHash,
+    registration_date: new Date(),
+  });
+  return account.save();
 };
 
-exports.updateAccount = (account, data) => {
+exports.updateAccount = async (account, data) => {
   return Account.findByIdAndUpdate(account.id, _.pick(data, ALLOWED_ATTRS), {new: true, runValidators: true}).exec();
 };
 
-exports.updateLogo = (account, logo) => {
-  return Promise.coroutine(function* () {
-    const currentAccount = yield $.getAccount(account.id);
-    const logoPath = path.join(settings.accountLogoPath, currentAccount.id);
-    yield renameAsync(logo.path, logoPath);
-    try {
-      currentAccount.logo = currentAccount.id;
-      currentAccount.logo = yield files.fixAccountLogo(currentAccount);
-    } catch (err) {
-      logger.debug('Could not fix logo of account %s: %s.', currentAccount.id, err.message);
-    }
-    return Account.findByIdAndUpdate(currentAccount.id, {logo: currentAccount.logo}, {new: true, runValidators: true}).exec();
-  })();
+exports.updateLogo = async (account, logo) => {
+  const currentAccount = await $.getAccount(account.id);
+  const oldLogoPath = currentAccount.logo ? path.join(settings.accountLogoPath, currentAccount.logo) : null;
+  currentAccount.logo = await files.fixAccountLogo(currentAccount, logo.path);
+  if (oldLogoPath) {
+    await unlinkAsync(oldLogoPath);
+  }
+  return Account.findByIdAndUpdate(currentAccount.id, {logo: currentAccount.logo}, {new: true, runValidators: true}).exec();
 };
 
-exports.authenticate = (email, password) => {
-  return Promise.coroutine(function* () {
-    const account = yield accountCommons.findAccount({email});
-    const match = yield hash.compare(password, account.password);
-    if (!match) {
-      throw errors.ayroError('account.auth.wrongPassword', 'Wrong account password');
-    }
-    return account;
-  })();
+exports.authenticate = async (email, password) => {
+  const account = await accountCommons.findAccount({email});
+  const match = await hash.compare(password, account.password);
+  if (!match) {
+    throw errors.ayroError('account.auth.wrongPassword', 'Wrong account password');
+  }
+  return account;
 };

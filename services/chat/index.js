@@ -20,118 +20,107 @@ function getBusinessChannelApi(channel) {
   }
 }
 
-exports.listMessages = (user, device) => {
-  return Promise.coroutine(function* () {
-    const chatMessages = yield ChatMessage.find({user: user.id, device: device.id}).sort({date: 'desc'}).exec();
-    return _.reverse(chatMessages);
-  })();
+exports.listMessages = async (user, device) => {
+  const chatMessages = await ChatMessage.find({user: user.id, device: device.id}).sort({date: 'desc'}).exec();
+  return _.reverse(chatMessages);
 };
 
-exports.pushMessage = (channel, data) => {
-  return Promise.coroutine(function* () {
-    const channelApi = getBusinessChannelApi(channel);
-    if (!channelApi) {
-      throw errors.ayroError('channel.notSupported', 'Channel not supported');
-    }
-    const integration = yield channelApi.getIntegration(data);
-    try {
-      const user = yield channelApi.getUser(data);
-      yield User.populate(user, 'latest_device');
-      const [agent, text] = yield Promise.all([
-        channelApi.getAgent(integration.configuration, data),
-        channelApi.extractText(data),
-      ]);
-      const chatMessage = new ChatMessage({
-        agent,
-        text,
-        user: user.id,
-        device: user.latest_device.id,
-        direction: constants.chatMessage.directions.INCOMING,
-        date: new Date(),
-      });
-      yield push.message(user, EVENT_CHAT_MESSAGE, chatMessage);
-      yield chatMessage.save();
-      yield channelApi.confirmMessage(integration.configuration, data, user, chatMessage);
-    } catch (err) {
-      if (err.code === 'user.doesNotExist') {
-        yield channelApi.postUserNotFound(integration.configuration, data);
-      } else {
-        yield channelApi.postMessageError(integration.configuration, data);
-      }
-    }
-  })();
-};
-
-exports.postMessage = (user, device, channel, message) => {
-  return Promise.coroutine(function* () {
-    const [currentUser, currentDevice] = yield Promise.all([
-      userCommons.getUser(user.id),
-      deviceCommons.getDevice(device.id),
+exports.pushMessage = async (channel, data) => {
+  const channelApi = getBusinessChannelApi(channel);
+  if (!channelApi) {
+    throw errors.ayroError('channel.notSupported', 'Channel not supported');
+  }
+  const integration = await channelApi.getIntegration(data);
+  try {
+    const user = await channelApi.getUser(data);
+    await User.populate(user, 'latest_device');
+    const [agent, text] = await Promise.all([
+      channelApi.getAgent(integration.configuration, data),
+      channelApi.extractText(data),
     ]);
-    if (currentUser.id !== currentDevice.user.toString()) {
-      throw errors.ayroError('user.deviceNotOwned', 'This device is not owned by the user');
-    }
-    const updatedUserData = {};
-    let updatedUser = currentUser;
-    if (channel !== updatedUser.latest_channel) {
-      updatedUserData.latest_channel = channel;
-    }
-    if (!updatedUser.latest_device || updatedUser.latest_device.toString() !== currentDevice.id) {
-      updatedUserData.latest_device = currentDevice.id;
-    }
-    if (!_.isEmpty(updatedUserData)) {
-      updatedUser = yield userCommons.updateUser(updatedUser, updatedUserData);
-    }
-    yield User.populate(updatedUser, 'app devices');
-    const integrations = yield integrationCommons.findIntegrations(updatedUser.app, constants.integration.types.BUSINESS);
-    let chatMessage = new ChatMessage({
-      user: updatedUser.id,
-      device: currentDevice.id,
-      text: message.text,
-      direction: constants.chatMessage.directions.OUTGOING,
+    const chatMessage = new ChatMessage({
+      agent,
+      text,
+      user: user.id,
+      device: user.latest_device.id,
+      direction: constants.chatMessage.directions.INCOMING,
       date: new Date(),
     });
-    const promises = [];
-    integrations.forEach((integration) => {
-      const channelApi = getBusinessChannelApi(integration.channel);
-      if (channelApi) {
-        promises.push(channelApi.postMessage(integration.configuration, updatedUser, chatMessage.text));
-      }
-    });
-    yield Promise.all(promises);
-    chatMessage = yield chatMessage.save();
-    return chatMessage;
-  })();
+    await push.message(user, EVENT_CHAT_MESSAGE, chatMessage);
+    await chatMessage.save();
+    await channelApi.confirmMessage(integration.configuration, data, user, chatMessage);
+  } catch (err) {
+    if (err.code === 'user.doesNotExist') {
+      await channelApi.postUserNotFound(integration.configuration, data);
+    } else {
+      await channelApi.postMessageError(integration.configuration, data);
+    }
+  }
 };
 
-exports.postProfile = (channel, data) => {
-  return Promise.coroutine(function* () {
-    const channelApi = getBusinessChannelApi(channel);
-    if (!channelApi) {
-      throw errors.ayroError('integration.notSupported', 'Integration not supported');
+exports.postMessage = async (user, device, channel, message) => {
+  const [currentUser, currentDevice] = await Promise.all([
+    userCommons.getUser(user.id),
+    deviceCommons.getDevice(device.id),
+  ]);
+  if (currentUser.id !== currentDevice.user.toString()) {
+    throw errors.ayroError('user.deviceNotOwned', 'This device is not owned by the user');
+  }
+  const updatedUserData = {};
+  let updatedUser = currentUser;
+  if (channel !== updatedUser.latest_channel) {
+    updatedUserData.latest_channel = channel;
+  }
+  if (!updatedUser.latest_device || updatedUser.latest_device.toString() !== currentDevice.id) {
+    updatedUserData.latest_device = currentDevice.id;
+  }
+  if (!_.isEmpty(updatedUserData)) {
+    updatedUser = await userCommons.updateUser(updatedUser, updatedUserData);
+  }
+  await User.populate(updatedUser, 'app devices');
+  const integrations = await integrationCommons.findIntegrations(updatedUser.app, constants.integration.types.BUSINESS);
+  const chatMessage = new ChatMessage({
+    user: updatedUser.id,
+    device: currentDevice.id,
+    text: message.text,
+    direction: constants.chatMessage.directions.OUTGOING,
+    date: new Date(),
+  });
+  const promises = [];
+  integrations.forEach((integration) => {
+    const channelApi = getBusinessChannelApi(integration.channel);
+    if (channelApi) {
+      promises.push(channelApi.postMessage(integration.configuration, updatedUser, chatMessage.text));
     }
-    const integration = yield channelApi.getIntegration(data);
-    try {
-      const user = yield channelApi.getUser(data);
-      yield User.populate(user, 'app devices');
-      yield channelApi.postProfile(integration.configuration, user);
-    } catch (err) {
-      if (err.code === 'user.doesNotExist') {
-        yield channelApi.postUserNotFound(integration.configuration, data);
-      } else {
-        yield channelApi.postProfileError(integration.configuration, data);
-      }
-    }
-  })();
+  });
+  await Promise.all(promises);
+  return chatMessage.save();
 };
 
-exports.postHelp = (channel, data) => {
-  return Promise.coroutine(function* () {
-    const channelApi = getBusinessChannelApi(channel);
-    if (!channelApi) {
-      throw errors.ayroError('integration.notSupported', 'Integration not supported');
+exports.postProfile = async (channel, data) => {
+  const channelApi = getBusinessChannelApi(channel);
+  if (!channelApi) {
+    throw errors.ayroError('integration.notSupported', 'Integration not supported');
+  }
+  const integration = await channelApi.getIntegration(data);
+  try {
+    const user = await channelApi.getUser(data);
+    await User.populate(user, 'app devices');
+    await channelApi.postProfile(integration.configuration, user);
+  } catch (err) {
+    if (err.code === 'user.doesNotExist') {
+      await channelApi.postUserNotFound(integration.configuration, data);
+    } else {
+      await channelApi.postProfileError(integration.configuration, data);
     }
-    const integration = yield channelApi.getIntegration(data);
-    yield channelApi.postHelp(integration.configuration, data);
-  })();
+  }
+};
+
+exports.postHelp = async (channel, data) => {
+  const channelApi = getBusinessChannelApi(channel);
+  if (!channelApi) {
+    throw errors.ayroError('integration.notSupported', 'Integration not supported');
+  }
+  const integration = await channelApi.getIntegration(data);
+  await channelApi.postHelp(integration.configuration, data);
 };

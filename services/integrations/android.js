@@ -6,21 +6,18 @@ const CONFIG_ANDROID = ['primary_color', 'conversation_color', 'fcm', 'fcm.serve
 const DEFAULT_PRIMARY_COLOR = '#5c7382';
 const DEFAULT_CONVERSATION_COLOR = '#007bff';
 
-exports.addIntegration = (app) => {
-  return Promise.resolve().then(() => {
-    const configuration = {
-      primary_color: DEFAULT_PRIMARY_COLOR,
-      conversation_color: DEFAULT_CONVERSATION_COLOR,
-    };
-    return integrationCommons.addIntegration(app, constants.integration.channels.ANDROID, constants.integration.types.USER, _.pick(configuration, CONFIG_ANDROID));
-  });
+exports.addIntegration = async (app) => {
+  const configuration = {
+    primary_color: DEFAULT_PRIMARY_COLOR,
+    conversation_color: DEFAULT_CONVERSATION_COLOR,
+  };
+  return integrationCommons.addIntegration(app, constants.integration.channels.ANDROID, constants.integration.types.USER, _.pick(configuration, CONFIG_ANDROID));
 };
 
-exports.updateIntegration = (app, configuration) => {
+exports.updateIntegration = async (app, configuration) => {
   return integrationCommons.updateIntegration(app, constants.integration.channels.ANDROID, _.pick(configuration, CONFIG_ANDROID));
 };
 
-exports.removeIntegration = (app) => {
+exports.removeIntegration = async (app) => {
   return integrationCommons.removeIntegration(app, constants.integration.channels.ANDROID);
 };
-

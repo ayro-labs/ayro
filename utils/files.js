@@ -15,14 +15,12 @@ const IMAGE_FORMAT = 'jpg';
 const writeFileAsync = Promise.promisify(fs.writeFile);
 const unlinkAsync = Promise.promisify(fs.unlink);
 
-function downloadImage(url, outputFile) {
-  return Promise.coroutine(function* () {
-    const response = yield axios.get(url, {responseType: 'arraybuffer'});
-    yield writeFileAsync(outputFile, response.data);
-  })();
+async function downloadImage(url, outputFile) {
+  const response = await axios.get(url, {responseType: 'arraybuffer'});
+  await writeFileAsync(outputFile, response.data);
 }
 
-function fixImage(inputFile, outputFile, dimension) {
+async function fixImage(inputFile, outputFile, dimension) {
   return sharp(inputFile)
     .resize(dimension)
     .background(IMAGE_BACKGROUND)
@@ -56,46 +54,31 @@ exports.getAccountLogo = (account) => {
   return account.logo ? `${settings.accountLogoUrl}/${account.logo}` : null;
 };
 
-exports.downloadUserPhoto = (user) => {
-  return Promise.coroutine(function* () {
-    if (!user.photo_url) {
-      return null;
-    }
-    const photoPath = path.join(settings.userPhotoPath, user.id);
-    const finalPhotoFile = `${user.id}.jpg`;
-    const finalPhotoPath = path.join(settings.userPhotoPath, finalPhotoFile);
-    yield downloadImage(user.photo_url, photoPath);
-    yield fixImage(photoPath, finalPhotoPath, USER_PHOTO_DIMENSION);
-    yield unlinkAsync(photoPath);
-    return finalPhotoFile;
-  })();
+exports.downloadUserPhoto = async (user) => {
+  if (!user.photo_url) {
+    return null;
+  }
+  const photoPath = path.join(settings.userPhotoPath, user.photo_url);
+  const finalPhotoFile = `${user.id}_${Date.now()}.jpg`;
+  const finalPhotoPath = path.join(settings.userPhotoPath, finalPhotoFile);
+  await downloadImage(user.photo_url, photoPath);
+  await fixImage(photoPath, finalPhotoPath, USER_PHOTO_DIMENSION);
+  await unlinkAsync(photoPath);
+  return finalPhotoFile;
 };
 
-exports.fixAppIcon = (app) => {
-  return Promise.coroutine(function* () {
-    if (!app.icon) {
-      return null;
-    }
-    const iconPath = path.join(settings.appIconPath, app.id);
-    const finalIconFile = `${app.id}.jpg`;
-    const finalIconPath = path.join(settings.appIconPath, finalIconFile);
-    yield fixImage(iconPath, finalIconPath, APP_ICON_DIMENSION);
-    yield unlinkAsync(iconPath);
-    return finalIconFile;
-  })();
+exports.fixAppIcon = async (app, iconPath) => {
+  const finalIconFile = `${app.id}_${Date.now()}.jpg`;
+  const finalIconPath = path.join(settings.appIconPath, finalIconFile);
+  await fixImage(iconPath, finalIconPath, APP_ICON_DIMENSION);
+  await unlinkAsync(iconPath);
+  return finalIconFile;
 };
 
-
-exports.fixAccountLogo = (account) => {
-  return Promise.coroutine(function* () {
-    if (!account.logo) {
-      return null;
-    }
-    const logoPath = path.join(settings.accountLogoPath, account.id);
-    const finalLogoFile = `${account.id}.jpg`;
-    const finalLogoPath = path.join(settings.accountLogoPath, finalLogoFile);
-    yield fixImage(logoPath, finalLogoPath, ACCOUNT_LOGO_DIMENSION);
-    yield unlinkAsync(logoPath);
-    return finalLogoFile;
-  })();
+exports.fixAccountLogo = async (account, logoPath) => {
+  const finalLogoFile = `${account.id}_${Date.now()}.jpg`;
+  const finalLogoPath = path.join(settings.accountLogoPath, finalLogoFile);
+  await fixImage(logoPath, finalLogoPath, ACCOUNT_LOGO_DIMENSION);
+  await unlinkAsync(logoPath);
+  return finalLogoFile;
 };

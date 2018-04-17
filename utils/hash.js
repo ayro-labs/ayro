@@ -18,17 +18,16 @@ exports.uuid = () => {
   return uuid().replace(/-/g, '');
 };
 
-exports.token = () => {
-  return randomBytesAsync(20).then((buffer) => {
-    return buffer.toString(ENCODING_HEX);
-  });
+exports.token = async () => {
+  const buffer = await randomBytesAsync(20);
+  return buffer.toString(ENCODING_HEX);
 };
 
-exports.hash = (data) => {
+exports.hash = async (data) => {
   return hashAsync(data, 10);
 };
 
-exports.compare = (data, hash) => {
+exports.compare = async (data, hash) => {
   return compareAsync(data, hash);
 };
 
@@ -39,17 +38,13 @@ exports.encryptSync = (text) => {
   return crypted;
 };
 
-exports.encrypt = (text) => {
-  return new Promise((resolve) => {
-    resolve($.encryptSync(text));
-  });
+exports.encrypt = async (text) => {
+  return $.encryptSync(text);
 };
 
-exports.decrypt = (text) => {
-  return new Promise((resolve) => {
-    const decipher = crypto.createDecipher(ALGORITHM, settings.domain);
-    let decrypted = decipher.update(text, ENCODING_HEX, ENCODING_UTF8);
-    decrypted += decipher.final(ENCODING_UTF8);
-    resolve(decrypted);
-  });
+exports.decrypt = async (text) => {
+  const decipher = crypto.createDecipher(ALGORITHM, settings.domain);
+  let decrypted = decipher.update(text, ENCODING_HEX, ENCODING_UTF8);
+  decrypted += decipher.final(ENCODING_UTF8);
+  return decrypted;
 };

@@ -3,7 +3,6 @@ const files = require('../../utils/files');
 const constants = require('../../utils/constants');
 const integrationCommons = require('../commons/integration');
 const userCommons = require('../commons/user');
-const Promise = require('bluebird');
 const _ = require('lodash');
 
 const CHANNEL_PREFIX = 'ch';
@@ -140,293 +139,276 @@ function getDeviceInfoAttachments(user) {
   return attachments;
 }
 
-function postBotIntro(slackApi, user, channel) {
-  return Promise.coroutine(function* () {
-    const message = `Olá, eu sou o Ayro Bot!\n<@${user.id}> acabou de integrar este Workspace com o <https://ayro.io|Ayro>. Agora você pode conversar com seus clientes em tempo real, direto do Slack.`;
-    yield slackApi.chat.postMessage(channel.id, message, {
-      username: AYRO_BOT_USERNAME,
-      as_user: false,
-    });
-  })();
-}
-
-function postChannelIntro(slackApi, user, channel) {
-  return Promise.coroutine(function* () {
-    const message = `Este é o canal exclusivo para conversar com *${user.getFullName()}*.`;
-    const alertAttachment = generatedNameAlertAttachment(user);
-    const commandsAttachments = getCommandsInfoAttachments(true);
-    const attachments = alertAttachment ? [alertAttachment, ...commandsAttachments] : commandsAttachments;
-    yield slackApi.chat.postMessage(channel.id, message, {
-      attachments,
-      username: AYRO_BOT_USERNAME,
-      as_user: false,
-    });
-  })();
-}
-
-function postProfile(slackApi, user, channel) {
-  return Promise.coroutine(function* () {
-    yield slackApi.chat.postMessage(channel.id, '', {
-      username: AYRO_BOT_USERNAME,
-      as_user: false,
-      attachments: _.concat(getUserInfoAttachment(user), getDeviceInfoAttachments(user)),
-    });
-  })();
-}
-
-function createChannel(slackApi, user, conflicts) {
-  return Promise.coroutine(function* () {
-    let channel;
-    if (!conflicts) {
-      channel = `${CHANNEL_PREFIX} ${user.getFullName()}`;
-      channel = _.truncate(channel, {length: 21, omission: ''});
-    } else {
-      const charsRemaining = 21 - (CHANNEL_PREFIX.length + String(conflicts).length + 2);
-      channel = _.truncate(user.getFullName(), {length: charsRemaining, omission: ''});
-      channel = `${CHANNEL_PREFIX} ${channel} ${conflicts}`;
-    }
-    channel = _.deburr(channel);
-    try {
-      const result = yield slackApi.channels.create(channel);
-      return {id: result.channel.id, name: result.channel.name};
-    } catch (err) {
-      if (err.message === 'name_taken') {
-        conflicts = conflicts ? conflicts + 1 : 1;
-        return createChannel(slackApi, user, conflicts);
-      }
-      throw err;
-    }
-  })();
-}
-
-function introduceUser(slackApi, user, message, supportChannel, userChannel) {
-  return Promise.coroutine(function* () {
-    const introMessage = `*${user.getFullName()}* quer conversar com o seu time no canal <#${userChannel.id}|${userChannel.name}>`;
-    yield slackApi.chat.postMessage(supportChannel.id, introMessage, {
-      username: AYRO_BOT_USERNAME,
-      as_user: false,
-      attachments: [{
-        fallback: getFallbackText(introMessage),
-        text: message,
-        color: PRIMARY_COLOR,
-      }],
-    });
-    yield postChannelIntro(slackApi, user, userChannel);
-    yield postProfile(slackApi, user, userChannel);
-  })();
-}
-
-function createChannelIntroducingUser(slackApi, user, message, supportChannel) {
-  return Promise.coroutine(function* () {
-    const userChannel = yield createChannel(slackApi, user);
-    yield introduceUser(slackApi, user, message, supportChannel, userChannel);
-    yield userCommons.updateUser(user, {extra: _.assign(user.extra || {}, {slack_channel: userChannel})});
-    return userChannel;
-  })();
-}
-
-function getChannel(slackApi, user) {
-  return Promise.coroutine(function* () {
-    try {
-      const result = yield slackApi.channels.info(user.extra.slack_channel.id);
-      return {id: result.channel.id, name: result.channel.name, archived: result.channel.is_archived};
-    } catch (err) {
-      if (err.message === 'channel_not_found') {
-        return null;
-      }
-      throw err;
-    }
-  })();
-}
-
-function unarchiveChannelIntroducingUser(slackApi, user, message, supportChannel, userChannel) {
-  return Promise.coroutine(function* () {
-    try {
-      yield slackApi.channels.unarchive(userChannel.id);
-      yield introduceUser(slackApi, user, message, supportChannel, userChannel);
-      return userChannel;
-    } catch (err) {
-      if (err.message === 'not_archived') {
-        return userChannel;
-      }
-      throw err;
-    }
-  })();
-}
-
-exports.addIntegration = (app, accessToken) => {
-  return Promise.coroutine(function* () {
-    const slackApi = apis.slack(accessToken);
-    const testResult = yield slackApi.auth.test();
-    const configuration = {
-      team: {
-        id: testResult.team_id,
-        name: testResult.team,
-        url: testResult.url,
-      },
-      user: {
-        id: testResult.user_id,
-        name: testResult.user,
-        access_token: accessToken,
-      },
-    };
-    const listResult = yield slackApi.channels.list({exclude_archived: true, exclude_members: true});
-    _.each(listResult.channels, (channel) => {
-      if (channel.is_general) {
-        configuration.channel = _.pick(channel, ['id', 'name']);
-      }
-    });
-    let integration = yield integrationCommons.getIntegration(app, constants.integration.channels.SLACK, {require: false});
-    if (!integration) {
-      integration = yield integrationCommons.addIntegration(app, constants.integration.channels.SLACK, constants.integration.types.BUSINESS, configuration);
-    } else {
-      integration = yield integrationCommons.updateIntegration(app, constants.integration.channels.SLACK, configuration);
-    }
-    yield postBotIntro(slackApi, configuration.user, configuration.channel);
-    return integration;
-  })();
-};
-
-exports.updateIntegration = (app, channel) => {
-  return Promise.resolve().then(() => {
-    const configuration = {channel};
-    return integrationCommons.updateIntegration(app, constants.integration.channels.SLACK, configuration);
+async function postBotIntro(slackApi, user, channel) {
+  const message = `Olá, eu sou o Ayro Bot!\n<@${user.id}> acabou de integrar este Workspace com o <https://ayro.io|Ayro>. Agora você pode conversar com seus clientes em tempo real, direto do Slack.`;
+  await slackApi.chat.postMessage({
+    channel: channel.id,
+    text: message,
+    username: AYRO_BOT_USERNAME,
+    as_user: false,
   });
+}
+
+async function postChannelIntro(slackApi, user, channel) {
+  const message = `Este é o canal exclusivo para conversar com *${user.getFullName()}*.`;
+  const alertAttachment = generatedNameAlertAttachment(user);
+  const commandsAttachments = getCommandsInfoAttachments(true);
+  const attachments = alertAttachment ? [alertAttachment, ...commandsAttachments] : commandsAttachments;
+  await slackApi.chat.postMessage({
+    channel: channel.id,
+    text: message,
+    attachments,
+    username: AYRO_BOT_USERNAME,
+    as_user: false,
+  });
+}
+
+async function postProfile(slackApi, user, channel) {
+  await slackApi.chat.postMessage({
+    channel: channel.id,
+    username: AYRO_BOT_USERNAME,
+    as_user: false,
+    attachments: _.concat(getUserInfoAttachment(user), getDeviceInfoAttachments(user)),
+  });
+}
+
+async function createChannel(slackApi, user, conflicts) {
+  let channel;
+  if (!conflicts) {
+    channel = `${CHANNEL_PREFIX} ${user.getFullName()}`;
+    channel = _.truncate(channel, {length: 21, omission: ''});
+  } else {
+    const charsRemaining = 21 - (CHANNEL_PREFIX.length + String(conflicts).length + 2);
+    channel = _.truncate(user.getFullName(), {length: charsRemaining, omission: ''});
+    channel = `${CHANNEL_PREFIX} ${channel} ${conflicts}`;
+  }
+  channel = _.deburr(channel);
+  try {
+    const result = await slackApi.channels.create({name: channel});
+    return {id: result.channel.id, name: result.channel.name};
+  } catch (err) {
+    if (err.message === 'name_taken') {
+      conflicts = conflicts ? conflicts + 1 : 1;
+      return createChannel(slackApi, user, conflicts);
+    }
+    throw err;
+  }
+}
+
+async function introduceUser(slackApi, user, message, supportChannel, userChannel) {
+  const introMessage = `*${user.getFullName()}* quer conversar com o seu time no canal <#${userChannel.id}|${userChannel.name}>`;
+  await slackApi.chat.postMessage({
+    channel: supportChannel.id,
+    text: introMessage,
+    username: AYRO_BOT_USERNAME,
+    as_user: false,
+    attachments: [{
+      fallback: getFallbackText(introMessage),
+      text: message,
+      color: PRIMARY_COLOR,
+    }],
+  });
+  await postChannelIntro(slackApi, user, userChannel);
+  await postProfile(slackApi, user, userChannel);
+}
+
+async function createChannelIntroducingUser(slackApi, user, message, supportChannel) {
+  const userChannel = await createChannel(slackApi, user);
+  await introduceUser(slackApi, user, message, supportChannel, userChannel);
+  await userCommons.updateUser(user, {extra: _.assign(user.extra || {}, {slack_channel: userChannel})});
+  return userChannel;
+}
+
+async function getChannel(slackApi, user) {
+  try {
+    const result = await slackApi.channels.info({channel: user.extra.slack_channel.id});
+    return {id: result.channel.id, name: result.channel.name, archived: result.channel.is_archived};
+  } catch (err) {
+    if (err.message === 'channel_not_found') {
+      return null;
+    }
+    throw err;
+  }
+}
+
+async function unarchiveChannelIntroducingUser(slackApi, user, message, supportChannel, userChannel) {
+  try {
+    await slackApi.channels.unarchive({channel: userChannel.id});
+    await introduceUser(slackApi, user, message, supportChannel, userChannel);
+    return userChannel;
+  } catch (err) {
+    if (err.message === 'not_archived') {
+      return userChannel;
+    }
+    throw err;
+  }
+}
+
+exports.addIntegration = async (app, accessToken) => {
+  const slackApi = apis.slack(accessToken);
+  const testResult = await slackApi.auth.test();
+  const configuration = {
+    team: {
+      id: testResult.team_id,
+      name: testResult.team,
+      url: testResult.url,
+    },
+    user: {
+      id: testResult.user_id,
+      name: testResult.user,
+      access_token: accessToken,
+    },
+  };
+  const listResult = await slackApi.channels.list({exclude_archived: true, exclude_members: true});
+  _.each(listResult.channels, (channel) => {
+    if (channel.is_general) {
+      configuration.channel = _.pick(channel, ['id', 'name']);
+    }
+  });
+  let integration = await integrationCommons.getIntegration(app, constants.integration.channels.SLACK, {require: false});
+  if (!integration) {
+    integration = await integrationCommons.addIntegration(app, constants.integration.channels.SLACK, constants.integration.types.BUSINESS, configuration);
+  } else {
+    integration = await integrationCommons.updateIntegration(app, constants.integration.channels.SLACK, configuration);
+  }
+  await postBotIntro(slackApi, configuration.user, configuration.channel);
+  return integration;
 };
 
-exports.removeIntegration = (app) => {
+exports.updateIntegration = async (app, channel) => {
+  const configuration = {channel};
+  return integrationCommons.updateIntegration(app, constants.integration.channels.SLACK, configuration);
+};
+
+exports.removeIntegration = async (app) => {
   return integrationCommons.removeIntegration(app, constants.integration.channels.SLACK);
 };
 
-exports.listChannels = (app) => {
-  return Promise.coroutine(function* () {
-    const integration = yield integrationCommons.getIntegration(app, constants.integration.channels.SLACK);
-    const slackApi = apis.slack(integration.configuration);
-    const result = yield slackApi.channels.list({exclude_archived: true, exclude_members: true});
-    const channels = [];
-    _.each(result.channels, (channel) => {
-      channels.push(_.pick(channel, ['id', 'name']));
-    });
-    return channels;
-  })();
+exports.listChannels = async (app) => {
+  const integration = await integrationCommons.getIntegration(app, constants.integration.channels.SLACK);
+  const slackApi = apis.slack(integration.configuration);
+  const result = await slackApi.channels.list({exclude_archived: true, exclude_members: true});
+  const channels = [];
+  _.each(result.channels, (channel) => {
+    channels.push(_.pick(channel, ['id', 'name']));
+  });
+  return channels;
 };
 
-exports.createChannel = (app, channel) => {
-  return Promise.coroutine(function* () {
-    const integration = yield integrationCommons.getIntegration(app, constants.integration.channels.SLACK);
-    const slackApi = apis.slack(integration.configuration);
-    const result = yield slackApi.channels.create(channel);
-    return _.pick(result.channel, ['id', 'name']);
-  })();
+exports.createChannel = async (app, channel) => {
+  const integration = await integrationCommons.getIntegration(app, constants.integration.channels.SLACK);
+  const slackApi = apis.slack(integration.configuration);
+  const result = await slackApi.channels.create({name: channel});
+  return _.pick(result.channel, ['id', 'name']);
 };
 
-exports.postMessage = (configuration, user, message) => {
-  return Promise.coroutine(function* () {
-    const slackApi = apis.slack(configuration);
-    let userChannel;
-    if (user.extra && user.extra.slack_channel) {
-      userChannel = yield getChannel(slackApi, user);
-      if (!userChannel) {
-        userChannel = yield createChannelIntroducingUser(slackApi, user, message, configuration.channel);
-      } else if (userChannel.archived) {
-        userChannel = yield unarchiveChannelIntroducingUser(slackApi, user, message, configuration.channel, userChannel);
-      }
-    } else {
-      userChannel = yield createChannelIntroducingUser(slackApi, user, message, configuration.channel);
+exports.postMessage = async (configuration, user, message) => {
+  const slackApi = apis.slack(configuration);
+  let userChannel;
+  if (user.extra && user.extra.slack_channel) {
+    userChannel = await getChannel(slackApi, user);
+    if (!userChannel) {
+      userChannel = await createChannelIntroducingUser(slackApi, user, message, configuration.channel);
+    } else if (userChannel.archived) {
+      userChannel = await unarchiveChannelIntroducingUser(slackApi, user, message, configuration.channel, userChannel);
     }
-    yield slackApi.chat.postMessage(userChannel.id, message, {
-      username: user.getFullName(),
-      as_user: false,
-      icon_url: files.getUserPhoto(user),
-    });
-  })();
+  } else {
+    userChannel = await createChannelIntroducingUser(slackApi, user, message, configuration.channel);
+  }
+  await slackApi.chat.postMessage({
+    channel: userChannel.id,
+    text: message,
+    username: user.getFullName(),
+    as_user: false,
+    icon_url: files.getUserPhoto(user),
+  });
 };
 
-exports.postProfile = (configuration, user) => {
-  return Promise.coroutine(function* () {
-    const slackApi = apis.slack(configuration);
-    if (user.extra && user.extra.slack_channel) {
-      yield postProfile(slackApi, user, user.extra.slack_channel);
-    }
-  })();
+exports.postProfile = async (configuration, user) => {
+  const slackApi = apis.slack(configuration);
+  if (user.extra && user.extra.slack_channel) {
+    await postProfile(slackApi, user, user.extra.slack_channel);
+  }
 };
 
-exports.postHelp = (configuration, data) => {
-  return Promise.coroutine(function* () {
-    const slackApi = apis.slack(configuration);
-    const message = 'Ayro é uma ferramenta de suporte ao cliente totalmente integrado ao Slack. Converse com seus clientes em tempo real através dos canais com prefixo "ch".';
-    yield slackApi.chat.postEphemeral(data.channel_id, message, data.user_id, {
-      username: AYRO_BOT_USERNAME,
-      as_user: false,
-      attachments: getCommandsInfoAttachments(false),
-    });
-  })();
+exports.postHelp = async (configuration, data) => {
+  const slackApi = apis.slack(configuration);
+  const message = 'Ayro é uma ferramenta de suporte ao cliente totalmente integrado ao Slack. Converse com seus clientes em tempo real através dos canais com prefixo "ch".';
+  await slackApi.chat.postEphemeral({
+    channel: data.channel_id,
+    text: message,
+    user: data.user_id,
+    username: AYRO_BOT_USERNAME,
+    as_user: false,
+    attachments: getCommandsInfoAttachments(false),
+  });
 };
 
-exports.postUserNotFound = (configuration, data) => {
-  return Promise.coroutine(function* () {
-    const slackApi = apis.slack(configuration);
-    const message = 'Este canal não está associado a nenhum usuário. Lembre-se, os canais dos usuários possuem o prefixo "ch".';
-    yield slackApi.chat.postEphemeral(data.channel_id, message, data.user_id, {
-      username: AYRO_BOT_USERNAME,
-      as_user: false,
-    });
-  })();
+exports.postUserNotFound = async (configuration, data) => {
+  const slackApi = apis.slack(configuration);
+  const message = 'Este canal não está associado a nenhum usuário. Lembre-se, os canais dos usuários possuem o prefixo "ch".';
+  await slackApi.chat.postEphemeral({
+    channel: data.channel_id,
+    text: message,
+    user: data.user_id,
+    username: AYRO_BOT_USERNAME,
+    as_user: false,
+  });
 };
 
-exports.postMessageError = (configuration, data) => {
-  return Promise.coroutine(function* () {
-    const slackApi = apis.slack(configuration);
-    const message = 'Não foi possível enviar a mensagem, por favor tente novamente em alguns instantes.';
-    yield slackApi.chat.postEphemeral(data.channel_id, message, data.user_id, {
-      username: AYRO_BOT_USERNAME,
-      as_user: false,
-    });
-  })();
+exports.postMessageError = async (configuration, data) => {
+  const slackApi = apis.slack(configuration);
+  const message = 'Não foi possível enviar a mensagem, por favor tente novamente em alguns instantes.';
+  await slackApi.chat.postEphemeral({
+    channel: data.channel_id,
+    text: message,
+    user: data.user_id,
+    username: AYRO_BOT_USERNAME,
+    as_user: false,
+  });
 };
 
-exports.postProfileError = (configuration, data) => {
-  return Promise.coroutine(function* () {
-    const slackApi = apis.slack(configuration);
-    const message = 'Não foi possível obter o perfil do usuário, por favor tente novamente em alguns instantes.';
-    yield slackApi.chat.postEphemeral(data.channel_id, message, data.user_id, {
-      username: AYRO_BOT_USERNAME,
-      as_user: false,
-    });
-  })();
+exports.postProfileError = async (configuration, data) => {
+  const slackApi = apis.slack(configuration);
+  const message = 'Não foi possível obter o perfil do usuário, por favor tente novamente em alguns instantes.';
+  await slackApi.chat.postEphemeral({
+    channel: data.channel_id,
+    text: message,
+    user: data.user_id,
+    username: AYRO_BOT_USERNAME,
+    as_user: false,
+  });
 };
 
-exports.getIntegration = (data) => {
+exports.getIntegration = async (data) => {
   return integrationCommons.findIntegration({channel: constants.integration.channels.SLACK, 'configuration.team.id': data.team_id});
 };
 
-exports.getUser = (data) => {
+exports.getUser = async (data) => {
   return userCommons.findUser({'extra.slack_channel.id': data.channel_id});
 };
 
-exports.getAgent = (configuration, data) => {
-  return Promise.coroutine(function* () {
-    const slackApi = apis.slack(configuration);
-    const result = yield slackApi.users.info(data.user_id);
-    return {
-      id: data.user_id,
-      name: result.user.profile.real_name,
-      photo_url: result.user.profile.image_192,
-    };
-  })();
+exports.getAgent = async (configuration, data) => {
+  const slackApi = apis.slack(configuration);
+  const result = await slackApi.users.info({user: data.user_id});
+  return {
+    id: data.user_id,
+    name: result.user.profile.real_name,
+    photo_url: result.user.profile.image_192,
+  };
 };
 
-exports.extractText = (data) => {
-  return Promise.resolve(data.text);
+exports.extractText = async (data) => {
+  return data.text;
 };
 
-exports.confirmMessage = (configuration, data, user, chatMessage) => {
-  return Promise.coroutine(function* () {
-    const slackApi = apis.slack(configuration);
-    yield slackApi.chat.postMessage(data.channel_id, chatMessage.text, {
-      username: `${chatMessage.agent.name} para ${user.getFullName()}`,
-      as_user: false,
-      icon_url: chatMessage.agent.photo_url,
-    });
-  })();
+exports.confirmMessage = async (configuration, data, user, chatMessage) => {
+  const slackApi = apis.slack(configuration);
+  await slackApi.chat.postMessage({
+    channel: data.channel_id,
+    text: chatMessage.text,
+    username: `${chatMessage.agent.name} para ${user.getFullName()}`,
+    as_user: false,
+    icon_url: chatMessage.agent.photo_url,
+  });
 };

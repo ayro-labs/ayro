@@ -6,7 +6,6 @@ const userCommons = require('../commons/user');
 const deviceCommons = require('../commons/device');
 const integrationCommons = require('../commons/integration');
 const chatService = require('.');
-const Promise = require('bluebird');
 const _ = require('lodash');
 
 function getUserData(profile) {
@@ -33,29 +32,25 @@ function getDeviceData(user, profile, data) {
   };
 }
 
-function createDevice(integration, data) {
-  return Promise.coroutine(function* () {
-    const profile = yield apis.facebook(integration.configuration, true).api(data.sender.id);
-    const user = yield userCommons.createUser(new App({id: integration.app}), getUserData(profile));
-    const device = yield deviceCommons.createDevice(user, getDeviceData(user, profile, data));
-    return Device.populate(device, 'user');
-  })();
+async function createDevice(integration, data) {
+  const profile = await apis.facebook(integration.configuration, true).api(data.sender.id);
+  const user = await userCommons.createUser(new App({id: integration.app}), getUserData(profile));
+  const device = await deviceCommons.createDevice(user, getDeviceData(user, profile, data));
+  return Device.populate(device, 'user');
 }
 
-exports.postMessage = (data) => {
-  return Promise.coroutine(function* () {
-    if (!data.message.text) {
-      return;
-    }
-    const integration = yield integrationCommons.findIntegration({channel: constants.integration.channels.MESSENGER, 'configuration.page.id': data.recipient.id}, {require: false});
-    if (!integration) {
-      return;
-    }
-    const devices = yield deviceCommons.findDevices({'info.profile_id': data.sender.id}, {populate: 'user'});
-    let device = devices.find(device => device.user.app.toString() === integration.app.toString());
-    if (!device) {
-      device = yield createDevice(integration, data);
-    }
-    yield chatService.postMessage(device.user, device, constants.integration.channels.MESSENGER, {text: data.message.text});
-  })();
+exports.postMessage = async (data) => {
+  if (!data.message.text) {
+    return;
+  }
+  const integration = await integrationCommons.findIntegration({channel: constants.integration.channels.MESSENGER, 'configuration.page.id': data.recipient.id}, {require: false});
+  if (!integration) {
+    return;
+  }
+  const devices = await deviceCommons.findDevices({'info.profile_id': data.sender.id}, {populate: 'user'});
+  let device = devices.find(device => device.user.app.toString() === integration.app.toString());
+  if (!device) {
+    device = await createDevice(integration, data);
+  }
+  await chatService.postMessage(device.user, device, constants.integration.channels.MESSENGER, {text: data.message.text});
 };

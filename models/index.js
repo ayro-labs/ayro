@@ -8,12 +8,11 @@ const _ = require('lodash');
 const {Schema} = mongoose;
 const {ObjectId} = Schema.Types;
 
-const options = {useMongoClient: true};
-if (settings.mongo.username && settings.mongo.password) {
-  options.user = settings.mongo.username;
-  options.pass = settings.mongo.password;
-  options.authSource = 'admin';
-}
+const options = settings.mongo.username && settings.mongo.password ? {
+  user: settings.mongo.username,
+  pass: settings.mongo.password,
+  authSource: 'admin',
+} : {};
 
 mongoose.Promise = Promise;
 mongoose.set('debug', settings.mongo.debug);

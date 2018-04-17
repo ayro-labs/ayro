@@ -2,7 +2,6 @@ const {Device} = require('../../models');
 const constants = require('../../utils/constants');
 const errors = require('../../utils/errors');
 const queries = require('../../utils/queries');
-const Promise = require('bluebird');
 const detectBrowser = require('detect-browser');
 
 function throwDeviceNotFoundIfNeeded(device, options) {
@@ -25,50 +24,40 @@ function fixDeviceData(data) {
   }
 }
 
-exports.getDevice = (id, options) => {
-  return Promise.coroutine(function* () {
-    const promise = Device.findById(id);
-    queries.fillQuery(promise, options);
-    const device = yield promise.exec();
-    throwDeviceNotFoundIfNeeded(device, options);
-    return device;
-  })();
+exports.getDevice = async (id, options) => {
+  const promise = Device.findById(id);
+  queries.fillQuery(promise, options);
+  const device = await promise.exec();
+  throwDeviceNotFoundIfNeeded(device, options);
+  return device;
 };
 
-exports.findDevice = (query, options) => {
-  return Promise.coroutine(function* () {
-    const promise = Device.findOne(query);
-    queries.fillQuery(promise, options);
-    const device = yield promise.exec();
-    throwDeviceNotFoundIfNeeded(device, options);
-    return device;
-  })();
+exports.findDevice = async (query, options) => {
+  const promise = Device.findOne(query);
+  queries.fillQuery(promise, options);
+  const device = await promise.exec();
+  throwDeviceNotFoundIfNeeded(device, options);
+  return device;
 };
 
-exports.findDevices = (query, options) => {
-  return Promise.resolve().then(() => {
-    const promise = Device.find(query);
-    queries.fillQuery(promise, options);
-    return promise.exec();
-  });
+exports.findDevices = async (query, options) => {
+  const promise = Device.find(query);
+  queries.fillQuery(promise, options);
+  return promise.exec();
 };
 
-exports.createDevice = (user, data) => {
-  return Promise.resolve().then(() => {
-    if (!data.uid) {
-      throw errors.ayroError('device.uid.required', 'Device unique id is required');
-    }
-    fixDeviceData(data);
-    const device = new Device(data);
-    device.user = user.id;
-    device.registration_date = new Date();
-    return device.save();
-  });
+exports.createDevice = async (user, data) => {
+  if (!data.uid) {
+    throw errors.ayroError('device.uid.required', 'Device unique id is required');
+  }
+  fixDeviceData(data);
+  const device = new Device(data);
+  device.user = user.id;
+  device.registration_date = new Date();
+  return device.save();
 };
 
-exports.updateDevice = (device, data) => {
-  return Promise.resolve().then(() => {
-    fixDeviceData(data);
-    return Device.findByIdAndUpdate(device.id, data, {new: true, runValidators: true}).exec();
-  });
+exports.updateDevice = async (device, data) => {
+  fixDeviceData(data);
+  return Device.findByIdAndUpdate(device.id, data, {new: true, runValidators: true}).exec();
 };

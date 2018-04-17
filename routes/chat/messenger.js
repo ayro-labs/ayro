@@ -2,7 +2,6 @@ const messengerService = require('../../services/chat/messenger');
 const settings = require('../../configs/settings');
 const errors = require('../../utils/errors');
 const {logger} = require('@ayro/commons');
-const Promise = require('bluebird');
 
 const SUBSCRIBE_EVENT = 'subscribe';
 
@@ -17,16 +16,14 @@ module.exports = (router, app) => {
     res.send(req.query['hub.challenge']);
   }
 
-  function postMessage(req, res) {
-    Promise.coroutine(function* () {
-      try {
-        yield messengerService.postMessage(req.body.entry[0].messaging[0]);
-        res.end();
-      } catch (err) {
-        logger.error(err);
-        errors.respondWithError(res, err);
-      }
-    })();
+  async function postMessage(req, res) {
+    try {
+      await messengerService.postMessage(req.body.entry[0].messaging[0]);
+      res.end();
+    } catch (err) {
+      logger.error(err);
+      errors.respondWithError(res, err);
+    }
   }
 
   router.get('/', confirmSubscription);

@@ -5,78 +5,78 @@ const androidIntegration = require('./integrations/android');
 const messengerIntegration = require('./integrations/messenger');
 const slackIntegration = require('./integrations/slack');
 
-exports.getIntegration = (app, channel, options) => {
+exports.getIntegration = async (app, channel, options) => {
   return integrationCommons.getIntegration(app, channel, options);
 };
 
-exports.addWebsiteIntegration = (app) => {
+exports.addWebsiteIntegration = async (app) => {
   return websiteIntegration.addIntegration(app);
 };
 
-exports.updateWebsiteIntegration = (app, configuration) => {
+exports.updateWebsiteIntegration = async (app, configuration) => {
   return websiteIntegration.updateIntegration(app, configuration);
 };
 
-exports.removeWebsiteIntegration = (app) => {
+exports.removeWebsiteIntegration = async (app) => {
   return websiteIntegration.removeIntegration(app);
 };
 
-exports.addWordPressIntegration = (app) => {
+exports.addWordPressIntegration = async (app) => {
   return wordPressIntegration.addIntegration(app);
 };
 
-exports.updateWordPressIntegration = (app, configuration) => {
+exports.updateWordPressIntegration = async (app, configuration) => {
   return wordPressIntegration.updateIntegration(app, configuration);
 };
 
-exports.removeWordPressIntegration = (app) => {
+exports.removeWordPressIntegration = async (app) => {
   return wordPressIntegration.removeIntegration(app);
 };
 
-exports.addAndroidIntegration = (app) => {
+exports.addAndroidIntegration = async (app) => {
   return androidIntegration.addIntegration(app);
 };
 
-exports.updateAndroidIntegration = (app, configuration) => {
+exports.updateAndroidIntegration = async (app, configuration) => {
   return androidIntegration.updateIntegration(app, configuration);
 };
 
-exports.removeAndroidIntegration = (app) => {
+exports.removeAndroidIntegration = async (app) => {
   return androidIntegration.removeIntegration(app);
 };
 
-exports.addMessengerIntegration = (app, profile) => {
+exports.addMessengerIntegration = async (app, profile) => {
   return messengerIntegration.addIntegration(app, profile);
 };
 
-exports.updateMessengerIntegration = (app, page) => {
+exports.updateMessengerIntegration = async (app, page) => {
   return messengerIntegration.updateIntegration(app, page);
 };
 
-exports.removeMessengerIntegration = (app) => {
+exports.removeMessengerIntegration = async (app) => {
   return messengerIntegration.removeIntegration(app);
 };
 
-exports.listMessengerPages = (app) => {
+exports.listMessengerPages = async (app) => {
   return messengerIntegration.listPages(app);
 };
 
-exports.addSlackIntegration = (app, accessToken) => {
+exports.addSlackIntegration = async (app, accessToken) => {
   return slackIntegration.addIntegration(app, accessToken);
 };
 
-exports.updateSlackIntegration = (app, channel) => {
+exports.updateSlackIntegration = async (app, channel) => {
   return slackIntegration.updateIntegration(app, channel);
 };
 
-exports.removeSlackIntegration = (app) => {
+exports.removeSlackIntegration = async (app) => {
   return slackIntegration.removeIntegration(app);
 };
 
-exports.listSlackChannels = (app) => {
+exports.listSlackChannels = async (app) => {
   return slackIntegration.listChannels(app);
 };
 
-exports.createSlackChannel = (app, channel) => {
+exports.createSlackChannel = async (app, channel) => {
   return slackIntegration.createChannel(app, channel);
 };
