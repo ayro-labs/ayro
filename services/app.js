@@ -1,4 +1,4 @@
-const {App} = require('../models');
+const {App, Integration, User, Device, ChatMessage} = require('../models');
 const settings = require('../configs/settings');
 const hash = require('../utils/hash');
 const files = require('../utils/files');
@@ -46,5 +46,13 @@ exports.updateIcon = async (account, app, icon) => {
 
 exports.deleteApp = async (account, app) => {
   const loadedApp = await $.getApp(account, app.id);
+  const users = await User.find({app: loadedApp.id}).select({_id: 1});
+  const usersIds = users.map((user) => {
+    return user.id;
+  });
+  await ChatMessage.remove({user: {$in: usersIds}});
+  await Device.remove({user: {$in: usersIds}});
+  await User.remove({app: loadedApp.id});
+  await Integration.remove({app: loadedApp.id});
   return App.remove({_id: loadedApp.id});
 };

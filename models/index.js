@@ -52,14 +52,14 @@ function normalizeSchema(schema, customTransform) {
 
 const Account = new Schema({
   name: {type: String, required: true, trim: true},
-  email: {type: String, required: true, trim: true, index: {unique: true}},
+  email: {type: String, required: true, trim: true, unique: true},
   password: {type: String, required: true},
   logo: {type: String, required: false},
   registration_date: {type: Date, required: true},
 });
 
 const App = new Schema({
-  account: {type: ObjectId, ref: 'Account', required: true},
+  account: {type: ObjectId, ref: 'Account', required: true, index: true},
   name: {type: String, required: true, trim: true},
   icon: {type: String, required: false},
   token: {type: String, required: true},
@@ -139,14 +139,13 @@ const DeviceInfo = new Schema({
 });
 
 const Device = new Schema({
-  user: {type: ObjectId, ref: 'User', required: true},
-  uid: {type: String, required: true, index: {unique: true}},
+  user: {type: ObjectId, ref: 'User', required: true, index: true},
+  uid: {type: String, required: true, unique: true},
   platform: {type: String, required: true},
   push_token: {type: String, required: false},
   info: {type: DeviceInfo, required: false},
   registration_date: {type: Date, required: true},
 });
-Device.index({uid: 1}, {unique: true});
 Device.index({'info.profile_id': 1});
 Device.methods.getPlatformName = function() {
   const platform = constants.device.platforms[_.toUpper(this.platform)];
@@ -172,8 +171,8 @@ const Agent = new Schema({
 }, {_id: false});
 
 const ChatMessage = new Schema({
-  user: {type: ObjectId, ref: 'User', required: true},
-  device: {type: ObjectId, ref: 'Device', required: true},
+  user: {type: ObjectId, ref: 'User', required: true, index: true},
+  device: {type: ObjectId, ref: 'Device', required: true, index: true},
   agent: {type: Agent, required: false},
   text: {type: String, required: true},
   direction: {type: String, enum: _.values(constants.chatMessage.directions), required: true},
