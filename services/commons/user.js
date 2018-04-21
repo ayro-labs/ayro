@@ -1,3 +1,5 @@
+'use strict';
+
 const {User} = require('../../models');
 const errors = require('../../utils/errors');
 const queries = require('../../utils/queries');
@@ -8,11 +10,11 @@ const _ = require('lodash');
 
 const $ = this;
 
-const UNALLOWED_ATTRS = ['_id', 'app', 'photo', 'generated_name', 'registration_date'];
+const UNALLOWED_ATTRS = ['_id', 'app', 'photo', 'random_name', 'registration_date'];
 
 function throwUserNotFoundIfNeeded(user, options) {
   if (!user && (!options || options.require)) {
-    throw errors.notFoundError('user.doesNotExist', 'User does not exist');
+    throw errors.notFoundError('user_not_found', 'User not found');
   }
 }
 
@@ -34,15 +36,15 @@ exports.findUser = async (query, options) => {
 
 exports.createUser = async (app, data) => {
   if (!data.uid) {
-    throw errors.ayroError('user.uid.required', 'User unique id is required');
+    throw errors.ayroError('user_uid_required', 'User unique id is required');
   }
   const user = new User(_.omit(data, UNALLOWED_ATTRS));
   user.app = app.id;
   user.registration_date = new Date();
-  user.generated_name = false;
+  user.random_name = false;
   if (!user.first_name && !user.last_name) {
     [user.first_name, user.last_name] = _.split(randomName(), ' ');
-    user.generated_name = true;
+    user.random_name = true;
   }
   try {
     user.photo = await files.downloadUserPhoto(user);
@@ -56,7 +58,7 @@ exports.updateUser = async (user, data) => {
   const loadedUser = await $.getUser(user.id);
   const allowedData = _.omit(data, UNALLOWED_ATTRS);
   if (allowedData.first_name || allowedData.last_name) {
-    allowedData.generated_name = false;
+    allowedData.random_name = false;
   }
   if (allowedData.photo_url && allowedData.photo_url !== loadedUser.photo_url) {
     try {

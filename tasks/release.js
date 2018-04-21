@@ -1,3 +1,5 @@
+'use strict';
+
 const {releaseTask, commands} = require('@ayro/commons');
 const path = require('path');
 

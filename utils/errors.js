@@ -1,3 +1,5 @@
+'use strict';
+
 const settings = require('../configs/settings');
 const util = require('util');
 
@@ -27,8 +29,12 @@ exports.ayroError = (code, message, cause) => {
   return new AyroError(400, code, message, cause);
 };
 
-exports.permissionError = (code, message, cause) => {
+exports.authenticationError = (code, message, cause) => {
   return new AyroError(401, code, message, cause);
+};
+
+exports.authorizationError = (code, message, cause) => {
+  return new AyroError(403, code, message, cause);
 };
 
 exports.notFoundError = (code, message, cause) => {
@@ -36,7 +42,7 @@ exports.notFoundError = (code, message, cause) => {
 };
 
 exports.internalError = (message, cause) => {
-  return new AyroError(500, 'internalError', message, cause);
+  return new AyroError(500, 'internal_error', message, cause);
 };
 
 exports.respondWithError = (res, err) => {

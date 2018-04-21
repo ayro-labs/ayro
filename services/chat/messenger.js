@@ -1,3 +1,5 @@
+'use strict';
+
 const {App, Device} = require('../../models');
 const constants = require('../../utils/constants');
 const hash = require('../../utils/hash');

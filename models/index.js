@@ -1,3 +1,5 @@
+'use strict';
+
 const settings = require('../configs/settings');
 const constants = require('../utils/constants');
 const {logger} = require('@ayro/commons');
@@ -91,7 +93,7 @@ const User = new Schema({
   photo_url: {type: String, required: false},
   photo: {type: String, required: false},
   identified: {type: Boolean, required: true},
-  generated_name: {type: Boolean, required: true},
+  random_name: {type: Boolean, required: true},
   properties: {type: Object, required: false},
   extra: {type: Object, required: false},
   sign_up_date: {type: Date, required: false},
@@ -140,12 +142,13 @@ const DeviceInfo = new Schema({
 
 const Device = new Schema({
   user: {type: ObjectId, ref: 'User', required: true, index: true},
-  uid: {type: String, required: true, unique: true},
+  uid: {type: String, required: true},
   platform: {type: String, required: true},
   push_token: {type: String, required: false},
   info: {type: DeviceInfo, required: false},
   registration_date: {type: Date, required: true},
 });
+Device.index({user: 1, uid: 1}, {unique: true});
 Device.index({'info.profile_id': 1});
 Device.methods.getPlatformName = function() {
   const platform = constants.device.platforms[_.toUpper(this.platform)];
@@ -180,15 +183,15 @@ const ChatMessage = new Schema({
 }, {collection: 'chat_messages'});
 ChatMessage.index({date: 1}, {expireAfterSeconds: 7776000});
 
-exports.Account = mongoose.model('Account', normalizeSchema(Account, (obj) => {
-  delete obj.password;
+exports.Account = mongoose.model('Account', normalizeSchema(Account, (account) => {
+  delete account.password;
 }));
 exports.App = mongoose.model('App', normalizeSchema(App));
-exports.Integration = mongoose.model('Integration', normalizeSchema(Integration, (obj) => {
-  if (_.has(obj, 'configuration.fcm.server_key')) {
-    const serverKey = obj.configuration.fcm.server_key;
+exports.Integration = mongoose.model('Integration', normalizeSchema(Integration, (integration) => {
+  if (_.has(integration, 'configuration.fcm.server_key')) {
+    const serverKey = integration.configuration.fcm.server_key;
     const hiddenKey = '*************';
-    obj.configuration.fcm.server_key = serverKey.length > 10 ? hiddenKey + serverKey.slice(-5) : hiddenKey;
+    integration.configuration.fcm.server_key = serverKey.length > 10 ? hiddenKey + serverKey.slice(-5) : hiddenKey;
   }
 }));
 exports.User = mongoose.model('User', normalizeSchema(User));

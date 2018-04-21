@@ -1,3 +1,5 @@
+'use strict';
+
 require('newrelic');
 
 const {properties, logger, loggerServer} = require('@ayro/commons');
@@ -16,8 +18,7 @@ const compression = require('compression');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
-const redis = require('redis');
-const session = require('jwt-redis-session');
+const bearerToken = require('express-bearer-token');
 
 require('json.date-extensions');
 
@@ -36,19 +37,9 @@ app.use(cookieParser());
 app.use(morgan('tiny', {stream: {write: message => loggerServer.debug(message)}}));
 app.use(cors());
 app.use(express.static(settings.publicPath));
-
-const redisClient = redis.createClient({
-  host: settings.redis.host,
-  port: settings.redis.port,
-  password: settings.redis.password,
-});
-
-app.use(session({
-  client: redisClient,
-  secret: settings.session.secret,
-  keyspace: settings.session.prefix,
-  requestArg: settings.session.requestHeader,
-  maxAge: settings.session.maxAge,
+app.use(bearerToken({
+  bodyKey: 'off',
+  queryKey: 'off',
 }));
 
 middlewares.configure(app);

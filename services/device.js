@@ -1,3 +1,5 @@
+'use strict';
+
 const {Device, ChatMessage} = require('../models');
 const userCommons = require('./commons/user');
 const deviceCommons = require('./commons/device');

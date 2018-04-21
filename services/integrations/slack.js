@@ -1,3 +1,5 @@
+'use strict';
+
 const apis = require('../../utils/apis');
 const files = require('../../utils/files');
 const constants = require('../../utils/constants');
@@ -20,7 +22,7 @@ function getFallbackText(text) {
 }
 
 function generatedNameAlertAttachment(user) {
-  return user.generated_name ? {
+  return user.random_name ? {
     fallback: 'Nome gerado randomicamente',
     text: 'O nome deste usuário foi gerado randomicamente porque não foi atribuído nenhum nome para ele.\nSaiba mais em https://www.ayro.io/guides/user-information.',
     color: 'warning',
@@ -59,7 +61,7 @@ function getUserInfoAttachment(user) {
     information.push(`ID: ${user.uid}`);
   }
   if (user.getFullName()) {
-    information.push(`Nome: ${user.getFullName()}${user.generated_name ? ' (Gerado randomicamente)' : ''}`);
+    information.push(`Nome: ${user.getFullName()}${user.random_name ? ' (Gerado randomicamente)' : ''}`);
   }
   if (user.email) {
     information.push(`Email: ${user.email}`);

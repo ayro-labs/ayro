@@ -1,3 +1,5 @@
+'use strict';
+
 const constants = require('../../utils/constants');
 const integrationCommons = require('../commons/integration');
 const _ = require('lodash');

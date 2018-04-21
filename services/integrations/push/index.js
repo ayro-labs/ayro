@@ -1,3 +1,5 @@
+'use strict';
+
 const {App} = require('../../../models');
 const constants = require('../../../utils/constants');
 const integrationCommons = require('../../commons/integration');

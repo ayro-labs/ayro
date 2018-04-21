@@ -1,3 +1,5 @@
+'use strict';
+
 const settings = require('../configs/settings');
 const axios = require('axios');
 const Promise = require('bluebird');

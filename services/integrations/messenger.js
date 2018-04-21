@@ -1,3 +1,5 @@
+'use strict';
+
 const constants = require('../../utils/constants');
 const apis = require('../../utils/apis');
 const integrationCommons = require('../commons/integration');

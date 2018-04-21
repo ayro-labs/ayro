@@ -1,10 +1,12 @@
+'use strict';
+
 const {Account} = require('../../models');
 const errors = require('../../utils/errors');
 const queries = require('../../utils/queries');
 
 function throwAccountNotFoundIfNeeded(account, options) {
   if (!account && (!options || options.require)) {
-    throw errors.notFoundError('account.doesNotExist', 'Account does not exist');
+    throw errors.notFoundError('account_not_found', 'Account not found');
   }
 }
 

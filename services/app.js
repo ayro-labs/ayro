@@ -1,3 +1,5 @@
+'use strict';
+
 const {App, Integration, User, Device, ChatMessage} = require('../models');
 const settings = require('../configs/settings');
 const hash = require('../utils/hash');

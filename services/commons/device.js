@@ -1,3 +1,5 @@
+'use strict';
+
 const {Device} = require('../../models');
 const constants = require('../../utils/constants');
 const errors = require('../../utils/errors');
@@ -6,7 +8,7 @@ const detectBrowser = require('detect-browser');
 
 function throwDeviceNotFoundIfNeeded(device, options) {
   if (!device && (!options || options.require)) {
-    throw errors.notFoundError('device.doesNotExist', 'Device does not exist');
+    throw errors.notFoundError('device_not_found', 'Device not found');
   }
 }
 
@@ -48,7 +50,7 @@ exports.findDevices = async (query, options) => {
 
 exports.createDevice = async (user, data) => {
   if (!data.uid) {
-    throw errors.ayroError('device.uid.required', 'Device unique id is required');
+    throw errors.ayroError('device_uid_required', 'Device unique id is required');
   }
   fixDeviceData(data);
   const device = new Device(data);

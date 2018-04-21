@@ -1,3 +1,5 @@
+'use strict';
+
 const apis = require('../../../utils/apis');
 
 exports.push = async (configuration, user, device, event, message) => {

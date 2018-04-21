@@ -1,3 +1,5 @@
+'use strict';
+
 const chatService = require('../../services/chat');
 const errors = require('../../utils/errors');
 const constants = require('../../utils/constants');

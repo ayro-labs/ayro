@@ -1,3 +1,5 @@
+'use strict';
+
 const {Account} = require('../models');
 const settings = require('../configs/settings');
 const hash = require('../utils/hash');
@@ -22,7 +24,7 @@ exports.getAccount = async (id) => {
 exports.createAccount = async (name, email, password) => {
   const accountWithEmail = await accountCommons.findAccount({email}, {require: false});
   if (accountWithEmail) {
-    throw errors.ayroError('account.alreadyExists', 'Account already exists');
+    throw errors.ayroError('account_already_exists', 'Account already exists');
   }
   const passHash = await hash.hash(password);
   const account = new Account({
@@ -52,7 +54,7 @@ exports.authenticate = async (email, password) => {
   const account = await accountCommons.findAccount({email});
   const match = await hash.compare(password, account.password);
   if (!match) {
-    throw errors.ayroError('account.auth.wrongPassword', 'Wrong account password');
+    throw errors.ayroError('wrong_password', 'Wrong account password');
   }
   return account;
 };

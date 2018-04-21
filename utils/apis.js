@@ -1,3 +1,5 @@
+'use strict';
+
 const settings = require('../configs/settings');
 const SlackClient = require('@slack/client').WebClient;
 const FB = require('fb');

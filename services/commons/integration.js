@@ -1,3 +1,5 @@
+'use strict';
+
 const {Integration} = require('../../models');
 const errors = require('../../utils/errors');
 const queries = require('../../utils/queries');
@@ -7,7 +9,7 @@ const $ = this;
 
 function throwIntegrationNotFoundIfNeeded(integration, options) {
   if (!integration && (!options || options.require)) {
-    throw errors.notFoundError('integration.doesNotExist', 'Integration does not exist');
+    throw errors.notFoundError('integration_not_found', 'Integration not found');
   }
 }
 
@@ -36,7 +38,7 @@ exports.findIntegrations = async (app, type, options) => {
 exports.addIntegration = async (app, channel, type, configuration) => {
   let integration = await $.getIntegration(app, channel, {require: false});
   if (integration) {
-    throw errors.ayroError('integration.alreadyExists', 'Integration already exists');
+    throw errors.ayroError('integration_already_exists', 'Integration already exists');
   }
   integration = new Integration({
     channel,

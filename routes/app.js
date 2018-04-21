@@ -1,8 +1,13 @@
+'use strict';
+
 const {App} = require('../models');
 const appService = require('../services/app');
 const integrationService = require('../services/integration');
+const userService = require('../services/user');
+const deviceService = require('../services/device');
 const settings = require('../configs/settings');
 const constants = require('../utils/constants');
+const session = require('../utils/session');
 const errors = require('../utils/errors');
 const {isAccountAuthenticated} = require('../utils/middlewares');
 const {logger} = require('@ayro/commons');
@@ -11,6 +16,88 @@ const multer = require('multer');
 const upload = multer({dest: settings.appIconPath});
 
 module.exports = (router, app) => {
+
+  async function initIntegration(req, res, channel) {
+    try {
+      const app = await appService.getAppByToken(req.body.app_token);
+      let integration = await integrationService.getIntegration(app, channel, {require: false});
+      if (!integration) {
+        switch (channel) {
+          case constants.integration.channels.WEBSITE:
+            integration = await integrationService.addWebsiteIntegration(app);
+            break;
+          case constants.integration.channels.WORDPRESS:
+            integration = await integrationService.addWordPressIntegration(app);
+            break;
+          case constants.integration.channels.ANDROID:
+            integration = await integrationService.addAndroidIntegration(app);
+            break;
+        }
+      }
+      const user = await userService.saveAnonymousUser(app, req.body.device.uid);
+      const device = await deviceService.saveDevice(user, req.body.device);
+      const token = await session.createUserToken(req, user, device);
+      res.json({app, integration, user, token});
+    } catch (err) {
+      logger.error(err);
+      errors.respondWithError(res, err);
+    }
+  }
+
+  async function updateIntegration(req, res, channel) {
+    try {
+      const app = new App({id: req.params.app});
+      let integration = null;
+      switch (channel) {
+        case constants.integration.channels.WEBSITE:
+          integration = await integrationService.updateWebsiteIntegration(app, req.body);
+          break;
+        case constants.integration.channels.WORDPRESS:
+          integration = await integrationService.updateWordPressIntegration(app, req.body);
+          break;
+        case constants.integration.channels.ANDROID:
+          integration = await integrationService.updateAndroidIntegration(app, req.body);
+          break;
+        case constants.integration.channels.MESSENGER:
+          integration = await integrationService.updateMessengerIntegration(app, req.body.page);
+          break;
+        case constants.integration.channels.SLACK:
+          integration = await integrationService.updateSlackIntegration(app, req.body.channel);
+          break;
+      }
+      res.json(integration);
+    } catch (err) {
+      logger.error(err);
+      errors.respondWithError(res, err);
+    }
+  }
+
+  async function removeIntegration(req, res, channel) {
+    try {
+      const app = new App({id: req.params.app});
+      switch (channel) {
+        case constants.integration.channels.WEBSITE:
+          await integrationService.removeWebsiteIntegration(app);
+          break;
+        case constants.integration.channels.WORDPRESS:
+          await integrationService.removeWordPressIntegration(app);
+          break;
+        case constants.integration.channels.ANDROID:
+          await integrationService.removeAndroidIntegration(app);
+          break;
+        case constants.integration.channels.MESSENGER:
+          await integrationService.removeMessengerIntegration(app);
+          break;
+        case constants.integration.channels.SLACK:
+          await integrationService.removeSlackIntegration(app);
+          break;
+      }
+      res.json({});
+    } catch (err) {
+      logger.error(err);
+      errors.respondWithError(res, err);
+    }
+  }
 
   async function listApps(req, res) {
     try {
@@ -87,111 +174,39 @@ module.exports = (router, app) => {
   }
 
   async function initWebsiteIntegration(req, res) {
-    try {
-      const app = await appService.getAppByToken(req.body.app_token);
-      let integration = await integrationService.getIntegration(app, constants.integration.channels.WEBSITE, {require: false});
-      integration = integration || (await integrationService.addWebsiteIntegration(app));
-      const appJSON = app.toJSON();
-      delete appJSON.integrations;
-      res.json({app: appJSON, integration});
-    } catch (err) {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    }
+    initIntegration(req, res, constants.integration.channels.WEBSITE);
   }
 
   async function updateWebsiteIntegration(req, res) {
-    try {
-      const app = new App({id: req.params.app});
-      const integration = await integrationService.updateWebsiteIntegration(app, req.body);
-      res.json(integration);
-    } catch (err) {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    }
+    updateIntegration(req, res, constants.integration.channels.WEBSITE);
   }
 
   async function removeWebsiteIntegration(req, res) {
-    try {
-      const app = new App({id: req.params.app});
-      await integrationService.removeWebsiteIntegration(app);
-      res.json({});
-    } catch (err) {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    }
+    removeIntegration(req, res, constants.integration.channels.WEBSITE);
   }
 
   async function initWordPressIntegration(req, res) {
-    try {
-      const app = await appService.getAppByToken(req.body.app_token);
-      let integration = await integrationService.getIntegration(app, constants.integration.channels.WORDPRESS, {require: false});
-      integration = integration || (await integrationService.addWordPressIntegration(app));
-      const appJSON = app.toJSON();
-      delete appJSON.integrations;
-      res.json({app: appJSON, integration});
-    } catch (err) {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    }
+    initIntegration(req, res, constants.integration.channels.WORDPRESS);
   }
 
   async function updateWordPressIntegration(req, res) {
-    try {
-      const app = new App({id: req.params.app});
-      const integration = await integrationService.updateWordPressIntegration(app, req.body);
-      res.json(integration);
-    } catch (err) {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    }
+    updateIntegration(req, res, constants.integration.channels.WORDPRESS);
   }
 
   async function removeWordPressIntegration(req, res) {
-    try {
-      const app = new App({id: req.params.app});
-      await integrationService.removeWordPressIntegration(app);
-      res.json({});
-    } catch (err) {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    }
+    removeIntegration(req, res, constants.integration.channels.WORDPRESS);
   }
 
   async function initAndroidIntegration(req, res) {
-    try {
-      const app = await appService.getAppByToken(req.body.app_token);
-      let integration = await integrationService.getIntegration(app, constants.integration.channels.ANDROID, {require: false});
-      integration = integration || (await integrationService.addAndroidIntegration(app));
-      const appJSON = app.toJSON();
-      delete appJSON.integrations;
-      res.json({app: appJSON, integration});
-    } catch (err) {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    }
+    initIntegration(req, res, constants.integration.channels.ANDROID);
   }
 
   async function updateAndroidIntegration(req, res) {
-    try {
-      const app = new App({id: req.params.app});
-      const integration = await integrationService.updateAndroidIntegration(app, req.body);
-      res.json(integration);
-    } catch (err) {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    }
+    updateIntegration(req, res, constants.integration.channels.ANDROID);
   }
 
   async function removeAndroidIntegration(req, res) {
-    try {
-      const app = new App({id: req.params.app});
-      await integrationService.removeAndroidIntegration(app);
-      res.json({});
-    } catch (err) {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    }
+    removeIntegration(req, res, constants.integration.channels.ANDROID);
   }
 
   async function addMessengerIntegration(req, res) {
@@ -206,25 +221,11 @@ module.exports = (router, app) => {
   }
 
   async function updateMessengerIntegration(req, res) {
-    try {
-      const app = new App({id: req.params.app});
-      const integration = await integrationService.updateMessengerIntegration(app, req.body.page);
-      res.json(integration);
-    } catch (err) {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    }
+    updateIntegration(req, res, constants.integration.channels.MESSENGER);
   }
 
   async function removeMessengerIntegration(req, res) {
-    try {
-      const app = new App({id: req.params.app});
-      await integrationService.removeMessengerIntegration(app);
-      res.json({});
-    } catch (err) {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    }
+    removeIntegration(req, res, constants.integration.channels.MESSENGER);
   }
 
   async function listMessengerPages(req, res) {
@@ -250,25 +251,11 @@ module.exports = (router, app) => {
   }
 
   async function updateSlackIntegration(req, res) {
-    try {
-      const app = new App({id: req.params.app});
-      const integration = await integrationService.updateSlackIntegration(app, req.body.channel);
-      res.json(integration);
-    } catch (err) {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    }
+    updateIntegration(req, res, constants.integration.channels.SLACK);
   }
 
   async function removeSlackIntegration(req, res) {
-    try {
-      const app = new App({id: req.params.app});
-      await integrationService.removeSlackIntegration(app);
-      res.json({});
-    } catch (err) {
-      logger.error(err);
-      errors.respondWithError(res, err);
-    }
+    removeIntegration(req, res, constants.integration.channels.SLACK);
   }
 
   async function listSlackChannels(req, res) {

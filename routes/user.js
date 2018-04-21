@@ -1,5 +1,9 @@
+'use strict';
+
+const appService = require('../services/app');
 const userService = require('../services/user');
 const deviceService = require('../services/device');
+const session = require('../utils/session');
 const errors = require('../utils/errors');
 const {isUserAuthenticated} = require('../utils/middlewares');
 const {logger} = require('@ayro/commons');
@@ -26,8 +30,34 @@ module.exports = (router, app) => {
     }
   }
 
+  async function login(req, res) {
+    try {
+      const app = await appService.getAppByToken(req.body.app_token);
+      const user = await userService.saveUser(app, req.body.user);
+      const device = await deviceService.saveDevice(user, req.body.device);
+      const token = await session.createUserToken(user, device);
+      await userService.mergeUsers(req.user, user);
+      res.json({user, token});
+    } catch (err) {
+      logger.error(err);
+      errors.respondWithError(res, err);
+    }
+  }
+
+  async function logout(req, res) {
+    try {
+      await session.destroyToken(req.token);
+      res.json({});
+    } catch (err) {
+      logger.error(err);
+      errors.respondWithError(res, err);
+    }
+  }
+
   router.put('/', isUserAuthenticated, updateUser);
   router.put('/devices', isUserAuthenticated, updateDevice);
+  router.post('/login', login);
+  router.post('/logout', isUserAuthenticated, logout);
 
   app.use('/users', router);
 

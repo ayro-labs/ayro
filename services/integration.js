@@ -1,3 +1,5 @@
+'use strict';
+
 const integrationCommons = require('./commons/integration');
 const websiteIntegration = require('./integrations/website');
 const wordPressIntegration = require('./integrations/wordpress');

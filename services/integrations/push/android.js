@@ -1,7 +1,10 @@
+'use strict';
+
 const axios = require('axios');
+const ms = require('ms');
 
 const ORIGIN_AYRO = 'ayro';
-const TIME_TO_LIVE = 600;
+const TIME_TO_LIVE = Math.floor(ms('10 minutes') / 1000);
 
 const fcmClient = axios.create({
   baseURL: 'https://fcm.googleapis.com/fcm/send',

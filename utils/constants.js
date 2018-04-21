@@ -1,42 +1,43 @@
-exports.integration = Object.freeze({
-  types: Object.freeze({
-    USER: 'user',
-    BUSINESS: 'business',
-  }),
-  channels: Object.freeze({
-    WEBSITE: 'website',
-    WORDPRESS: 'wordpress',
-    ANDROID: 'android',
-    MESSENGER: 'messenger',
-    SLACK: 'slack',
-  }),
-});
+'use strict';
 
-exports.device = Object.freeze({
-  platforms: Object.freeze({
-    WEB: Object.freeze({
-      id: 'web',
-      name: 'Web Messenger',
+module.exports = Object.freeze({
+  integration: Object.freeze({
+    types: Object.freeze({
+      USER: 'user',
+      BUSINESS: 'business',
     }),
-    ANDROID: Object.freeze({
-      id: 'android',
-      name: 'Android Messaging',
-    }),
-    MESSENGER: Object.freeze({
-      id: 'messenger',
-      name: 'Facebook Messenger',
+    channels: Object.freeze({
+      WEBSITE: 'website',
+      WORDPRESS: 'wordpress',
+      ANDROID: 'android',
+      MESSENGER: 'messenger',
+      SLACK: 'slack',
     }),
   }),
-});
-
-exports.chatMessage = Object.freeze({
-  directions: Object.freeze({
-    INCOMING: 'incoming',
-    OUTGOING: 'outgoing',
+  device: Object.freeze({
+    platforms: Object.freeze({
+      WEB: Object.freeze({
+        id: 'web',
+        name: 'Web Messenger',
+      }),
+      ANDROID: Object.freeze({
+        id: 'android',
+        name: 'Android Messaging',
+      }),
+      MESSENGER: Object.freeze({
+        id: 'messenger',
+        name: 'Facebook Messenger',
+      }),
+    }),
   }),
-});
-
-exports.genders = Object.freeze({
-  MALE: 'Masculino',
-  FEMALE: 'Feminino',
+  chatMessage: Object.freeze({
+    directions: Object.freeze({
+      INCOMING: 'incoming',
+      OUTGOING: 'outgoing',
+    }),
+  }),
+  genders: Object.freeze({
+    MALE: 'Masculino',
+    FEMALE: 'Feminino',
+  }),
 });

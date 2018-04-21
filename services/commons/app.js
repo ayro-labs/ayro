@@ -1,10 +1,12 @@
+'use strict';
+
 const {App} = require('../../models');
 const errors = require('../../utils/errors');
 const queries = require('../../utils/queries');
 
 function throwAppNotFoundIfNeeded(app, options) {
   if (!app && (!options || options.require)) {
-    throw errors.notFoundError('app.doesNotExist', 'App does not exist');
+    throw errors.notFoundError('app_not_found', 'App not found');
   }
 }
 

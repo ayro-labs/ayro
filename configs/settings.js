@@ -1,3 +1,5 @@
+'use strict';
+
 const files = require('../utils/files');
 const {properties, logger} = require('@ayro/commons');
 const path = require('path');
@@ -23,10 +25,10 @@ exports.webcmUrl = properties.get('webcm.url', this.env === 'production' ? 'http
 exports.domain = 'ayro.io';
 
 exports.session = {
-  secret: 'ayro.io',
   prefix: 'session:',
-  requestHeader: 'token',
-  maxAge: Number.MAX_SAFE_INTEGER,
+  keyId: 'ayro',
+  secret: 'ayro.io',
+  expiresIn: '10 minutes',
 };
 
 exports.mongo = {
