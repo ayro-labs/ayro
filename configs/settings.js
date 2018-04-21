@@ -22,8 +22,6 @@ exports.userPhotoPath = path.join(this.publicPath, 'img/users');
 
 exports.webcmUrl = properties.get('webcm.url', this.env === 'production' ? 'https://webcm.ayro.io:3100' : 'http://localhost:3100');
 
-exports.domain = 'ayro.io';
-
 exports.session = {
   prefix: 'session:',
   keyId: properties.get('session.keyId'),
