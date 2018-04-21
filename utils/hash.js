@@ -1,6 +1,5 @@
 'use strict';
 
-const settings = require('../configs/settings');
 const Promise = require('bluebird');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
