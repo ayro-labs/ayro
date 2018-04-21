@@ -36,7 +36,7 @@ module.exports = (router, app) => {
       }
       const user = await userService.saveAnonymousUser(app, req.body.device.uid);
       const device = await deviceService.saveDevice(user, req.body.device);
-      const token = await session.createUserToken(req, user, device);
+      const token = await session.createUserToken(user, device);
       res.json({app, integration, user, token});
     } catch (err) {
       logger.error(err);
