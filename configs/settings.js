@@ -26,9 +26,9 @@ exports.domain = 'ayro.io';
 
 exports.session = {
   prefix: 'session:',
-  keyId: 'ayro',
-  secret: 'ayro.io',
-  expiresIn: '10 minutes',
+  keyId: properties.get('session.keyId'),
+  secret: properties.get('session.secret'),
+  expiresIn: properties.get('session.expiresIn', '24 hours'),
 };
 
 exports.mongo = {
