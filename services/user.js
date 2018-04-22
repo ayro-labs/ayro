@@ -8,9 +8,9 @@ const Promise = require('bluebird');
 const _ = require('lodash');
 
 exports.saveUser = async (app, data) => {
-  data.identified = true;
-  const user = await userCommons.findUser({app: app.id, uid: data.uid}, {require: false});
-  return !user ? userCommons.createUser(app, data) : userCommons.updateUser(user, data);
+  const finalData = {identified: true, ...data};
+  const user = await userCommons.findUser({app: app.id, uid: finalData.uid}, {require: false});
+  return !user ? userCommons.createUser(app, finalData) : userCommons.updateUser(user, finalData);
 };
 
 exports.saveAnonymousUser = async (app, uid) => {

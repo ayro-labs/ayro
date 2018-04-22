@@ -10,7 +10,7 @@ const _ = require('lodash');
 
 const $ = this;
 
-const UNALLOWED_ATTRS = ['_id', 'app', 'photo', 'random_name', 'registration_date'];
+const ALLOWED_ATTRIBUTES = ['uid', 'first_name', 'last_name', 'email', 'photo_url', 'properties', 'sign_up_date', 'identified'];
 
 function throwUserNotFoundIfNeeded(user, options) {
   if (!user && (!options || options.require)) {
@@ -38,7 +38,7 @@ exports.createUser = async (app, data) => {
   if (!data.uid) {
     throw errors.ayroError('user_uid_required', 'User unique id is required');
   }
-  const user = new User(_.omit(data, UNALLOWED_ATTRS));
+  const user = new User(_.pick(data, ALLOWED_ATTRIBUTES));
   user.app = app.id;
   user.registration_date = new Date();
   user.random_name = false;
@@ -56,7 +56,7 @@ exports.createUser = async (app, data) => {
 
 exports.updateUser = async (user, data) => {
   const loadedUser = await $.getUser(user.id);
-  const allowedData = _.omit(data, UNALLOWED_ATTRS);
+  const allowedData = _.pick(data, ALLOWED_ATTRIBUTES);
   if (allowedData.first_name || allowedData.last_name) {
     allowedData.random_name = false;
   }
