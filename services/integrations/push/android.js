@@ -22,7 +22,7 @@ exports.push = async (configuration, user, device, event, message) => {
   const data = {
     registration_ids: [device.push_token],
     time_to_live: TIME_TO_LIVE,
-    data: {event, message, origin: ORIGIN_AYRO},
+    data: {event, message, user: user.id, origin: ORIGIN_AYRO},
   };
   await fcmClient.post('', data, options);
 };
