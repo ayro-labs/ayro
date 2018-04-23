@@ -34,6 +34,7 @@ module.exports = (router, app) => {
   async function login(req, res) {
     try {
       await decodeToken(req);
+      await session.destroyToken(req.token);
       const app = await appService.getAppByToken(req.body.app_token);
       const user = await userService.saveUser(app, req.body.user);
       const device = await deviceService.saveDevice(user, req.body.device);

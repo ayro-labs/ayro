@@ -50,17 +50,19 @@ exports.createUserToken = async (user, device) => {
 exports.decodeToken = async (token) => {
   const result = {};
   try {
-    const decoded = await jwtRedis.decode(token, {complete: true});
-    if (decoded.header.kid === settings.session.keyId) {
-      const payload = await jwtRedis.verify(token, settings.session.secret);
-      switch (payload.scope) {
-        case SCOPE_ACCOUNT:
-          result.account = new Account({id: payload.account});
-          break;
-        case SCOPE_USER:
-          result.user = new User({id: payload.user});
-          result.device = new Device({id: payload.device});
-          break;
+    if (token) {
+      const decoded = await jwtRedis.decode(token, {complete: true});
+      if (decoded.header.kid === settings.session.keyId) {
+        const payload = await jwtRedis.verify(token, settings.session.secret);
+        switch (payload.scope) {
+          case SCOPE_ACCOUNT:
+            result.account = new Account({id: payload.account});
+            break;
+          case SCOPE_USER:
+            result.user = new User({id: payload.user});
+            result.device = new Device({id: payload.device});
+            break;
+        }
       }
     }
   } catch (err) {
@@ -72,9 +74,13 @@ exports.decodeToken = async (token) => {
 };
 
 exports.touchToken = async (token) => {
-  await jwtRedis.touch(token);
+  if (token) {
+    await jwtRedis.touch(token);
+  }
 };
 
 exports.destroyToken = async (token) => {
-  await jwtRedis.destroy(token);
+  if (token) {
+    await jwtRedis.destroy(token);
+  }
 };
