@@ -141,7 +141,7 @@ const DeviceInfo = new Schema({
 });
 
 const Device = new Schema({
-  user: {type: ObjectId, ref: 'User', required: true, index: true},
+  user: {type: ObjectId, ref: 'User', required: true},
   uid: {type: String, required: true},
   platform: {type: String, required: true},
   push_token: {type: String, required: false},

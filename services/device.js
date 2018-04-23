@@ -15,7 +15,7 @@ async function removeOldDeviceIfNeeded(user, data) {
 
 exports.saveDevice = async (user, data) => {
   await removeOldDeviceIfNeeded(user, data);
-  const device = await deviceCommons.findDevice({uid: data.uid}, {require: false});
+  const device = await deviceCommons.findDevice({user: user.id, uid: data.uid}, {require: false});
   let updatedDevice;
   if (!device) {
     updatedDevice = await deviceCommons.createDevice(user, data);
@@ -31,4 +31,8 @@ exports.saveDevice = async (user, data) => {
 
 exports.updateDevice = async (device, data) => {
   return deviceCommons.updateDevice(device, data);
+};
+
+exports.getDevice = async (id) => {
+  return deviceCommons.getDevice(id);
 };

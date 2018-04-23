@@ -21,14 +21,18 @@ exports.updateUser = async (user, data) => {
   return userCommons.updateUser(user, data);
 };
 
+exports.getUser = async (id) => {
+  return userCommons.getUser(id);
+};
+
 exports.mergeUsers = async (user, survivingUser) => {
   if (user) {
     user = await userCommons.getUser(user.id);
-    survivingUser = await userCommons.getUser(user.id);
+    survivingUser = await userCommons.getUser(survivingUser.id);
     if (user.app.toString() !== survivingUser.app.toString()) {
       throw errors.internalError('Can not merge users from different apps');
     }
-    if (!user.identified && !survivingUser.identified) {
+    if (!user.identified && survivingUser.identified) {
       const devices = await deviceCommons.findDevices({user: user.id});
       const survivingDevices = await deviceCommons.findDevices({user: survivingUser.id});
       const survivingDevicesByUid = _.keyBy(survivingDevices, (device) => {

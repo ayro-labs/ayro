@@ -65,5 +65,12 @@ files.createDir(this.appIconPath);
 files.createDir(this.accountLogoPath);
 files.createDir(this.userPhotoPath);
 
+if (!this.session.keyId) {
+  throw new Error('Property session.keyId is required');
+}
+if (!this.session.secret) {
+  throw new Error('Property session.secret is required');
+}
+
 logger.info('Using %s environment settings', this.env);
 logger.info('Debug mode is %s', this.debug ? 'ON' : 'OFF');
