@@ -43,9 +43,9 @@ exports.mergeUsers = async (user, survivingUser) => {
       _.each(devices, (device) => {
         const survivingDevice = survivingDevicesByUid[device.uid];
         if (survivingDevice) {
-          updateChatMessagePromises.push(ChatMessage.updateOne(
+          updateChatMessagePromises.push(ChatMessage.updateMany(
             {user: user.id, device: device.id},
-            {user: survivingUser.id, survivingDevice: device.id},
+            {user: survivingUser.id, device: survivingDevice.id},
           ));
         } else {
           devicesIdsToRemove.push(device.id);

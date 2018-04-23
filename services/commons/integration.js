@@ -59,7 +59,7 @@ exports.updateIntegration = async (app, channel, configuration) => {
   if (configuration.fcm && _.isEmpty(configuration.fcm)) {
     delete integration.configuration.fcm;
   }
-  await Integration.update({_id: integration.id}, {configuration: integration.configuration}).exec();
+  await Integration.updateOne({_id: integration.id}, {configuration: integration.configuration}).exec();
   return integration;
 };
 
