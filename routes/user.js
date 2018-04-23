@@ -8,12 +8,16 @@ const session = require('../utils/session');
 const errors = require('../utils/errors');
 const {isUserAuthenticated, decodeToken} = require('../utils/middlewares');
 const {logger} = require('@ayro/commons');
+const _ = require('lodash');
+
+const ALLOWED_USER_ATTRS = ['uid', 'first_name', 'last_name', 'email', 'photo_url', 'properties', 'sign_up_date', 'identified'];
+const ALLOWED_DEVICE_ATTRS = ['uid', 'platform', 'push_token', 'info'];
 
 module.exports = (router, app) => {
 
   async function updateUser(req, res) {
     try {
-      const user = await userService.updateUser(req.user, req.body);
+      const user = await userService.updateUser(req.user, _.pick(req.body, ALLOWED_USER_ATTRS));
       res.json(user);
     } catch (err) {
       logger.error(err);
@@ -23,7 +27,7 @@ module.exports = (router, app) => {
 
   async function updateDevice(req, res) {
     try {
-      const device = await deviceService.updateDevice(req.device, req.body);
+      const device = await deviceService.updateDevice(req.device, _.pick(req.body, ALLOWED_DEVICE_ATTRS));
       res.json(device);
     } catch (err) {
       logger.error(err);
@@ -36,8 +40,8 @@ module.exports = (router, app) => {
       await decodeToken(req);
       await session.destroyToken(req.token);
       const app = await appService.getAppByToken(req.body.app_token);
-      const user = await userService.saveUser(app, req.body.user);
-      const device = await deviceService.saveDevice(user, req.body.device);
+      const user = await userService.saveUser(app, _.pick(req.body.user, ALLOWED_USER_ATTRS));
+      const device = await deviceService.saveDevice(user, _.pick(req.body.device, ALLOWED_DEVICE_ATTRS));
       const token = await session.createUserToken(user, device);
       await userService.mergeUsers(req.user, user);
       res.json({user, token});

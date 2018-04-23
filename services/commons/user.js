@@ -10,7 +10,7 @@ const _ = require('lodash');
 
 const $ = this;
 
-const ALLOWED_ATTRIBUTES = ['uid', 'first_name', 'last_name', 'email', 'photo_url', 'properties', 'sign_up_date', 'identified'];
+const UNALLOWED_ATTRS = ['_id', 'id', 'app', 'photo', 'random_name', 'registration_date'];
 
 function throwUserNotFoundIfNeeded(user, options) {
   if (!user && (!options || options.require)) {
@@ -38,7 +38,7 @@ exports.createUser = async (app, data) => {
   if (!data.uid) {
     throw errors.ayroError('user_uid_required', 'User unique id is required');
   }
-  const user = new User(_.pick(data, ALLOWED_ATTRIBUTES));
+  const user = new User(_.omit(data, UNALLOWED_ATTRS));
   user.app = app.id;
   user.registration_date = new Date();
   user.random_name = false;
@@ -56,17 +56,17 @@ exports.createUser = async (app, data) => {
 
 exports.updateUser = async (user, data) => {
   const loadedUser = await $.getUser(user.id);
-  const allowedData = _.pick(data, ALLOWED_ATTRIBUTES);
-  if (allowedData.first_name || allowedData.last_name) {
-    allowedData.random_name = false;
+  const finalData = _.omit(data, UNALLOWED_ATTRS);
+  if (finalData.first_name || finalData.last_name) {
+    finalData.random_name = false;
   }
-  if (allowedData.photo_url && allowedData.photo_url !== loadedUser.photo_url) {
+  if (finalData.photo_url && finalData.photo_url !== loadedUser.photo_url) {
     try {
-      loadedUser.set(allowedData);
-      allowedData.photo = await files.downloadUserPhoto(loadedUser);
+      loadedUser.set(finalData);
+      finalData.photo = await files.downloadUserPhoto(loadedUser);
     } catch (err) {
       logger.debug('Could not download photo of user %s: %s.', loadedUser.id, err.message);
     }
   }
-  return User.findByIdAndUpdate(loadedUser.id, allowedData, {new: true, runValidators: true}).exec();
+  return User.findByIdAndUpdate(loadedUser.id, finalData, {new: true, runValidators: true}).exec();
 };

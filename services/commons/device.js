@@ -7,7 +7,7 @@ const queries = require('../../utils/queries');
 const detectBrowser = require('detect-browser');
 const _ = require('lodash');
 
-const ALLOWED_ATTRIBUTES = ['uid', 'platform', 'push_token', 'info'];
+const UNALLOWED_ATTRS = ['_id', 'id', 'user', 'registration_date'];
 
 function throwDeviceNotFoundIfNeeded(device, options) {
   if (!device && (!options || options.require)) {
@@ -54,7 +54,7 @@ exports.createDevice = async (user, data) => {
   if (!data.uid) {
     throw errors.ayroError('device_uid_required', 'Device unique id is required');
   }
-  const finalData = _.pick(data, ALLOWED_ATTRIBUTES);
+  const finalData = _.omit(data, UNALLOWED_ATTRS);
   fixDeviceData(finalData);
   const device = new Device(finalData);
   device.user = user.id;
@@ -63,7 +63,7 @@ exports.createDevice = async (user, data) => {
 };
 
 exports.updateDevice = async (device, data) => {
-  const finalData = _.pick(data, ALLOWED_ATTRIBUTES);
+  const finalData = _.omit(data, UNALLOWED_ATTRS);
   fixDeviceData(finalData);
   return Device.findByIdAndUpdate(device.id, finalData, {new: true, runValidators: true}).exec();
 };
