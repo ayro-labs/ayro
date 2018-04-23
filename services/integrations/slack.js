@@ -21,7 +21,7 @@ function getFallbackText(text) {
   return fallback;
 }
 
-function generatedNameAlertAttachment(user) {
+function randomNameWarningAttachment(user) {
   return user.random_name ? {
     fallback: 'Nome gerado randomicamente',
     text: 'O nome deste usuário foi gerado randomicamente porque não foi atribuído nenhum nome para ele.\nSaiba mais em https://www.ayro.io/guides/user-information.',
@@ -157,9 +157,9 @@ async function postBotIntro(slackApi, user, channel) {
 
 async function postChannelIntro(slackApi, user, channel) {
   const message = `Este é o canal exclusivo para conversar com *${user.getFullName()}*.`;
-  const alertAttachment = generatedNameAlertAttachment(user);
+  const randomNameAttachment = randomNameWarningAttachment(user);
   const commandsAttachments = getCommandsInfoAttachments(true);
-  const attachments = alertAttachment ? [alertAttachment, ...commandsAttachments] : commandsAttachments;
+  const attachments = randomNameAttachment ? [randomNameAttachment, ...commandsAttachments] : commandsAttachments;
   await slackApi.chat.postMessage({
     channel: channel.id,
     text: message,
