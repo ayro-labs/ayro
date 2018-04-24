@@ -1,20 +1,46 @@
 'use strict';
 
-const {User, Device, ChatMessage} = require('../models');
+const {AppSecret, User, Device, ChatMessage} = require('../models');
 const errors = require('../utils/errors');
 const userCommons = require('./commons/user');
 const deviceCommons = require('./commons/device');
+const jwt = require('jsonwebtoken');
 const Promise = require('bluebird');
 const _ = require('lodash');
 
-exports.saveUser = async (app, data) => {
-  const finalData = {identified: true, ...data};
-  const user = await userCommons.findUser({app: app.id, uid: finalData.uid}, {require: false});
-  return !user ? userCommons.createUser(app, finalData) : userCommons.updateUser(user, finalData);
+const JWT_SCOPE_USER = 'user';
+
+async function saveUser(app, data, jwtToken) {
+  if (data.identified && !jwtToken) {
+    throw errors.ayroError('jwt_required', 'JWT token is required');
+  }
+  if (data.uid && jwtToken) {
+    const decoded = jwt.decode(jwtToken, {complete: true});
+    if (!decoded) {
+      throw errors.ayroError('jwt_invalid', 'Invalid JWT token');
+    }
+    if (!decoded.header.kid) {
+      throw errors.ayroError('jwt_invalid', 'JWT token requires kid header');
+    }
+    const appSecret = await AppSecret.findOne({_id: decoded.header.kid, app: app.id});
+    if (!appSecret) {
+      throw errors.ayroError('jwt_invalid', 'App secret not found');
+    }
+    const payload = jwt.verify(jwtToken, appSecret.secret);
+    if (payload.scope !== JWT_SCOPE_USER || payload.user !== data.uid) {
+      throw errors.ayroError('jwt_invalid', 'User\'s uid not match');
+    }
+  }
+  const user = await userCommons.findUser({app: app.id, uid: data.uid}, {require: false});
+  return !user ? userCommons.createUser(app, data) : userCommons.updateUser(user, data);
+}
+
+exports.saveIdentifiedUser = async (app, data, jwtToken) => {
+  return saveUser(app, {...data, identified: true}, jwtToken);
 };
 
 exports.saveAnonymousUser = async (app, uid) => {
-  return this.saveUser(app, {uid, identified: false});
+  return saveUser(app, {uid, identified: false});
 };
 
 exports.updateUser = async (user, data) => {

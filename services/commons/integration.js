@@ -5,8 +5,6 @@ const errors = require('../../utils/errors');
 const queries = require('../../utils/queries');
 const _ = require('lodash');
 
-const $ = this;
-
 function throwIntegrationNotFoundIfNeeded(integration, options) {
   if (!integration && (!options || options.require)) {
     throw errors.notFoundError('integration_not_found', 'Integration not found');
@@ -36,7 +34,7 @@ exports.findIntegrations = async (app, type, options) => {
 };
 
 exports.addIntegration = async (app, channel, type, configuration) => {
-  let integration = await $.getIntegration(app, channel, {require: false});
+  let integration = await this.getIntegration(app, channel, {require: false});
   if (integration) {
     throw errors.ayroError('integration_already_exists', 'Integration already exists');
   }
@@ -51,7 +49,7 @@ exports.addIntegration = async (app, channel, type, configuration) => {
 };
 
 exports.updateIntegration = async (app, channel, configuration) => {
-  const integration = await $.getIntegration(app, channel);
+  const integration = await this.getIntegration(app, channel);
   if (!integration.configuration) {
     integration.configuration = {};
   }
@@ -64,6 +62,6 @@ exports.updateIntegration = async (app, channel, configuration) => {
 };
 
 exports.removeIntegration = async (app, channel) => {
-  const integration = await $.getIntegration(app, channel);
+  const integration = await this.getIntegration(app, channel);
   await Integration.remove({_id: integration.id});
 };

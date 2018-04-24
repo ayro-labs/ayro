@@ -14,8 +14,6 @@ function getUserData(profile) {
   return {
     first_name: profile.first_name,
     last_name: profile.last_name,
-    uid: hash.uuid(),
-    identified: false,
   };
 }
 

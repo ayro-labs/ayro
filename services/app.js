@@ -1,6 +1,7 @@
 'use strict';
 
-const {App, Integration, User, Device, ChatMessage} = require('../models');
+const {App, AppSecret, Integration} = require('../models');
+const {User, Device, ChatMessage} = require('../models');
 const settings = require('../configs/settings');
 const hash = require('../utils/hash');
 const files = require('../utils/files');
@@ -8,8 +9,6 @@ const appCommons = require('./commons/app');
 const path = require('path');
 const fs = require('fs');
 const Promise = require('bluebird');
-
-const $ = this;
 
 const unlinkAsync = Promise.promisify(fs.unlink);
 
@@ -32,12 +31,12 @@ exports.createApp = async (account, name) => {
 };
 
 exports.updateApp = async (account, app, name) => {
-  const loadedApp = await $.getApp(account, app.id);
+  const loadedApp = await this.getApp(account, app.id);
   return App.findByIdAndUpdate(loadedApp.id, {name}, {new: true, runValidators: true}).exec();
 };
 
 exports.updateIcon = async (account, app, icon) => {
-  const loadedApp = await $.getApp(account, app.id);
+  const loadedApp = await this.getApp(account, app.id);
   const oldIconPath = loadedApp.icon ? path.join(settings.appIconPath, loadedApp.icon) : null;
   loadedApp.icon = await files.fixAppIcon(loadedApp, icon.path);
   if (oldIconPath) {
@@ -47,7 +46,7 @@ exports.updateIcon = async (account, app, icon) => {
 };
 
 exports.deleteApp = async (account, app) => {
-  const loadedApp = await $.getApp(account, app.id);
+  const loadedApp = await this.getApp(account, app.id);
   const users = await User.find({app: loadedApp.id}).select({_id: 1});
   const usersIds = users.map((user) => {
     return user.id;
@@ -56,5 +55,26 @@ exports.deleteApp = async (account, app) => {
   await Device.remove({user: {$in: usersIds}});
   await User.remove({app: loadedApp.id});
   await Integration.remove({app: loadedApp.id});
-  return App.remove({_id: loadedApp.id});
+  await App.remove({_id: loadedApp.id});
+};
+
+exports.listAppSecrets = async (account, app) => {
+  const loadedApp = await this.getApp(account, app.id);
+  const appSecrets = await AppSecret.find({app: loadedApp.id});
+  return appSecrets;
+};
+
+exports.createAppSecret = async (account, app) => {
+  const loadedApp = await this.getApp(account, app.id);
+  const appSecret = new AppSecret({
+    app: app.id,
+    secret: await hash.token(),
+    registration_date: new Date(),
+  });
+  return appSecret.save();
+};
+
+exports.removeAppSecret = async (account, app, appSecret) => {
+  const loadedApp = await this.getApp(account, app.id);
+  await AppSecret.remove({_id: appSecret.id, app: loadedApp.id});
 };

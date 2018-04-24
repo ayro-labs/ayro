@@ -73,6 +73,12 @@ App.virtual('integrations', {
   foreignField: 'app',
 });
 
+const AppSecret = new Schema({
+  app: {type: ObjectId, ref: 'App', required: true, index: true},
+  secret: {type: String, required: true},
+  registration_date: {type: Date, required: true},
+});
+
 const Integration = new Schema({
   app: {type: ObjectId, ref: 'App', required: true},
   type: {type: String, enum: _.values(constants.integration.types), required: true},
@@ -187,6 +193,7 @@ exports.Account = mongoose.model('Account', normalizeSchema(Account, (account) =
   delete account.password;
 }));
 exports.App = mongoose.model('App', normalizeSchema(App));
+exports.AppSecret = mongoose.model('AppSecret', normalizeSchema(AppSecret));
 exports.Integration = mongoose.model('Integration', normalizeSchema(Integration, (integration) => {
   if (_.has(integration, 'configuration.fcm.server_key')) {
     const serverKey = integration.configuration.fcm.server_key;

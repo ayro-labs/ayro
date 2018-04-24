@@ -1,6 +1,6 @@
 'use strict';
 
-const {App} = require('../models');
+const {App, AppSecret} = require('../models');
 const appService = require('../services/app');
 const integrationService = require('../services/integration');
 const userService = require('../services/user');
@@ -162,6 +162,40 @@ module.exports = (router, app) => {
     }
   }
 
+  async function listAppSecrets(req, res) {
+    try {
+      const app = new App({id: req.params.app});
+      const appSecrets = await appService.listAppSecrets(req.account, app);
+      res.json(appSecrets);
+    } catch (err) {
+      logger.error(err);
+      errors.respondWithError(res, err);
+    }
+  }
+
+  async function createAppSecret(req, res) {
+    try {
+      const app = new App({id: req.params.app});
+      const appSecret = await appService.createAppSecret(req.account, app);
+      res.json(appSecret);
+    } catch (err) {
+      logger.error(err);
+      errors.respondWithError(res, err);
+    }
+  }
+
+  async function removeAppSecret(req, res) {
+    try {
+      const app = new App({id: req.params.app});
+      const appSecret = new AppSecret({id: req.params.app_secret});
+      await appService.removeAppSecret(req.account, app, appSecret);
+      res.json({});
+    } catch (err) {
+      logger.error(err);
+      errors.respondWithError(res, err);
+    }
+  }
+
   async function getIntegration(req, res) {
     try {
       const app = new App({id: req.params.app});
@@ -286,6 +320,10 @@ module.exports = (router, app) => {
   router.put('/:app', isAccountAuthenticated, updateApp);
   router.put('/:app/icon', [isAccountAuthenticated, upload.single('icon')], updateIcon);
   router.delete('/:app', isAccountAuthenticated, deleteApp);
+
+  router.get('/:app/secrets', isAccountAuthenticated, listAppSecrets);
+  router.post('/:app/secrets', isAccountAuthenticated, createAppSecret);
+  router.delete('/:app/secrets/:app_secret', isAccountAuthenticated, removeAppSecret);
 
   router.get('/:app/integrations/:channel', getIntegration);
 

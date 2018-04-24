@@ -11,8 +11,6 @@ const fs = require('fs');
 const Promise = require('bluebird');
 const _ = require('lodash');
 
-const $ = this;
-
 const ALLOWED_ATTRS = ['name', 'email'];
 
 const unlinkAsync = Promise.promisify(fs.unlink);
@@ -41,7 +39,7 @@ exports.updateAccount = async (account, data) => {
 };
 
 exports.updateLogo = async (account, logo) => {
-  const loadedAccount = await $.getAccount(account.id);
+  const loadedAccount = await this.getAccount(account.id);
   const oldLogoPath = loadedAccount.logo ? path.join(settings.accountLogoPath, loadedAccount.logo) : null;
   loadedAccount.logo = await files.fixAccountLogo(loadedAccount, logo.path);
   if (oldLogoPath) {
