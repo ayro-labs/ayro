@@ -24,7 +24,6 @@ mongoose.connect(`mongodb://${settings.mongo.host}:${settings.mongo.port}/${sett
 });
 
 function transform(obj, customTransform) {
-  obj.id = obj._id;
   delete obj._id;
   delete obj.__v;
   if (customTransform) {
