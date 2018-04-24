@@ -37,7 +37,7 @@
     "hiredis": "0.5.0",
     "json.date-extensions": "1.2.2",
     "jsonwebtoken": "8.2.1",
-    "jsonwebtoken-redis": "1.0.4",
+    "jsonwebtoken-redis": "1.0.6",
     "lodash": "4.17.5",
     "mongoose": "5.0.15",
     "morgan": "1.9.0",

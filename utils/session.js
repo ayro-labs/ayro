@@ -5,6 +5,7 @@ const settings = require('../configs/settings');
 const errors = require('../utils/errors');
 const redis = require('redis');
 const JwtRedis = require('jsonwebtoken-redis');
+const Promise = require('bluebird');
 
 const SCOPE_ACCOUNT = 'account';
 const SCOPE_USER = 'user';
@@ -15,12 +16,18 @@ const redisClient = redis.createClient({
   password: settings.redis.password,
 });
 
-const jwtRedis = new JwtRedis(redisClient, settings.session.expiresIn);
+const jwtRedis = new JwtRedis(redisClient, {
+  prefix: settings.session.prefix,
+  expiresKeyIn: settings.session.expiresIn,
+  promiseImpl: Promise,
+});
 
 exports.createAccountToken = async (account) => {
   try {
-    const decoded = await jwtRedis.sign({scope: SCOPE_ACCOUNT, account: account.id}, settings.session.secret, {
-      expiresKeyIn: settings.session.expiresIn,
+    const decoded = await jwtRedis.sign({
+      scope: SCOPE_ACCOUNT,
+      account: account.id,
+    }, settings.session.secret, {
       keyid: settings.session.keyId,
     });
     return decoded;
@@ -34,8 +41,11 @@ exports.createAccountToken = async (account) => {
 
 exports.createUserToken = async (user, device) => {
   try {
-    const decoded = await jwtRedis.sign({scope: SCOPE_USER, user: user.id, device: device.id}, settings.session.secret, {
-      expiresKeyIn: settings.session.expiresIn,
+    const decoded = await jwtRedis.sign({
+      scope: SCOPE_USER,
+      user: user.id,
+      device: device.id
+    }, settings.session.secret, {
       keyid: settings.session.keyId,
     });
     return decoded;
