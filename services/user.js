@@ -27,7 +27,7 @@ async function saveUser(app, data, jwtToken) {
       throw errors.ayroError('jwt_invalid', 'App secret not found');
     }
     const payload = jwt.verify(jwtToken, appSecret.secret);
-    if (payload.scope !== JWT_SCOPE_USER || payload.user !== data.uid) {
+    if (payload.scope !== JWT_SCOPE_USER || payload.userId !== data.uid) {
       throw errors.ayroError('jwt_invalid', 'User\'s uid not match');
     }
   }
