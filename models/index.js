@@ -76,7 +76,7 @@ const AppSecret = new Schema({
   app: {type: ObjectId, ref: 'App', required: true, index: true},
   secret: {type: String, required: true},
   registration_date: {type: Date, required: true},
-});
+}, {collection: 'app_secrets'});
 
 const Integration = new Schema({
   app: {type: ObjectId, ref: 'App', required: true},
