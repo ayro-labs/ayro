@@ -44,7 +44,7 @@ exports.createUserToken = async (user, device) => {
     const decoded = await jwtRedis.sign({
       scope: SCOPE_USER,
       user: user.id,
-      device: device.id
+      device: device.id,
     }, settings.session.secret, {
       keyid: settings.session.keyId,
     });

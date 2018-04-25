@@ -67,7 +67,7 @@ exports.listAppSecrets = async (account, app) => {
 exports.createAppSecret = async (account, app) => {
   const loadedApp = await this.getApp(account, app.id);
   const appSecret = new AppSecret({
-    app: app.id,
+    app: loadedApp.id,
     secret: await hash.token(),
     registration_date: new Date(),
   });
