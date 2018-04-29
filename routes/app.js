@@ -3,6 +3,7 @@
 const {App, AppSecret} = require('../models');
 const appService = require('../services/app');
 const integrationService = require('../services/integration');
+const pluginService = require('../services/plugin');
 const userService = require('../services/user');
 const deviceService = require('../services/device');
 const settings = require('../configs/settings');
@@ -101,7 +102,7 @@ module.exports = (router, app) => {
 
   async function listApps(req, res) {
     try {
-      const apps = await appService.listApps(req.account, req.query.integrations === 'true');
+      const apps = await appService.listApps(req.account, req.query.integrations === 'true', req.query.plugins === 'true');
       res.json(apps);
     } catch (err) {
       logger.error(err);
@@ -111,7 +112,7 @@ module.exports = (router, app) => {
 
   async function getApp(req, res) {
     try {
-      const app = await appService.getApp(req.account, req.params.app, req.query.integrations === 'true');
+      const app = await appService.getApp(req.account, req.params.app, req.query.integrations === 'true', req.query.plugins === 'true');
       res.json(app);
     } catch (err) {
       logger.error(err);
@@ -314,6 +315,17 @@ module.exports = (router, app) => {
     }
   }
 
+  async function getPlugin(req, res) {
+    try {
+      const app = new App({id: req.params.app});
+      const plugin = await pluginService.getPlugin(app, req.params.type, {require: req.query.require ? req.query.require === 'true' : null});
+      res.json(plugin);
+    } catch (err) {
+      logger.error(err);
+      errors.respondWithError(res, err);
+    }
+  }
+
   router.get('/', isAccountAuthenticated, listApps);
   router.get('/:app', isAccountAuthenticated, getApp);
   router.post('/', isAccountAuthenticated, createApp);
@@ -349,6 +361,8 @@ module.exports = (router, app) => {
   router.delete('/:app/integrations/slack', isAccountAuthenticated, removeSlackIntegration);
   router.get('/:app/integrations/slack/channels', isAccountAuthenticated, listSlackChannels);
   router.post('/:app/integrations/slack/channels', isAccountAuthenticated, createSlackChannel);
+
+  router.get('/:app/plugins/:type', getPlugin);
 
   app.use('/apps', router);
 

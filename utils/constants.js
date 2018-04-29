@@ -14,6 +14,12 @@ module.exports = Object.freeze({
       SLACK: 'slack',
     }),
   }),
+  plugin: Object.freeze({
+    types: Object.freeze({
+      WELCOME_MESSAGE: 'welcome_message',
+      OFFICE_HOURS: 'out_of_office',
+    }),
+  }),
   device: Object.freeze({
     platforms: Object.freeze({
       WEB: Object.freeze({

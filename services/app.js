@@ -12,16 +12,27 @@ const Promise = require('bluebird');
 
 const unlinkAsync = Promise.promisify(fs.unlink);
 
-exports.listApps = async (account, withIntegrations) => {
-  return appCommons.findApps({account: account.id}, withIntegrations ? {populate: 'integrations'} : {});
+function getAppPopulateOption(withIntegrations, withPlugins) {
+  const populate = [];
+  if (withIntegrations) {
+    populate.push('integrations');
+  }
+  if (withPlugins) {
+    populate.push('plugins');
+  }
+  return populate;
+}
+
+exports.listApps = async (account, withIntegrations, withPlugins) => {
+  return appCommons.findApps({account: account.id}, {populate: getAppPopulateOption(withIntegrations, withPlugins)});
 };
 
-exports.getApp = async (account, id, withIntegrations) => {
-  return appCommons.findApp({_id: id, account: account.id}, withIntegrations ? {populate: 'integrations'} : {});
+exports.getApp = async (account, id, withIntegrations, withPlugins) => {
+  return appCommons.findApp({_id: id, account: account.id}, {populate: getAppPopulateOption(withIntegrations, withPlugins)});
 };
 
-exports.getAppByToken = async (token, withIntegrations) => {
-  return appCommons.findApp({token}, withIntegrations ? {populate: 'integrations'} : {});
+exports.getAppByToken = async (token, withIntegrations, withPlugins) => {
+  return appCommons.findApp({token}, {populate: getAppPopulateOption(withIntegrations, withPlugins)});
 };
 
 exports.createApp = async (account, name) => {

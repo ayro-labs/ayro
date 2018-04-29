@@ -71,6 +71,11 @@ App.virtual('integrations', {
   localField: '_id',
   foreignField: 'app',
 });
+App.virtual('plugins', {
+  ref: 'Plugin',
+  localField: '_id',
+  foreignField: 'app',
+});
 
 const AppSecret = new Schema({
   app: {type: ObjectId, ref: 'App', required: true, index: true},
@@ -88,6 +93,14 @@ const Integration = new Schema({
 Integration.index({app: 1, channel: 1}, {unique: true});
 Integration.index({channel: 1, 'configuration.page.id': 1});
 Integration.index({channel: 1, 'configuration.team.id': 1});
+
+const Plugin = new Schema({
+  app: {type: ObjectId, ref: 'App', required: true},
+  type: {type: String, enum: _.values(constants.plugin.types), required: true},
+  channels: {type: String, enum: _.values(constants.integration.channels), required: true},
+  configuration: {type: Object, required: false},
+  registration_date: {type: Date, required: true},
+});
 
 const User = new Schema({
   app: {type: ObjectId, ref: 'App', required: true},
@@ -200,6 +213,7 @@ exports.Integration = mongoose.model('Integration', normalizeSchema(Integration,
     integration.configuration.fcm.server_key = serverKey.length > 10 ? hiddenKey + serverKey.slice(-5) : hiddenKey;
   }
 }));
+exports.Plugin = mongoose.model('Plugin', normalizeSchema(Plugin));
 exports.User = mongoose.model('User', normalizeSchema(User));
 exports.Device = mongoose.model('Device', normalizeSchema(Device));
 exports.ChatMessage = mongoose.model('ChatMessage', normalizeSchema(ChatMessage));
