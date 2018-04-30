@@ -1,6 +1,6 @@
 'use strict';
 
-const {App, Plugin, Agent} = require('../models');
+const {App, Plugin} = require('../models');
 const settings = require('../configs/settings');
 const constants = require('../utils/constants');
 const errors = require('../utils/errors');
@@ -8,6 +8,7 @@ const appCommons = require('./commons/app');
 const pluginCommons = require('./commons/plugin');
 const userCommons = require('./commons/user');
 const chatCommons = require('./commons/chat');
+const {logger} = require('@ayro/commons');
 const pubSub = require('pubsub-js');
 const moment = require('moment');
 const _ = require('lodash');
@@ -29,7 +30,7 @@ async function executeOfficeHoursPlugin(plugin, user) {
     return;
   }
   const timezone = fixTimezone(plugin.configuration.timezone);
-  now.utcOffset(timezone)
+  now.utcOffset(timezone);
   const day = _.lowerCase(now.format('dddd'));
   const timeRange = plugin.configuration.time_range[day];
   if (!timeRange) {
@@ -52,7 +53,7 @@ async function executeOfficeHoursPlugin(plugin, user) {
       chatCommons.pushMessage(agent, user, plugin.configuration.reply);
     }, 3000);
   }
-  await user.update({'extra.plugins.office_hours.last_check': moment().valueOf()})
+  await user.update({'extra.plugins.office_hours.last_check': moment().valueOf()});
 }
 
 async function executeWelcomeMessagePlugin(plugin, user) {

@@ -7,7 +7,7 @@ const {logger} = require('@ayro/commons');
 
 module.exports = (router, app) => {
 
-  async function viewChat(req, res, type) {
+  async function viewChat(req, res) {
     try {
       await eventService.trackViewChat(req.user);
       res.json({});
