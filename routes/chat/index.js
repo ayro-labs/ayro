@@ -1,6 +1,7 @@
 'use strict';
 
 const chatService = require('../../services/chat');
+const eventService = require('../../services/event');
 const errors = require('../../utils/errors');
 const {userAuthenticated} = require('../../utils/middlewares');
 const {logger} = require('@ayro/commons');
@@ -20,6 +21,7 @@ module.exports = (router, app) => {
   async function postMessage(req, res) {
     try {
       const chatMessage = await chatService.postMessage(req.user, req.device, req.params.channel, req.body);
+      await eventService.trackPostMessage(req.user);
       res.json(chatMessage);
     } catch (err) {
       logger.error(err);

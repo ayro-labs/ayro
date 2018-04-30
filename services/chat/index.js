@@ -6,12 +6,10 @@ const errors = require('../../utils/errors');
 const userCommons = require('../commons/user');
 const deviceCommons = require('../commons/device');
 const integrationCommons = require('../commons/integration');
+const chatCommons = require('../commons/chat');
 const slack = require('../integrations/slack');
-const push = require('../integrations/push');
 const Promise = require('bluebird');
 const _ = require('lodash');
-
-const EVENT_CHAT_MESSAGE = 'chat_message';
 
 function getBusinessChannelApi(channel) {
   switch (channel) {
@@ -34,20 +32,10 @@ exports.pushMessage = async (channel, data) => {
   }
   const integration = await channelApi.getIntegration(data);
   try {
-    const user = await channelApi.getUser(data);
-    await User.populate(user, 'latest_device');
     const agent = await channelApi.getAgent(integration.configuration, data);
+    const user = await channelApi.getUser(data);
     const text = await channelApi.extractText(data);
-    const chatMessage = new ChatMessage({
-      agent,
-      text,
-      user: user.id,
-      device: user.latest_device.id,
-      direction: constants.chatMessage.directions.INCOMING,
-      date: new Date(),
-    });
-    await push.message(user, EVENT_CHAT_MESSAGE, chatMessage);
-    await chatMessage.save();
+    const chatMessage = await chatCommons.pushMessage(agent, user, text);
     await channelApi.confirmMessage(integration.configuration, data, user, chatMessage);
   } catch (err) {
     if (err.code === 'user_not_found') {
