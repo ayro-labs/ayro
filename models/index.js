@@ -52,8 +52,8 @@ function normalizeSchema(schema, customTransform) {
 }
 
 const Account = new Schema({
-  name: {type: String, required: true, trim: true},
-  email: {type: String, required: true, trim: true, unique: true},
+  name: {type: String, required: true},
+  email: {type: String, required: true, unique: true},
   password: {type: String, required: true},
   logo: {type: String, required: false},
   registration_date: {type: Date, required: true},
@@ -61,7 +61,7 @@ const Account = new Schema({
 
 const App = new Schema({
   account: {type: ObjectId, ref: 'Account', required: true, index: true},
-  name: {type: String, required: true, trim: true},
+  name: {type: String, required: true},
   icon: {type: String, required: false},
   token: {type: String, required: true},
   registration_date: {type: Date, required: true},
@@ -97,7 +97,7 @@ Integration.index({channel: 1, 'configuration.team.id': 1});
 const Plugin = new Schema({
   app: {type: ObjectId, ref: 'App', required: true},
   type: {type: String, enum: _.values(constants.plugin.types), required: true},
-  channels: {type: String, enum: _.values(constants.integration.channels), required: true},
+  channels: [{type: String, enum: _.values(constants.integration.channels), required: true}],
   configuration: {type: Object, required: false},
   registration_date: {type: Date, required: true},
 });
@@ -105,9 +105,9 @@ const Plugin = new Schema({
 const User = new Schema({
   app: {type: ObjectId, ref: 'App', required: true},
   uid: {type: String, required: true},
-  first_name: {type: String, required: false, trim: true},
-  last_name: {type: String, required: false, trim: true},
-  email: {type: String, required: false, trim: true},
+  first_name: {type: String, required: false},
+  last_name: {type: String, required: false},
+  email: {type: String, required: false},
   photo_url: {type: String, required: false},
   photo: {type: String, required: false},
   identified: {type: Boolean, required: true},

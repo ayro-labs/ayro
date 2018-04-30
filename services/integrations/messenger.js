@@ -51,6 +51,8 @@ exports.updateIntegration = async (app, page) => {
 };
 
 exports.removeIntegration = async (app) => {
+  const integration = await integrationCommons.getIntegration(app, constants.integration.channels.MESSENGER);
+  await unsubscribePage(integration.configuration);
   return integrationCommons.removeIntegration(app, constants.integration.channels.MESSENGER);
 };
 

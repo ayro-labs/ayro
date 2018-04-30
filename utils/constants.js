@@ -17,7 +17,7 @@ module.exports = Object.freeze({
   plugin: Object.freeze({
     types: Object.freeze({
       WELCOME_MESSAGE: 'welcome_message',
-      OFFICE_HOURS: 'out_of_office',
+      OFFICE_HOURS: 'office_hours',
     }),
   }),
   device: Object.freeze({

@@ -73,5 +73,7 @@ exports.updateUser = async (user, data) => {
       logger.debug('Could not download photo of user %s: %s.', loadedUser.id, err.message);
     }
   }
-  return User.findByIdAndUpdate(loadedUser.id, finalData, {new: true, runValidators: true}).exec();
+  await loadedUser.update(finalData, {runValidators: true});
+  loadedUser.set(finalData);
+  return loadedUser;
 };

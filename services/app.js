@@ -9,6 +9,9 @@ const appCommons = require('./commons/app');
 const path = require('path');
 const fs = require('fs');
 const Promise = require('bluebird');
+const _ = require('lodash');
+
+const ALLOWED_ATTRS = ['name'];
 
 const unlinkAsync = Promise.promisify(fs.unlink);
 
@@ -27,8 +30,13 @@ exports.listApps = async (account, withIntegrations, withPlugins) => {
   return appCommons.findApps({account: account.id}, {populate: getAppPopulateOption(withIntegrations, withPlugins)});
 };
 
-exports.getApp = async (account, id, withIntegrations, withPlugins) => {
-  return appCommons.findApp({_id: id, account: account.id}, {populate: getAppPopulateOption(withIntegrations, withPlugins)});
+exports.getApp = async (id, withIntegrations, withPlugins) => {
+  return appCommons.getApp(id, {populate: getAppPopulateOption(withIntegrations, withPlugins)});
+};
+
+exports.appExists = async (query) => {
+  const count = await App.count({query});
+  return count > 0;
 };
 
 exports.getAppByToken = async (token, withIntegrations, withPlugins) => {
@@ -41,23 +49,28 @@ exports.createApp = async (account, name) => {
   return app.save();
 };
 
-exports.updateApp = async (account, app, name) => {
-  const loadedApp = await this.getApp(account, app.id);
-  return App.findByIdAndUpdate(loadedApp.id, {name}, {new: true, runValidators: true}).exec();
+exports.updateApp = async (app, data) => {
+  const loadedApp = await appCommons.getApp(app.id);
+  const attrs = _.pick(data, ALLOWED_ATTRS);
+  await loadedApp.update(attrs, {runValidators: true});
+  loadedApp.set(attrs);
+  return loadedApp;
 };
 
-exports.updateIcon = async (account, app, icon) => {
-  const loadedApp = await this.getApp(account, app.id);
+exports.updateIcon = async (app, iconFile) => {
+  const loadedApp = await appCommons.getApp(app.id);
   const oldIconPath = loadedApp.icon ? path.join(settings.appIconPath, loadedApp.icon) : null;
-  loadedApp.icon = await files.fixAppIcon(loadedApp, icon.path);
+  const icon = await files.fixAppIcon(loadedApp, iconFile.path);
+  await loadedApp.update({icon}, {runValidators: true});
+  loadedApp.icon = icon;
   if (oldIconPath) {
     await unlinkAsync(oldIconPath);
   }
-  return App.findByIdAndUpdate(loadedApp.id, {icon: loadedApp.icon}, {new: true, runValidators: true}).exec();
+  return loadedApp;
 };
 
-exports.deleteApp = async (account, app) => {
-  const loadedApp = await this.getApp(account, app.id);
+exports.deleteApp = async (app) => {
+  const loadedApp = await appCommons.getApp(app.id);
   const users = await User.find({app: loadedApp.id}).select({_id: 1});
   const usersIds = users.map((user) => {
     return user.id;
@@ -69,14 +82,14 @@ exports.deleteApp = async (account, app) => {
   await App.remove({_id: loadedApp.id});
 };
 
-exports.listAppSecrets = async (account, app) => {
-  const loadedApp = await this.getApp(account, app.id);
+exports.listAppSecrets = async (app) => {
+  const loadedApp = await appCommons.getApp(app.id);
   const appSecrets = await AppSecret.find({app: loadedApp.id});
   return appSecrets;
 };
 
-exports.createAppSecret = async (account, app) => {
-  const loadedApp = await this.getApp(account, app.id);
+exports.createAppSecret = async (app) => {
+  const loadedApp = await appCommons.getApp(app.id);
   const appSecret = new AppSecret({
     app: loadedApp.id,
     secret: await hash.token(),
@@ -85,7 +98,7 @@ exports.createAppSecret = async (account, app) => {
   return appSecret.save();
 };
 
-exports.removeAppSecret = async (account, app, appSecret) => {
-  const loadedApp = await this.getApp(account, app.id);
+exports.removeAppSecret = async (app, appSecret) => {
+  const loadedApp = await appCommons.getApp(app.id);
   await AppSecret.remove({_id: appSecret.id, app: loadedApp.id});
 };

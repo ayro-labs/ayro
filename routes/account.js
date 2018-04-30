@@ -4,7 +4,7 @@ const accountService = require('../services/account');
 const settings = require('../configs/settings');
 const session = require('../utils/session');
 const errors = require('../utils/errors');
-const {isAccountAuthenticated, decodeToken} = require('../utils/middlewares');
+const {accountAuthenticated, decodeToken} = require('../utils/middlewares');
 const {logger} = require('@ayro/commons');
 const multer = require('multer');
 
@@ -85,8 +85,8 @@ module.exports = (router, app) => {
   }
 
   router.post('/', createAccount);
-  router.put('/', isAccountAuthenticated, updateAccount);
-  router.put('/logo', [isAccountAuthenticated, upload.single('logo')], updateLogo);
+  router.put('/', accountAuthenticated, updateAccount);
+  router.put('/logo', [accountAuthenticated, upload.single('logo')], updateLogo);
   router.get('/authenticated', getAuthenticatedAccount);
   router.post('/login', login);
   router.post('/logout', logout);

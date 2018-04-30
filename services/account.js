@@ -35,17 +35,23 @@ exports.createAccount = async (name, email, password) => {
 };
 
 exports.updateAccount = async (account, data) => {
-  return Account.findByIdAndUpdate(account.id, _.pick(data, ALLOWED_ATTRS), {new: true, runValidators: true}).exec();
+  const loadedAccount = await accountCommons.getAccount(account.id);
+  const attrs = _.pick(data, ALLOWED_ATTRS);
+  await loadedAccount.update(attrs, {runValidators: true});
+  loadedAccount.set(attrs);
+  return loadedAccount;
 };
 
-exports.updateLogo = async (account, logo) => {
+exports.updateLogo = async (account, logoFile) => {
   const loadedAccount = await this.getAccount(account.id);
   const oldLogoPath = loadedAccount.logo ? path.join(settings.accountLogoPath, loadedAccount.logo) : null;
-  loadedAccount.logo = await files.fixAccountLogo(loadedAccount, logo.path);
+  const logo = await files.fixAccountLogo(loadedAccount, logoFile.path);
+  await loadedAccount.update({logo}, {runValidators: true});
+  loadedAccount.logo = logo;
   if (oldLogoPath) {
     await unlinkAsync(oldLogoPath);
   }
-  return Account.findByIdAndUpdate(loadedAccount.id, {logo: loadedAccount.logo}, {new: true, runValidators: true}).exec();
+  return loadedAccount;
 };
 
 exports.authenticate = async (email, password) => {

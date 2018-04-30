@@ -6,7 +6,7 @@ const userService = require('../services/user');
 const deviceService = require('../services/device');
 const session = require('../utils/session');
 const errors = require('../utils/errors');
-const {isUserAuthenticated, decodeToken} = require('../utils/middlewares');
+const {userAuthenticated, decodeToken} = require('../utils/middlewares');
 const {logger} = require('@ayro/commons');
 const _ = require('lodash');
 
@@ -67,10 +67,10 @@ module.exports = (router, app) => {
     }
   }
 
-  router.put('/', isUserAuthenticated, updateUser);
-  router.put('/devices', isUserAuthenticated, updateDevice);
+  router.put('/', userAuthenticated, updateUser);
+  router.put('/devices', userAuthenticated, updateDevice);
   router.post('/login', login);
-  router.post('/logout', isUserAuthenticated, logout);
+  router.post('/logout', userAuthenticated, logout);
 
   app.use('/users', router);
 

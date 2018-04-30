@@ -12,11 +12,7 @@ function throwIntegrationNotFoundIfNeeded(integration, options) {
 }
 
 exports.getIntegration = async (app, channel, options) => {
-  const promise = Integration.findOne({app: app.id, channel});
-  queries.fillQuery(promise, options);
-  const integration = await promise.exec();
-  throwIntegrationNotFoundIfNeeded(integration, options);
-  return integration;
+  return this.findIntegration({app: app.id, channel}, options);
 };
 
 exports.findIntegration = async (query, options) => {
@@ -53,11 +49,13 @@ exports.updateIntegration = async (app, channel, configuration) => {
   if (!integration.configuration) {
     integration.configuration = {};
   }
-  _.assign(integration.configuration, configuration);
+  const newConfiguration = _.cloneDeep(integration.configuration);
+  _.assign(newConfiguration, configuration);
   if (configuration.fcm && _.isEmpty(configuration.fcm)) {
-    delete integration.configuration.fcm;
+    delete newConfiguration.fcm;
   }
-  await Integration.updateOne({_id: integration.id}, {configuration: integration.configuration}).exec();
+  await integration.update({configuration: newConfiguration}, {runValidators: true});
+  integration.configuration = newConfiguration;
   return integration;
 };
 

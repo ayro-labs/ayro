@@ -2,7 +2,7 @@
 
 const chatService = require('../../services/chat');
 const errors = require('../../utils/errors');
-const {isUserAuthenticated} = require('../../utils/middlewares');
+const {userAuthenticated} = require('../../utils/middlewares');
 const {logger} = require('@ayro/commons');
 
 module.exports = (router, app) => {
@@ -27,8 +27,8 @@ module.exports = (router, app) => {
     }
   }
 
-  router.get('/', isUserAuthenticated, listMessages);
-  router.post('/:channel', isUserAuthenticated, postMessage);
+  router.get('/', userAuthenticated, listMessages);
+  router.post('/:channel', userAuthenticated, postMessage);
 
   app.use('/chat', router);
 

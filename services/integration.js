@@ -1,50 +1,67 @@
 'use strict';
 
+const constants = require('../utils/constants');
 const integrationCommons = require('./commons/integration');
-const websiteIntegration = require('./integrations/website');
-const wordPressIntegration = require('./integrations/wordpress');
-const androidIntegration = require('./integrations/android');
 const messengerIntegration = require('./integrations/messenger');
 const slackIntegration = require('./integrations/slack');
+const _ = require('lodash');
+
+const CONFIG_WEBSITE = ['primary_color', 'conversation_color'];
+const CONFIG_WORDPRESS = ['primary_color', 'conversation_color'];
+const CONFIG_ANDROID = ['primary_color', 'conversation_color', 'fcm', 'fcm.server_key', 'fcm.sender_id'];
+const DEFAULT_PRIMARY_COLOR = '#5c7382';
+const DEFAULT_CONVERSATION_COLOR = '#007bff';
 
 exports.getIntegration = async (app, channel, options) => {
   return integrationCommons.getIntegration(app, channel, options);
 };
 
 exports.addWebsiteIntegration = async (app) => {
-  return websiteIntegration.addIntegration(app);
+  const configuration = {
+    primary_color: DEFAULT_PRIMARY_COLOR,
+    conversation_color: DEFAULT_CONVERSATION_COLOR,
+  };
+  return integrationCommons.addIntegration(app, constants.integration.channels.WEBSITE, constants.integration.types.USER, _.pick(configuration, CONFIG_WEBSITE));
 };
 
 exports.updateWebsiteIntegration = async (app, configuration) => {
-  return websiteIntegration.updateIntegration(app, configuration);
+  return integrationCommons.updateIntegration(app, constants.integration.channels.WEBSITE, _.pick(configuration, CONFIG_WEBSITE));
 };
 
 exports.removeWebsiteIntegration = async (app) => {
-  return websiteIntegration.removeIntegration(app);
+  return integrationCommons.removeIntegration(app, constants.integration.channels.WEBSITE);
 };
 
 exports.addWordPressIntegration = async (app) => {
-  return wordPressIntegration.addIntegration(app);
+  const configuration = {
+    primary_color: DEFAULT_PRIMARY_COLOR,
+    conversation_color: DEFAULT_CONVERSATION_COLOR,
+  };
+  return integrationCommons.addIntegration(app, constants.integration.channels.WORDPRESS, constants.integration.types.USER, _.pick(configuration, CONFIG_WORDPRESS));
 };
 
 exports.updateWordPressIntegration = async (app, configuration) => {
-  return wordPressIntegration.updateIntegration(app, configuration);
+  return integrationCommons.updateIntegration(app, constants.integration.channels.WORDPRESS, _.pick(configuration, CONFIG_WORDPRESS));
 };
 
 exports.removeWordPressIntegration = async (app) => {
-  return wordPressIntegration.removeIntegration(app);
+  return integrationCommons.removeIntegration(app, constants.integration.channels.WORDPRESS);
 };
 
 exports.addAndroidIntegration = async (app) => {
-  return androidIntegration.addIntegration(app);
+  const configuration = {
+    primary_color: DEFAULT_PRIMARY_COLOR,
+    conversation_color: DEFAULT_CONVERSATION_COLOR,
+  };
+  return integrationCommons.addIntegration(app, constants.integration.channels.ANDROID, constants.integration.types.USER, _.pick(configuration, CONFIG_ANDROID));
 };
 
 exports.updateAndroidIntegration = async (app, configuration) => {
-  return androidIntegration.updateIntegration(app, configuration);
+  return integrationCommons.updateIntegration(app, constants.integration.channels.ANDROID, _.pick(configuration, CONFIG_ANDROID));
 };
 
 exports.removeAndroidIntegration = async (app) => {
-  return androidIntegration.removeIntegration(app);
+  return integrationCommons.removeIntegration(app, constants.integration.channels.ANDROID);
 };
 
 exports.addMessengerIntegration = async (app, profile) => {
