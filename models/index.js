@@ -97,7 +97,7 @@ Integration.index({channel: 1, 'configuration.team.id': 1});
 const Plugin = new Schema({
   app: {type: ObjectId, ref: 'App', required: true},
   type: {type: String, enum: _.values(constants.plugin.types), required: true},
-  channels: [{type: String, enum: _.values(constants.integration.channels), required: true}],
+  channels: {type: [String], enum: _.values(constants.integration.channels), default: undefined},
   configuration: {type: Object, required: false},
   registration_date: {type: Date, required: true},
 });

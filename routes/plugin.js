@@ -15,10 +15,10 @@ module.exports = (router, app) => {
       let plugin = null;
       switch (type) {
         case constants.plugin.types.OFFICE_HOURS:
-          plugin = await pluginService.addOfficeHoursPlugin(app, req.body.channels, req.body.configuration);
+          plugin = await pluginService.addOfficeHoursPlugin(app, req.body);
           break;
         case constants.plugin.types.WELCOME_MESSAGE:
-          plugin = await pluginService.addWelcomeMessagePlugin(app, req.body.channels, req.body.configuration);
+          plugin = await pluginService.addWelcomeMessagePlugin(app, req.body);
           break;
       }
       res.json(plugin);
@@ -34,10 +34,10 @@ module.exports = (router, app) => {
       let plugin = null;
       switch (type) {
         case constants.plugin.types.OFFICE_HOURS:
-          plugin = await pluginService.updateOfficeHoursPlugin(app, req.body.channels, req.body.configuration);
+          plugin = await pluginService.updateOfficeHoursPlugin(app, req.body);
           break;
         case constants.plugin.types.WELCOME_MESSAGE:
-          plugin = await pluginService.updateWelcomeMessagePlugin(app, req.body.channels, req.body.configuration);
+          plugin = await pluginService.updateWelcomeMessagePlugin(app, req.body);
           break;
       }
       res.json(plugin);
