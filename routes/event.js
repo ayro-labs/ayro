@@ -9,7 +9,7 @@ module.exports = (router, app) => {
 
   async function viewChat(req, res) {
     try {
-      await eventService.trackViewChat(req.user);
+      await eventService.trackViewChat(req.user, req.body.channel);
       res.json({});
     } catch (err) {
       logger.error(err);

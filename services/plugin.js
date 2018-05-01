@@ -14,7 +14,7 @@ const moment = require('moment');
 const _ = require('lodash');
 
 const CONFIG_OFFICE_HOURS = ['timezone', 'time_range', 'time_range.sunday', 'time_range.monday', 'time_range.tuesday', 'time_range.wednesday', 'time_range.thursday', 'time_range.friday', 'time_range.saturday', 'reply'];
-const CONFIG_WELCOME_MESSAGE = ['message'];
+const CONFIG_GREETINGS_MESSAGE = ['message'];
 
 function fixTimezone(timezone) {
   if (timezone === 'UTC') {
@@ -49,33 +49,40 @@ async function executeOfficeHoursPlugin(plugin, user) {
       name: app.name,
       photo_url: `${settings.appIconUrl}/${app.icon}`,
     };
-    setTimeout(() => {
-      chatCommons.pushMessage(agent, user, plugin.configuration.reply);
-    }, 3000);
+    try {
+      await chatCommons.pushMessage(agent, user, plugin.configuration.reply);
+    } catch (err) {
+      logger.warn('Could not push message to user', err);
+    }
   }
   await user.update({'extra.plugins.office_hours.last_check': moment().valueOf()});
 }
 
-async function executeWelcomeMessagePlugin(plugin, user) {
+async function executeGreetingsMessagePlugin(plugin, user, channel) {
   const app = await appCommons.getApp(user.app);
   const agent = {
     id: '0',
     name: app.name,
     photo_url: `${settings.appIconUrl}/${app.icon}`,
   };
-  setTimeout(() => {
-    chatCommons.pushMessage(agent, user, plugin.configuration.message);
+  setTimeout(async () => {
+    try {
+      chatCommons.pushMessage(agent, user, plugin.configuration.message, channel);
+    } catch (err) {
+      logger.warn('Could not push message to user', err);
+    }
   }, 3000);
 }
 
-pubSub.subscribe(constants.events.VIEW_CHAT, async (msg, user) => {
+pubSub.subscribe(constants.events.VIEW_CHAT, async (msg, data) => {
   try {
+    const {user, channel} = data;
     const loadedUser = await userCommons.getUser(user.id);
     if (_.get(loadedUser, 'extra.events.view_chat') === 1) {
       const app = new App({id: loadedUser.app});
-      const welcomeMessagePlugin = await pluginCommons.getPlugin(app, constants.plugin.types.WELCOME_MESSAGE, {require: false});
-      if (welcomeMessagePlugin) {
-        executeWelcomeMessagePlugin(welcomeMessagePlugin, loadedUser);
+      const greetingsMessagePlugin = await pluginCommons.getPlugin(app, constants.plugin.types.GREETINGS_MESSAGE, {require: false});
+      if (greetingsMessagePlugin) {
+        executeGreetingsMessagePlugin(greetingsMessagePlugin, loadedUser, channel);
       }
     }
   } catch (err) {
@@ -129,12 +136,12 @@ exports.updateOfficeHoursPlugin = async (app, configuration) => {
   return updatePlugin(app, constants.plugin.types.OFFICE_HOURS, _.pick(configuration, CONFIG_OFFICE_HOURS));
 };
 
-exports.addWelcomeMessagePlugin = async (app, configuration) => {
-  return addPlugin(app, constants.plugin.types.WELCOME_MESSAGE, _.pick(configuration, CONFIG_WELCOME_MESSAGE));
+exports.addGreetingsMessagePlugin = async (app, configuration) => {
+  return addPlugin(app, constants.plugin.types.GREETINGS_MESSAGE, _.pick(configuration, CONFIG_GREETINGS_MESSAGE));
 };
 
-exports.updateWelcomeMessagePlugin = async (app, configuration) => {
-  return updatePlugin(app, constants.plugin.types.WELCOME_MESSAGE, _.pick(configuration, CONFIG_WELCOME_MESSAGE));
+exports.updateGreetingsMessagePlugin = async (app, configuration) => {
+  return updatePlugin(app, constants.plugin.types.GREETINGS_MESSAGE, _.pick(configuration, CONFIG_GREETINGS_MESSAGE));
 };
 
 exports.removePlugin = async (app, type) => {

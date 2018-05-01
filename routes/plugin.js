@@ -17,8 +17,8 @@ module.exports = (router, app) => {
         case constants.plugin.types.OFFICE_HOURS:
           plugin = await pluginService.addOfficeHoursPlugin(app, req.body);
           break;
-        case constants.plugin.types.WELCOME_MESSAGE:
-          plugin = await pluginService.addWelcomeMessagePlugin(app, req.body);
+        case constants.plugin.types.GREETINGS_MESSAGE:
+          plugin = await pluginService.addGreetingsMessagePlugin(app, req.body);
           break;
       }
       res.json(plugin);
@@ -36,8 +36,8 @@ module.exports = (router, app) => {
         case constants.plugin.types.OFFICE_HOURS:
           plugin = await pluginService.updateOfficeHoursPlugin(app, req.body);
           break;
-        case constants.plugin.types.WELCOME_MESSAGE:
-          plugin = await pluginService.updateWelcomeMessagePlugin(app, req.body);
+        case constants.plugin.types.GREETINGS_MESSAGE:
+          plugin = await pluginService.updateGreetingsMessagePlugin(app, req.body);
           break;
       }
       res.json(plugin);
@@ -66,12 +66,12 @@ module.exports = (router, app) => {
     updatePlugin(req, res, constants.plugin.types.OFFICE_HOURS);
   }
 
-  async function addWelcomeMessagePlugin(req, res) {
-    addPlugin(req, res, constants.plugin.types.WELCOME_MESSAGE);
+  async function addGreetingsMessagePlugin(req, res) {
+    addPlugin(req, res, constants.plugin.types.GREETINGS_MESSAGE);
   }
 
-  async function updateWelcomeMessagePlugin(req, res) {
-    updatePlugin(req, res, constants.plugin.types.WELCOME_MESSAGE);
+  async function updateGreetingsMessagePlugin(req, res) {
+    updatePlugin(req, res, constants.plugin.types.GREETINGS_MESSAGE);
   }
 
   async function removePlugin(req, res) {
@@ -91,8 +91,8 @@ module.exports = (router, app) => {
   router.post('/office_hours', [accountAuthenticated, accountOwnsApp], addOfficeHoursPlugin);
   router.put('/office_hours', [accountAuthenticated, accountOwnsApp], updateOfficeHoursPlugin);
 
-  router.post('/welcome_message', [accountAuthenticated, accountOwnsApp], addWelcomeMessagePlugin);
-  router.put('/welcome_message', [accountAuthenticated, accountOwnsApp], updateWelcomeMessagePlugin);
+  router.post('/greetings_message', [accountAuthenticated, accountOwnsApp], addGreetingsMessagePlugin);
+  router.put('/greetings_message', [accountAuthenticated, accountOwnsApp], updateGreetingsMessagePlugin);
 
   app.use('/apps/:app/plugins', router);
 

@@ -3,9 +3,9 @@
 const constants = require('../utils/constants');
 const pubSub = require('pubsub-js');
 
-exports.trackViewChat = async (user) => {
+exports.trackViewChat = async (user, channel) => {
   await user.update({$inc: {'extra.events.view_chat': 1}});
-  pubSub.publish(constants.events.VIEW_CHAT, user);
+  pubSub.publish(constants.events.VIEW_CHAT, {user, channel});
 };
 
 exports.trackPostMessage = async (user) => {
