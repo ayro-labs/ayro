@@ -72,6 +72,9 @@ exports.decodeToken = async (token) => {
             result.user = new User({id: payload.user});
             result.device = new Device({id: payload.device});
             break;
+          default:
+            // Nothing to do...
+            break;
         }
       }
     }

@@ -47,8 +47,10 @@ exports.postMessage = async (data) => {
   if (!integration) {
     return;
   }
-  const devices = await deviceCommons.findDevices({'info.profile_id': data.sender.id}, {populate: 'user'});
-  let device = devices.find(device => device.user.app.toString() === integration.app.toString());
+  const devices = await deviceCommons.findDevices({platform: constants.device.platforms.MESSENGER, 'info.profile_id': data.sender.id}, {populate: 'user'});
+  let device = _.find(devices, (currentDevice) => {
+    return currentDevice.user.app.toString() === integration.app.toString();
+  });
   if (!device) {
     device = await createDevice(integration, data);
   }

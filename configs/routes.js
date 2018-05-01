@@ -12,9 +12,7 @@ const eventRoutes = require('../routes/event');
 const {logger} = require('@ayro/commons');
 
 exports.configure = (express, app) => {
-
   logger.info('Configuring routes');
-
   accountRoutes(express.Router({mergeParams: true}), app);
   appRoutes(express.Router({mergeParams: true}), app);
   integrationRoutes(express.Router({mergeParams: true}), app);
@@ -24,5 +22,4 @@ exports.configure = (express, app) => {
   messengerChatRoutes(express.Router({mergeParams: true}), app);
   chatRoutes(express.Router({mergeParams: true}), app);
   eventRoutes(express.Router({mergeParams: true}), app);
-
 };
