@@ -194,8 +194,8 @@ async function createChannel(slackApi, user, conflicts) {
     return {id: result.channel.id, name: result.channel.name};
   } catch (err) {
     if (err.data.error === CHANNEL_NAME_TAKEN) {
-      conflicts = conflicts ? conflicts + 1 : 1;
-      return createChannel(slackApi, user, conflicts);
+      const conflictsInc = conflicts ? conflicts + 1 : 1;
+      return createChannel(slackApi, user, conflictsInc);
     }
     throw err;
   }

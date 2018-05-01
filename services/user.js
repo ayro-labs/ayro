@@ -53,14 +53,14 @@ exports.getUser = async (id) => {
 
 exports.mergeUsers = async (user, survivingUser) => {
   if (user) {
-    user = await userCommons.getUser(user.id);
-    survivingUser = await userCommons.getUser(survivingUser.id);
-    if (user.app.toString() !== survivingUser.app.toString()) {
+    const loadedUser = await userCommons.getUser(user.id);
+    const loadedSurvivingUser = await userCommons.getUser(survivingUser.id);
+    if (loadedUser.app.toString() !== loadedSurvivingUser.app.toString()) {
       throw errors.internalError('Can not merge users from different apps');
     }
-    if (!user.identified && survivingUser.identified) {
-      const devices = await deviceCommons.findDevices({user: user.id});
-      const survivingDevices = await deviceCommons.findDevices({user: survivingUser.id});
+    if (!loadedUser.identified && loadedSurvivingUser.identified) {
+      const devices = await deviceCommons.findDevices({user: loadedUser.id});
+      const survivingDevices = await deviceCommons.findDevices({user: loadedSurvivingUser.id});
       const survivingDevicesByUid = _.keyBy(survivingDevices, (device) => {
         return device.uid;
       });
@@ -70,8 +70,8 @@ exports.mergeUsers = async (user, survivingUser) => {
         const survivingDevice = survivingDevicesByUid[device.uid];
         if (survivingDevice) {
           updateChatMessagePromises.push(ChatMessage.updateMany(
-            {user: user.id, device: device.id},
-            {user: survivingUser.id, device: survivingDevice.id},
+            {user: loadedUser.id, device: device.id},
+            {user: loadedSurvivingUser.id, device: survivingDevice.id},
           ));
         } else {
           devicesIdsToRemove.push(device.id);
@@ -79,8 +79,8 @@ exports.mergeUsers = async (user, survivingUser) => {
       });
       await Promise.all(updateChatMessagePromises);
       await ChatMessage.remove({device: {$in: devicesIdsToRemove}});
-      await Device.remove({user: user.id});
-      await User.remove({_id: user.id});
+      await Device.remove({user: loadedUser.id});
+      await User.remove({_id: loadedUser.id});
     }
   }
 };
