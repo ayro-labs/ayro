@@ -105,7 +105,7 @@ async function removeIntegration(req, res, channel) {
 async function getIntegration(req, res) {
   try {
     const app = new App({id: req.params.app});
-    const integration = await integrationService.getIntegration(app, req.params.channel);
+    const integration = await integrationService.getIntegration(app, req.params.channel, {require: req.query.require && req.query.require === 'true'});
     res.json(integration);
   } catch (err) {
     logger.error(err);

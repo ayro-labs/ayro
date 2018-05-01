@@ -3,6 +3,7 @@
 const {Account, User, Device} = require('../models');
 const settings = require('../configs/settings');
 const errors = require('../utils/errors');
+const {logger} = require('@ayro/commons');
 const redis = require('redis');
 const JwtRedis = require('jsonwebtoken-redis');
 const Promise = require('bluebird');
@@ -82,6 +83,7 @@ exports.decodeToken = async (token) => {
     if (err instanceof JwtRedis.TokenExpiredError) {
       throw errors.authorizationError('token_expired', 'Token expired');
     }
+    logger.warn('Could not decode jwt token', err);
   }
   return result;
 };

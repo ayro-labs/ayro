@@ -54,7 +54,7 @@ async function updatePlugin(req, res, type) {
 async function getPlugin(req, res) {
   try {
     const app = new App({id: req.params.app});
-    const plugin = await pluginService.getPlugin(app, req.params.type, {require: req.query.require ? req.query.require === 'true' : null});
+    const plugin = await pluginService.getPlugin(app, req.params.type, {require: req.query.require && req.query.require === 'true'});
     res.json(plugin);
   } catch (err) {
     logger.error(err);

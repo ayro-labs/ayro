@@ -33,7 +33,7 @@ function transform(obj, customTransform) {
 }
 
 function normalizeSchema(schema, customTransform) {
-  schema.virtual('id').set((id) => {
+  schema.virtual('id').set(function (id) {
     this.set('_id', id);
   });
   schema.set('toJSON', {
@@ -126,7 +126,7 @@ User.virtual('devices', {
   localField: '_id',
   foreignField: 'user',
 });
-User.methods.getFullName = () => {
+User.methods.getFullName = function () {
   let fullName = '';
   if (this.first_name) {
     fullName = this.first_name + (this.last_name ? ` ${this.last_name}` : '');
@@ -168,20 +168,20 @@ const Device = new Schema({
 });
 Device.index({user: 1, uid: 1}, {unique: true});
 Device.index({platfotm: 1, 'info.profile_id': 1});
-Device.methods.getPlatformName = () => {
+Device.methods.getPlatformName = function () {
   const platform = constants.device.platforms[_.toUpper(this.platform)];
   return platform ? platform.name : '';
 };
-Device.methods.isSmartphone = () => {
+Device.methods.isSmartphone = function () {
   return _.includes([constants.device.platforms.ANDROID.id], this.platform);
 };
-Device.methods.isAndroid = () => {
+Device.methods.isAndroid = function () {
   return this.platform === constants.device.platforms.ANDROID.id;
 };
-Device.methods.isWeb = () => {
+Device.methods.isWeb = function () {
   return this.platform === constants.device.platforms.WEB.id;
 };
-Device.methods.isMessenger = () => {
+Device.methods.isMessenger = function () {
   return this.platform === constants.device.platforms.MESSENGER.id;
 };
 
