@@ -49,11 +49,13 @@ async function executeOfficeHoursPlugin(plugin, user) {
       name: app.name,
       photo_url: `${settings.appIconUrl}/${app.icon}`,
     };
-    try {
-      await chatCommons.pushMessage(agent, user, plugin.configuration.reply);
-    } catch (err) {
-      logger.warn('Could not push message to user', err);
-    }
+    setTimeout(async () => {
+      try {
+        await chatCommons.pushMessage(agent, user, plugin.configuration.reply);
+      } catch (err) {
+        logger.warn('Could not push "office hours" message to user', err);
+      }
+    }, 2000);
   }
   await user.update({'extra.plugins.office_hours.last_check': moment().valueOf()});
 }
@@ -69,9 +71,9 @@ async function executeGreetingsMessagePlugin(plugin, user, channel) {
     try {
       chatCommons.pushMessage(agent, user, plugin.configuration.message, channel);
     } catch (err) {
-      logger.warn('Could not push message to user', err);
+      logger.warn('Could not push "greetings" message to user', err);
     }
-  }, 3000);
+  }, 2000);
 }
 
 pubSub.subscribe(constants.events.VIEW_CHAT, async (msg, data) => {
