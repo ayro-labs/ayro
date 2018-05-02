@@ -10,7 +10,7 @@ exports.facebook = (configuration, withPageToken) => {
     appId: settings.facebook.appId,
     appSecret: settings.facebook.appSecret,
     accessToken: withPageToken && configuration.page ? configuration.page.access_token : configuration.profile.access_token,
-    version: 'v2.10',
+    version: 'v3.0',
   });
 };
 
