@@ -38,11 +38,11 @@ async function executeOfficeHoursPlugin(plugin, user) {
   }
   const startTime = moment().utcOffset(timezone);
   const [startHour, startMinute] = timeRange.start.split(':');
-  startTime.set({hours: startHour, minutes: startMinute});
+  startTime.set({hours: startHour, minutes: startMinute, seconds: 0});
   const endTime = moment().utcOffset(timezone);
   const [endHour, endMinute] = timeRange.end.split(':');
-  endTime.set({hours: endHour, minutes: endMinute});
-  if (!now.isBefore(startTime) && !now.isAfter(endTime)) {
+  endTime.set({hours: endHour, minutes: endMinute, seconds: 59});
+  if (now.isBefore(startTime) || now.isAfter(endTime)) {
     const app = await appCommons.getApp(user.app);
     const agent = {
       id: '0',
