@@ -1,6 +1,7 @@
 'use strict';
 
 const constants = require('../utils/constants');
+const integrationQueries = require('../utils/queries/integration');
 const integrationCommons = require('./commons/integration');
 const messengerIntegration = require('./integrations/messenger');
 const slackIntegration = require('./integrations/slack');
@@ -13,7 +14,7 @@ const DEFAULT_PRIMARY_COLOR = '#5c7382';
 const DEFAULT_CONVERSATION_COLOR = '#007bff';
 
 exports.getIntegration = async (app, channel, options) => {
-  return integrationCommons.getIntegration(app, channel, options);
+  return integrationQueries.getIntegration(app, channel, options);
 };
 
 exports.addWebsiteIntegration = async (app) => {

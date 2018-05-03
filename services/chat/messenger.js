@@ -4,9 +4,10 @@ const {App, Device} = require('../../models');
 const constants = require('../../utils/constants');
 const hash = require('../../utils/hash');
 const apis = require('../../utils/apis');
+const integrationQueries = require('../../utils/queries/integration');
+const deviceQueries = require('../../utils/queries/device');
 const userCommons = require('../commons/user');
 const deviceCommons = require('../commons/device');
-const integrationCommons = require('../commons/integration');
 const chatService = require('.');
 const _ = require('lodash');
 
@@ -43,11 +44,11 @@ exports.postMessage = async (data) => {
   if (!data.message.text) {
     return;
   }
-  const integration = await integrationCommons.findIntegration({channel: constants.integration.channels.MESSENGER, 'configuration.page.id': data.recipient.id}, {require: false});
+  const integration = await integrationQueries.findIntegration({channel: constants.integration.channels.MESSENGER, 'configuration.page.id': data.recipient.id}, {require: false});
   if (!integration) {
     return;
   }
-  const devices = await deviceCommons.findDevices({platform: constants.device.platforms.MESSENGER, 'info.profile_id': data.sender.id}, {populate: 'user'});
+  const devices = await deviceQueries.findDevices({platform: constants.device.platforms.MESSENGER, 'info.profile_id': data.sender.id}, {populate: 'user'});
   let device = _.find(devices, (currentDevice) => {
     return currentDevice.user.app.toString() === integration.app.toString();
   });

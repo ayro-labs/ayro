@@ -2,6 +2,7 @@
 
 const constants = require('../../utils/constants');
 const apis = require('../../utils/apis');
+const integrationQueries = require('../../utils/queries/integration');
 const integrationCommons = require('../commons/integration');
 const _ = require('lodash');
 
@@ -35,7 +36,7 @@ exports.addIntegration = async (app, profile) => {
 };
 
 exports.updateIntegration = async (app, page) => {
-  const integration = await integrationCommons.getIntegration(app, constants.integration.channels.MESSENGER);
+  const integration = await integrationQueries.getIntegration(app, constants.integration.channels.MESSENGER);
   const oldConfiguration = _.cloneDeep(integration.configuration);
   const result = await apis.facebook(integration.configuration).api(page.id, {fields: ['id', 'name', 'access_token']});
   const configuration = {
@@ -51,13 +52,13 @@ exports.updateIntegration = async (app, page) => {
 };
 
 exports.removeIntegration = async (app) => {
-  const integration = await integrationCommons.getIntegration(app, constants.integration.channels.MESSENGER);
+  const integration = await integrationQueries.getIntegration(app, constants.integration.channels.MESSENGER);
   await unsubscribePage(integration.configuration);
   return integrationCommons.removeIntegration(app, constants.integration.channels.MESSENGER);
 };
 
 exports.listPages = async (app) => {
-  const integration = await integrationCommons.getIntegration(app, constants.integration.channels.MESSENGER);
+  const integration = await integrationQueries.getIntegration(app, constants.integration.channels.MESSENGER);
   const result = await apis.facebook(integration.configuration).api('me/accounts');
   const pages = [];
   result.data.forEach((page) => {

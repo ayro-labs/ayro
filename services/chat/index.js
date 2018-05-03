@@ -3,9 +3,10 @@
 const {User, ChatMessage} = require('../../models');
 const constants = require('../../utils/constants');
 const errors = require('../../utils/errors');
+const integrationQueries = require('../../utils/queries/integration');
+const userQueries = require('../../utils/queries/user');
+const deviceQueries = require('../../utils/queries/device');
 const userCommons = require('../commons/user');
-const deviceCommons = require('../commons/device');
-const integrationCommons = require('../commons/integration');
 const chatCommons = require('../commons/chat');
 const slack = require('../integrations/slack');
 const Promise = require('bluebird');
@@ -47,8 +48,8 @@ exports.pushMessage = async (channel, data) => {
 };
 
 exports.postMessage = async (user, device, channel, message) => {
-  let loadedUser = await userCommons.getUser(user.id);
-  const loadedDevice = await deviceCommons.getDevice(device.id);
+  let loadedUser = await userQueries.getUser(user.id);
+  const loadedDevice = await deviceQueries.getDevice(device.id);
   if (loadedUser.id !== loadedDevice.user.toString()) {
     throw errors.ayroError('device_not_owned_by_user', 'This device is not owned by the user');
   }
@@ -63,7 +64,7 @@ exports.postMessage = async (user, device, channel, message) => {
     loadedUser = await userCommons.updateUser(loadedUser, updatedUserData);
   }
   await User.populate(loadedUser, 'app devices');
-  const integrations = await integrationCommons.findIntegrations(loadedUser.app, constants.integration.types.BUSINESS);
+  const integrations = await integrationQueries.findIntegrations(loadedUser.app, constants.integration.types.BUSINESS);
   const chatMessage = new ChatMessage({
     app: loadedUser.app.id,
     user: loadedUser.id,

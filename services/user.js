@@ -2,8 +2,9 @@
 
 const {AppSecret, User, Device, ChatMessage} = require('../models');
 const errors = require('../utils/errors');
+const userQueries = require('../utils/queries/user');
+const deviceQueries = require('../utils/queries/device');
 const userCommons = require('./commons/user');
-const deviceCommons = require('./commons/device');
 const jwt = require('jsonwebtoken');
 const Promise = require('bluebird');
 const _ = require('lodash');
@@ -31,7 +32,7 @@ async function saveUser(app, data, jwtToken) {
       throw errors.ayroError('jwt_invalid', 'User\'s uid not match');
     }
   }
-  const user = await userCommons.findUser({app: app.id, uid: data.uid}, {require: false});
+  const user = await userQueries.findUser({app: app.id, uid: data.uid}, {require: false});
   return !user ? userCommons.createUser(app, data) : userCommons.updateUser(user, data);
 }
 
@@ -48,19 +49,19 @@ exports.updateUser = async (user, data) => {
 };
 
 exports.getUser = async (id) => {
-  return userCommons.getUser(id);
+  return userQueries.getUser(id);
 };
 
 exports.mergeUsers = async (user, survivingUser) => {
   if (user) {
-    const loadedUser = await userCommons.getUser(user.id);
-    const loadedSurvivingUser = await userCommons.getUser(survivingUser.id);
+    const loadedUser = await userQueries.getUser(user.id);
+    const loadedSurvivingUser = await userQueries.getUser(survivingUser.id);
     if (loadedUser.app.toString() !== loadedSurvivingUser.app.toString()) {
       throw errors.internalError('Can not merge users from different apps');
     }
     if (!loadedUser.identified && loadedSurvivingUser.identified) {
-      const devices = await deviceCommons.findDevices({user: loadedUser.id});
-      const survivingDevices = await deviceCommons.findDevices({user: loadedSurvivingUser.id});
+      const devices = await deviceQueries.findDevices({user: loadedUser.id});
+      const survivingDevices = await deviceQueries.findDevices({user: loadedSurvivingUser.id});
       const survivingDevicesByUid = _.keyBy(survivingDevices, (device) => {
         return device.uid;
       });

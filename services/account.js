@@ -5,7 +5,7 @@ const settings = require('../configs/settings');
 const hash = require('../utils/hash');
 const files = require('../utils/files');
 const errors = require('../utils/errors');
-const accountCommons = require('./commons/account');
+const accountQueries = require('../utils/queries/account');
 const path = require('path');
 const fs = require('fs');
 const Promise = require('bluebird');
@@ -16,11 +16,11 @@ const ALLOWED_ATTRS = ['name', 'email'];
 const unlinkAsync = Promise.promisify(fs.unlink);
 
 exports.getAccount = async (id) => {
-  return accountCommons.getAccount(id);
+  return accountQueries.getAccount(id);
 };
 
 exports.createAccount = async (name, email, password) => {
-  const accountWithEmail = await accountCommons.findAccount({email}, {require: false});
+  const accountWithEmail = await accountQueries.findAccount({email}, {require: false});
   if (accountWithEmail) {
     throw errors.ayroError('account_already_exists', 'Account already exists');
   }
@@ -35,7 +35,7 @@ exports.createAccount = async (name, email, password) => {
 };
 
 exports.updateAccount = async (account, data) => {
-  const loadedAccount = await accountCommons.getAccount(account.id);
+  const loadedAccount = await accountQueries.getAccount(account.id);
   const attrs = _.pick(data, ALLOWED_ATTRS);
   await loadedAccount.update(attrs, {runValidators: true});
   loadedAccount.set(attrs);
@@ -55,7 +55,7 @@ exports.updateLogo = async (account, logoFile) => {
 };
 
 exports.authenticate = async (email, password) => {
-  const account = await accountCommons.findAccount({email});
+  const account = await accountQueries.findAccount({email});
   const match = await hash.compare(password, account.password);
   if (!match) {
     throw errors.ayroError('wrong_password', 'Wrong account password');

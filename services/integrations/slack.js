@@ -3,6 +3,8 @@
 const apis = require('../../utils/apis');
 const files = require('../../utils/files');
 const constants = require('../../utils/constants');
+const integrationQueries = require('../../utils/queries/integration');
+const userQueries = require('../../utils/queries/user');
 const integrationCommons = require('../commons/integration');
 const userCommons = require('../commons/user');
 const _ = require('lodash');
@@ -271,7 +273,7 @@ exports.addIntegration = async (app, accessToken) => {
       configuration.channel = _.pick(channel, ['id', 'name']);
     }
   });
-  let integration = await integrationCommons.getIntegration(app, constants.integration.channels.SLACK, {require: false});
+  let integration = await integrationQueries.getIntegration(app, constants.integration.channels.SLACK, {require: false});
   if (!integration) {
     integration = await integrationCommons.addIntegration(app, constants.integration.channels.SLACK, constants.integration.types.BUSINESS, configuration);
   } else {
@@ -291,7 +293,7 @@ exports.removeIntegration = async (app) => {
 };
 
 exports.listChannels = async (app) => {
-  const integration = await integrationCommons.getIntegration(app, constants.integration.channels.SLACK);
+  const integration = await integrationQueries.getIntegration(app, constants.integration.channels.SLACK);
   const slackApi = apis.slack(integration.configuration);
   const result = await slackApi.channels.list({exclude_archived: true, exclude_members: true});
   const channels = [];
@@ -302,7 +304,7 @@ exports.listChannels = async (app) => {
 };
 
 exports.createChannel = async (app, channel) => {
-  const integration = await integrationCommons.getIntegration(app, constants.integration.channels.SLACK);
+  const integration = await integrationQueries.getIntegration(app, constants.integration.channels.SLACK);
   const slackApi = apis.slack(integration.configuration);
   const result = await slackApi.channels.create({name: channel});
   return _.pick(result.channel, ['id', 'name']);
@@ -387,11 +389,11 @@ exports.postProfileError = async (configuration, data) => {
 };
 
 exports.getIntegration = async (data) => {
-  return integrationCommons.findIntegration({channel: constants.integration.channels.SLACK, 'configuration.team.id': data.team_id});
+  return integrationQueries.findIntegration({channel: constants.integration.channels.SLACK, 'configuration.team.id': data.team_id});
 };
 
 exports.getUser = async (data) => {
-  return userCommons.findUser({'extra.slack_channel.id': data.channel_id});
+  return userQueries.findUser({'extra.slack_channel.id': data.channel_id});
 };
 
 exports.getAgent = async (configuration, data) => {

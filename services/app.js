@@ -5,7 +5,7 @@ const {User, Device, ChatMessage} = require('../models');
 const settings = require('../configs/settings');
 const hash = require('../utils/hash');
 const files = require('../utils/files');
-const appCommons = require('./commons/app');
+const appQueries = require('../utils/queries/app');
 const path = require('path');
 const fs = require('fs');
 const Promise = require('bluebird');
@@ -27,11 +27,11 @@ function getAppPopulateOption(withIntegrations, withPlugins) {
 }
 
 exports.listApps = async (account, withIntegrations, withPlugins) => {
-  return appCommons.findApps({account: account.id}, {populate: getAppPopulateOption(withIntegrations, withPlugins)});
+  return appQueries.findApps({account: account.id}, {populate: getAppPopulateOption(withIntegrations, withPlugins)});
 };
 
 exports.getApp = async (id, withIntegrations, withPlugins) => {
-  return appCommons.getApp(id, {populate: getAppPopulateOption(withIntegrations, withPlugins)});
+  return appQueries.getApp(id, {populate: getAppPopulateOption(withIntegrations, withPlugins)});
 };
 
 exports.appExists = async (query) => {
@@ -40,7 +40,7 @@ exports.appExists = async (query) => {
 };
 
 exports.getAppByToken = async (token, withIntegrations, withPlugins) => {
-  return appCommons.findApp({token}, {populate: getAppPopulateOption(withIntegrations, withPlugins)});
+  return appQueries.findApp({token}, {populate: getAppPopulateOption(withIntegrations, withPlugins)});
 };
 
 exports.createApp = async (account, name) => {
@@ -50,7 +50,7 @@ exports.createApp = async (account, name) => {
 };
 
 exports.updateApp = async (app, data) => {
-  const loadedApp = await appCommons.getApp(app.id);
+  const loadedApp = await appQueries.getApp(app.id);
   const attrs = _.pick(data, ALLOWED_ATTRS);
   await loadedApp.update(attrs, {runValidators: true});
   loadedApp.set(attrs);
@@ -58,7 +58,7 @@ exports.updateApp = async (app, data) => {
 };
 
 exports.updateIcon = async (app, iconFile) => {
-  const loadedApp = await appCommons.getApp(app.id);
+  const loadedApp = await appQueries.getApp(app.id);
   const oldIconPath = loadedApp.icon ? path.join(settings.appIconPath, loadedApp.icon) : null;
   const icon = await files.fixAppIcon(loadedApp, iconFile.path);
   await loadedApp.update({icon}, {runValidators: true});
@@ -70,7 +70,7 @@ exports.updateIcon = async (app, iconFile) => {
 };
 
 exports.deleteApp = async (app) => {
-  const loadedApp = await appCommons.getApp(app.id);
+  const loadedApp = await appQueries.getApp(app.id);
   await ChatMessage.remove({app: loadedApp.id});
   await Device.remove({app: loadedApp.id});
   await User.remove({app: loadedApp.id});
@@ -79,13 +79,13 @@ exports.deleteApp = async (app) => {
 };
 
 exports.listAppSecrets = async (app) => {
-  const loadedApp = await appCommons.getApp(app.id);
+  const loadedApp = await appQueries.getApp(app.id);
   const appSecrets = await AppSecret.find({app: loadedApp.id});
   return appSecrets;
 };
 
 exports.createAppSecret = async (app) => {
-  const loadedApp = await appCommons.getApp(app.id);
+  const loadedApp = await appQueries.getApp(app.id);
   const appSecret = new AppSecret({
     app: loadedApp.id,
     secret: await hash.token(),
@@ -95,6 +95,6 @@ exports.createAppSecret = async (app) => {
 };
 
 exports.removeAppSecret = async (app, appSecret) => {
-  const loadedApp = await appCommons.getApp(app.id);
+  const loadedApp = await appQueries.getApp(app.id);
   await AppSecret.remove({_id: appSecret.id, app: loadedApp.id});
 };

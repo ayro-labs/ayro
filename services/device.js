@@ -1,11 +1,12 @@
 'use strict';
 
 const {Device, ChatMessage} = require('../models');
+const deviceQueries = require('../utils/queries/device');
 const userCommons = require('./commons/user');
 const deviceCommons = require('./commons/device');
 
 async function removeOldDeviceIfNeeded(user, data) {
-  const device = await deviceCommons.findDevice({user: user.id, platform: data.platform}, {require: false});
+  const device = await deviceQueries.findDevice({user: user.id, platform: data.platform}, {require: false});
   if (device && device.uid !== data.uid) {
     await ChatMessage.remove({user: device.user});
     await Device.remove({_id: device.id});
@@ -15,7 +16,7 @@ async function removeOldDeviceIfNeeded(user, data) {
 
 exports.saveDevice = async (user, data) => {
   await removeOldDeviceIfNeeded(user, data);
-  const device = await deviceCommons.findDevice({user: user.id, uid: data.uid}, {require: false});
+  const device = await deviceQueries.findDevice({user: user.id, uid: data.uid}, {require: false});
   let updatedDevice;
   if (!device) {
     updatedDevice = await deviceCommons.createDevice(user, data);
@@ -34,5 +35,5 @@ exports.updateDevice = async (device, data) => {
 };
 
 exports.getDevice = async (id) => {
-  return deviceCommons.getDevice(id);
+  return deviceQueries.getDevice(id);
 };

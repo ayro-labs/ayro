@@ -2,7 +2,6 @@
 
 const {User} = require('../../models');
 const errors = require('../../utils/errors');
-const queries = require('../../utils/queries');
 const files = require('../../utils/files');
 const hash = require('../../utils/hash');
 const {logger} = require('@ayro/commons');
@@ -10,28 +9,6 @@ const randomName = require('node-random-name');
 const _ = require('lodash');
 
 const UNALLOWED_ATTRS = ['_id', 'id', 'app', 'photo', 'random_name', 'registration_date'];
-
-function throwUserNotFoundIfNeeded(user, options) {
-  if (!user && (!options || options.require)) {
-    throw errors.notFoundError('user_not_found', 'User not found');
-  }
-}
-
-exports.getUser = async (id, options) => {
-  const promise = User.findById(id);
-  queries.fillQuery(promise, options);
-  const user = await promise.exec();
-  throwUserNotFoundIfNeeded(user, options);
-  return user;
-};
-
-exports.findUser = async (query, options) => {
-  const promise = User.findOne(query);
-  queries.fillQuery(promise, options);
-  const user = await promise.exec();
-  throwUserNotFoundIfNeeded(user, options);
-  return user;
-};
 
 exports.createUser = async (app, data) => {
   if (data.identified && !data.uid) {

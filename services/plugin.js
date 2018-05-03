@@ -4,9 +4,9 @@ const {App, Plugin} = require('../models');
 const settings = require('../configs/settings');
 const constants = require('../utils/constants');
 const errors = require('../utils/errors');
-const appCommons = require('./commons/app');
-const pluginCommons = require('./commons/plugin');
-const userCommons = require('./commons/user');
+const appQueries = require('../utils/queries/app');
+const pluginQueries = require('../utils/queries/plugin');
+const userQueries = require('../utils/queries/user');
 const chatCommons = require('./commons/chat');
 const {logger} = require('@ayro/commons');
 const pubSub = require('pubsub-js');
@@ -43,7 +43,7 @@ async function executeOfficeHoursPlugin(plugin, user) {
   const [endHour, endMinute] = timeRange.end.split(':');
   endTime.set({hours: endHour, minutes: endMinute, seconds: 59});
   if (now.isBefore(startTime) || now.isAfter(endTime)) {
-    const app = await appCommons.getApp(user.app);
+    const app = await appQueries.getApp(user.app);
     const agent = {
       id: '0',
       name: app.name,
@@ -61,7 +61,7 @@ async function executeOfficeHoursPlugin(plugin, user) {
 }
 
 async function executeGreetingsMessagePlugin(plugin, user, channel) {
-  const app = await appCommons.getApp(user.app);
+  const app = await appQueries.getApp(user.app);
   const agent = {
     id: '0',
     name: app.name,
@@ -79,10 +79,10 @@ async function executeGreetingsMessagePlugin(plugin, user, channel) {
 pubSub.subscribe(constants.events.VIEW_CHAT, async (msg, data) => {
   try {
     const {user, channel} = data;
-    const loadedUser = await userCommons.getUser(user.id);
+    const loadedUser = await userQueries.getUser(user.id);
     if (_.get(loadedUser, 'extra.events.view_chat') === 1) {
       const app = new App({id: loadedUser.app});
-      const greetingsMessagePlugin = await pluginCommons.getPlugin(app, constants.plugin.types.GREETINGS_MESSAGE, {require: false});
+      const greetingsMessagePlugin = await pluginQueries.getPlugin(app, constants.plugin.types.GREETINGS_MESSAGE, {require: false});
       if (greetingsMessagePlugin) {
         executeGreetingsMessagePlugin(greetingsMessagePlugin, loadedUser, channel);
       }
@@ -94,9 +94,9 @@ pubSub.subscribe(constants.events.VIEW_CHAT, async (msg, data) => {
 
 pubSub.subscribe(constants.events.POST_MESSAGE, async (msg, user) => {
   try {
-    const loadedUser = await userCommons.getUser(user.id);
+    const loadedUser = await userQueries.getUser(user.id);
     const app = new App({id: loadedUser.app});
-    const officeHoursPlugin = await pluginCommons.getPlugin(app, constants.plugin.types.OFFICE_HOURS, {require: false});
+    const officeHoursPlugin = await pluginQueries.getPlugin(app, constants.plugin.types.OFFICE_HOURS, {require: false});
     if (officeHoursPlugin) {
       executeOfficeHoursPlugin(officeHoursPlugin, loadedUser);
     }
@@ -106,7 +106,7 @@ pubSub.subscribe(constants.events.POST_MESSAGE, async (msg, user) => {
 });
 
 async function addPlugin(app, type, configuration) {
-  let plugin = await pluginCommons.getPlugin(app, type, {require: false});
+  let plugin = await pluginQueries.getPlugin(app, type, {require: false});
   if (plugin) {
     throw errors.ayroError('plugin_already_exists', 'Plugin already exists');
   }
@@ -120,14 +120,14 @@ async function addPlugin(app, type, configuration) {
 }
 
 async function updatePlugin(app, type, configuration) {
-  const plugin = await pluginCommons.getPlugin(app, type);
+  const plugin = await pluginQueries.getPlugin(app, type);
   await plugin.update({configuration}, {runValidators: true});
   plugin.configuration = configuration;
   return plugin;
 }
 
 exports.getPlugin = async (app, type, options) => {
-  return pluginCommons.getPlugin(app, type, options);
+  return pluginQueries.getPlugin(app, type, options);
 };
 
 exports.addOfficeHoursPlugin = async (app, configuration) => {
@@ -147,6 +147,6 @@ exports.updateGreetingsMessagePlugin = async (app, configuration) => {
 };
 
 exports.removePlugin = async (app, type) => {
-  const plugin = await pluginCommons.getPlugin(app, type);
+  const plugin = await pluginQueries.getPlugin(app, type);
   await Plugin.remove({_id: plugin.id});
 };
