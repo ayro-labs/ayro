@@ -127,7 +127,7 @@ exports.chatViewed = async (user, channel) => {
   }
 };
 
-exports.messagePosted = async (msg, user) => {
+exports.messagePosted = async (user) => {
   try {
     const loadedUser = await userQueries.getUser(user.id);
     const app = new App({id: loadedUser.app});
