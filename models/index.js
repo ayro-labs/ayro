@@ -159,6 +159,7 @@ const DeviceInfo = new Schema({
 });
 
 const Device = new Schema({
+  app: {type: ObjectId, ref: 'App', required: true, index: true},
   user: {type: ObjectId, ref: 'User', required: true},
   uid: {type: String, required: true},
   platform: {type: String, required: true},
@@ -192,6 +193,7 @@ const Agent = new Schema({
 }, {_id: false});
 
 const ChatMessage = new Schema({
+  app: {type: ObjectId, ref: 'App', required: true, index: true},
   user: {type: ObjectId, ref: 'User', required: true, index: true},
   device: {type: ObjectId, ref: 'Device', required: true, index: true},
   agent: {type: Agent, required: false},

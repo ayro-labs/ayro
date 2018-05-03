@@ -1,6 +1,6 @@
 'use strict';
 
-const {Device} = require('../../models');
+const {User, Device} = require('../../models');
 const constants = require('../../utils/constants');
 const errors = require('../../utils/errors');
 const queries = require('../../utils/queries');
@@ -54,10 +54,12 @@ exports.createDevice = async (user, data) => {
   if (!data.uid) {
     throw errors.ayroError('device_uid_required', 'Device unique id is required');
   }
+  const loadedUser = await User.findById(user.id);
   const finalData = _.omit(data, UNALLOWED_ATTRS);
   fixDeviceData(finalData);
   const device = new Device(finalData);
-  device.user = user.id;
+  device.app = loadedUser.app;
+  device.user = loadedUser.id;
   device.registration_date = new Date();
   return device.save();
 };

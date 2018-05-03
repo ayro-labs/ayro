@@ -65,6 +65,7 @@ exports.postMessage = async (user, device, channel, message) => {
   await User.populate(loadedUser, 'app devices');
   const integrations = await integrationCommons.findIntegrations(loadedUser.app, constants.integration.types.BUSINESS);
   const chatMessage = new ChatMessage({
+    app: loadedUser.app.id,
     user: loadedUser.id,
     device: loadedDevice.id,
     text: message.text,

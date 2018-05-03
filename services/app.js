@@ -71,12 +71,8 @@ exports.updateIcon = async (app, iconFile) => {
 
 exports.deleteApp = async (app) => {
   const loadedApp = await appCommons.getApp(app.id);
-  const users = await User.find({app: loadedApp.id}).select({_id: 1});
-  const usersIds = users.map((user) => {
-    return user.id;
-  });
-  await ChatMessage.remove({user: {$in: usersIds}});
-  await Device.remove({user: {$in: usersIds}});
+  await ChatMessage.remove({app: loadedApp.id});
+  await Device.remove({app: loadedApp.id});
   await User.remove({app: loadedApp.id});
   await Integration.remove({app: loadedApp.id});
   await App.remove({_id: loadedApp.id});
