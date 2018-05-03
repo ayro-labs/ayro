@@ -8,7 +8,7 @@ const push = require('../integrations/push');
 const EVENT_CHAT_MESSAGE = 'chat_message';
 
 exports.pushMessage = async (agent, user, text, channel) => {
-  const loadedUser = await User.findById(user.id);
+  const loadedUser = await User.findById(user.id).populate('latest_device').exec();
   if (!loadedUser) {
     throw errors.notFoundError('user_not_found', 'User not found');
   }
