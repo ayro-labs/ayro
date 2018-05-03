@@ -18,8 +18,8 @@ exports.configure = (express, app) => {
   integrationRoutes(express.Router({mergeParams: true}), app);
   pluginRoutes(express.Router({mergeParams: true}), app);
   userRoutes(express.Router({mergeParams: true}), app);
+  eventRoutes(express.Router({mergeParams: true}), app);
   slackChatRoutes(express.Router({mergeParams: true}), app);
   messengerChatRoutes(express.Router({mergeParams: true}), app);
   chatRoutes(express.Router({mergeParams: true}), app);
-  eventRoutes(express.Router({mergeParams: true}), app);
 };

@@ -115,7 +115,7 @@ exports.removePlugin = async (app, type) => {
 exports.chatViewed = async (user, channel) => {
   try {
     const loadedUser = await userQueries.getUser(user.id);
-    if (_.get(loadedUser, 'extra.events.view_chat') === 1) {
+    if (_.get(loadedUser, 'extra.metrics.chat_views') === 1) {
       const app = new App({id: loadedUser.app});
       const greetingsMessagePlugin = await pluginQueries.getPlugin(app, constants.plugin.types.GREETINGS_MESSAGE, {require: false});
       if (greetingsMessagePlugin) {

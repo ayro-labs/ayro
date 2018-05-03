@@ -1,7 +1,6 @@
 'use strict';
 
 const pluginService = require('../../services/plugin');
-const eventService = require('../../services/event');
 const chatService = require('../../services/chat');
 const errors = require('../../utils/errors');
 const {userAuthenticated} = require('../../utils/middlewares');
@@ -20,7 +19,6 @@ async function listMessages(req, res) {
 async function postMessage(req, res) {
   try {
     const chatMessage = await chatService.postMessage(req.user, req.device, req.params.channel, req.body);
-    await eventService.trackPostMessage(req.user);
     // Asynchronous because it can take a long time
     pluginService.messagePosted(req.user);
     res.json(chatMessage);
