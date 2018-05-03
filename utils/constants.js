@@ -46,8 +46,4 @@ module.exports = Object.freeze({
     MALE: 'Masculino',
     FEMALE: 'Feminino',
   }),
-  events: Object.freeze({
-    VIEW_CHAT: 'view_chat',
-    POST_MESSAGE: 'post_message',
-  }),
 });

@@ -9,7 +9,7 @@ const pluginQueries = require('../utils/queries/plugin');
 const userQueries = require('../utils/queries/user');
 const chatCommons = require('./commons/chat');
 const {logger} = require('@ayro/commons');
-const pubSub = require('pubsub-js');
+const Promise = require('bluebird');
 const moment = require('moment');
 const _ = require('lodash');
 
@@ -49,13 +49,8 @@ async function executeOfficeHoursPlugin(plugin, user) {
       name: app.name,
       photo_url: `${settings.appIconUrl}/${app.icon}`,
     };
-    setTimeout(async () => {
-      try {
-        await chatCommons.pushMessage(agent, user, plugin.configuration.reply);
-      } catch (err) {
-        logger.warn('Could not push "office hours" message to user', err);
-      }
-    }, 2000);
+    await Promise.delay(2000);
+    await chatCommons.pushMessage(agent, user, plugin.configuration.reply);
   }
   await user.update({'extra.plugins.office_hours.last_check': moment().valueOf()});
 }
@@ -67,43 +62,9 @@ async function executeGreetingsMessagePlugin(plugin, user, channel) {
     name: app.name,
     photo_url: `${settings.appIconUrl}/${app.icon}`,
   };
-  setTimeout(async () => {
-    try {
-      chatCommons.pushMessage(agent, user, plugin.configuration.message, channel);
-    } catch (err) {
-      logger.warn('Could not push "greetings" message to user', err);
-    }
-  }, 2000);
+  await Promise.delay(2000);
+  await chatCommons.pushMessage(agent, user, plugin.configuration.message, channel);
 }
-
-pubSub.subscribe(constants.events.VIEW_CHAT, async (msg, data) => {
-  try {
-    const {user, channel} = data;
-    const loadedUser = await userQueries.getUser(user.id);
-    if (_.get(loadedUser, 'extra.events.view_chat') === 1) {
-      const app = new App({id: loadedUser.app});
-      const greetingsMessagePlugin = await pluginQueries.getPlugin(app, constants.plugin.types.GREETINGS_MESSAGE, {require: false});
-      if (greetingsMessagePlugin) {
-        executeGreetingsMessagePlugin(greetingsMessagePlugin, loadedUser, channel);
-      }
-    }
-  } catch (err) {
-    logger.warn('Could not process "view_chat" event', err);
-  }
-});
-
-pubSub.subscribe(constants.events.POST_MESSAGE, async (msg, user) => {
-  try {
-    const loadedUser = await userQueries.getUser(user.id);
-    const app = new App({id: loadedUser.app});
-    const officeHoursPlugin = await pluginQueries.getPlugin(app, constants.plugin.types.OFFICE_HOURS, {require: false});
-    if (officeHoursPlugin) {
-      executeOfficeHoursPlugin(officeHoursPlugin, loadedUser);
-    }
-  } catch (err) {
-    logger.warn('Could not process "post_message" event', err);
-  }
-});
 
 async function addPlugin(app, type, configuration) {
   let plugin = await pluginQueries.getPlugin(app, type, {require: false});
@@ -149,4 +110,32 @@ exports.updateGreetingsMessagePlugin = async (app, configuration) => {
 exports.removePlugin = async (app, type) => {
   const plugin = await pluginQueries.getPlugin(app, type);
   await Plugin.remove({_id: plugin.id});
+};
+
+exports.chatViewed = async (user, channel) => {
+  try {
+    const loadedUser = await userQueries.getUser(user.id);
+    if (_.get(loadedUser, 'extra.events.view_chat') === 1) {
+      const app = new App({id: loadedUser.app});
+      const greetingsMessagePlugin = await pluginQueries.getPlugin(app, constants.plugin.types.GREETINGS_MESSAGE, {require: false});
+      if (greetingsMessagePlugin) {
+        executeGreetingsMessagePlugin(greetingsMessagePlugin, loadedUser, channel);
+      }
+    }
+  } catch (err) {
+    logger.warn('Could not process "chatViewed" trigger', err);
+  }
+};
+
+exports.messagePosted = async (msg, user) => {
+  try {
+    const loadedUser = await userQueries.getUser(user.id);
+    const app = new App({id: loadedUser.app});
+    const officeHoursPlugin = await pluginQueries.getPlugin(app, constants.plugin.types.OFFICE_HOURS, {require: false});
+    if (officeHoursPlugin) {
+      executeOfficeHoursPlugin(officeHoursPlugin, loadedUser);
+    }
+  } catch (err) {
+    logger.warn('Could not process "messagePosted" trigger', err);
+  }
 };

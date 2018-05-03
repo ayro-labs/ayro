@@ -43,7 +43,7 @@ exports.updateAccount = async (account, data) => {
 };
 
 exports.updateLogo = async (account, logoFile) => {
-  const loadedAccount = await this.getAccount(account.id);
+  const loadedAccount = await accountQueries.getAccount(account.id);
   const oldLogoPath = loadedAccount.logo ? path.join(settings.accountLogoPath, loadedAccount.logo) : null;
   const logo = await files.fixAccountLogo(loadedAccount, logoFile.path);
   await loadedAccount.update({logo}, {runValidators: true});

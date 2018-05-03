@@ -4,6 +4,7 @@ const {User} = require('../../models');
 const errors = require('../../utils/errors');
 const files = require('../../utils/files');
 const hash = require('../../utils/hash');
+const userQueries = require('../../utils/queries/user');
 const {logger} = require('@ayro/commons');
 const randomName = require('node-random-name');
 const _ = require('lodash');
@@ -37,7 +38,7 @@ exports.createUser = async (app, data) => {
 };
 
 exports.updateUser = async (user, data) => {
-  const loadedUser = await this.getUser(user.id);
+  const loadedUser = await userQueries.getUser(user.id);
   const finalData = _.omit(data, UNALLOWED_ATTRS);
   if (finalData.first_name || finalData.last_name) {
     finalData.random_name = false;

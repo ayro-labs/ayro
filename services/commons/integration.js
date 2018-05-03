@@ -2,10 +2,11 @@
 
 const {Integration} = require('../../models');
 const errors = require('../../utils/errors');
+const integrationQueries = require('../../utils/queries/integration');
 const _ = require('lodash');
 
 exports.addIntegration = async (app, channel, type, configuration) => {
-  let integration = await this.getIntegration(app, channel, {require: false});
+  let integration = await integrationQueries.getIntegration(app, channel, {require: false});
   if (integration) {
     throw errors.ayroError('integration_already_exists', 'Integration already exists');
   }
@@ -20,7 +21,7 @@ exports.addIntegration = async (app, channel, type, configuration) => {
 };
 
 exports.updateIntegration = async (app, channel, configuration) => {
-  const integration = await this.getIntegration(app, channel);
+  const integration = await integrationQueries.getIntegration(app, channel);
   if (!integration.configuration) {
     integration.configuration = {};
   }
@@ -35,6 +36,6 @@ exports.updateIntegration = async (app, channel, configuration) => {
 };
 
 exports.removeIntegration = async (app, channel) => {
-  const integration = await this.getIntegration(app, channel);
+  const integration = await integrationQueries.getIntegration(app, channel);
   await Integration.remove({_id: integration.id});
 };
