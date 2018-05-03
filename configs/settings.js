@@ -60,10 +60,10 @@ exports.slack = {
   verificationToken: 'BVUOTnQlEn5vBZQG6AaACegL',
 };
 
-files.createDir(this.publicPath);
-files.createDir(this.appIconPath);
-files.createDir(this.accountLogoPath);
-files.createDir(this.userPhotoPath);
+files.createDirSync(this.publicPath);
+files.createDirSync(this.appIconPath);
+files.createDirSync(this.accountLogoPath);
+files.createDirSync(this.userPhotoPath);
 
 if (!this.session.keyId) {
   throw new Error('Property session.keyId is required');

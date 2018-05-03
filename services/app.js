@@ -13,8 +13,6 @@ const _ = require('lodash');
 
 const ALLOWED_ATTRS = ['name'];
 
-const unlinkAsync = Promise.promisify(fs.unlink);
-
 function getAppPopulateOption(withIntegrations, withPlugins) {
   const populate = [];
   if (withIntegrations) {
@@ -63,8 +61,8 @@ exports.updateIcon = async (app, iconFile) => {
   const icon = await files.fixAppIcon(loadedApp, iconFile.path);
   await loadedApp.update({icon}, {runValidators: true});
   loadedApp.icon = icon;
-  if (oldIconPath) {
-    await unlinkAsync(oldIconPath);
+  if (oldIconPath && (await files.fileExists(oldIconPath))) {
+    await files.removeFile(oldIconPath);
   }
   return loadedApp;
 };

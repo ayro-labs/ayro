@@ -119,7 +119,7 @@ exports.chatViewed = async (user, channel) => {
       const app = new App({id: loadedUser.app});
       const greetingsMessagePlugin = await pluginQueries.getPlugin(app, constants.plugin.types.GREETINGS_MESSAGE, {require: false});
       if (greetingsMessagePlugin) {
-        executeGreetingsMessagePlugin(greetingsMessagePlugin, loadedUser, channel);
+        await executeGreetingsMessagePlugin(greetingsMessagePlugin, loadedUser, channel);
       }
     }
   } catch (err) {

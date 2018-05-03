@@ -13,8 +13,6 @@ const _ = require('lodash');
 
 const ALLOWED_ATTRS = ['name', 'email'];
 
-const unlinkAsync = Promise.promisify(fs.unlink);
-
 exports.getAccount = async (id) => {
   return accountQueries.getAccount(id);
 };
@@ -48,8 +46,8 @@ exports.updateLogo = async (account, logoFile) => {
   const logo = await files.fixAccountLogo(loadedAccount, logoFile.path);
   await loadedAccount.update({logo}, {runValidators: true});
   loadedAccount.logo = logo;
-  if (oldLogoPath) {
-    await unlinkAsync(oldLogoPath);
+  if (oldLogoPath && (await files.fileExists(oldLogoPath))) {
+    await files.removeFile(oldLogoPath);
   }
   return loadedAccount;
 };

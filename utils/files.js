@@ -9,13 +9,12 @@ const path = require('path');
 
 const ACCOUNT_LOGO_DIMENSION = 160;
 const APP_ICON_DIMENSION = 160;
-const USER_PHOTO_DIMENSION = 128;
-const IMAGE_QUALITY = 90;
+const USER_PHOTO_DIMENSION = 128
 const IMAGE_BACKGROUND = '#ffffff';
-const IMAGE_FORMAT = 'jpg';
 
 const writeFileAsync = Promise.promisify(fs.writeFile);
 const unlinkAsync = Promise.promisify(fs.unlink);
+const statAsync = Promise.promisify(fs.stat);
 
 async function downloadImage(url, outputFile) {
   const response = await axios.get(url, {responseType: 'arraybuffer'});
@@ -27,12 +26,11 @@ async function fixImage(inputFile, outputFile, dimension) {
     .resize(dimension)
     .background(IMAGE_BACKGROUND)
     .flatten()
-    .jpeg({quality: IMAGE_QUALITY})
-    .toFormat(IMAGE_FORMAT)
+    .png()
     .toFile(outputFile);
 }
 
-exports.createDir = (dir) => {
+exports.createDirSync = (dir) => {
   const separator = path.sep;
   const initDir = path.isAbsolute(dir) ? separator : '';
   dir.split(separator).reduce((parentDir, childDir) => {
@@ -42,6 +40,22 @@ exports.createDir = (dir) => {
     }
     return currentDir;
   }, initDir);
+};
+
+exports.fileExists = async (file) => {
+  try {
+    const result = await statAsync(file);
+    return true;
+  } catch (err) {
+    if (err.code == 'ENOENT') {
+      return false;
+    }
+    throw err;
+  }
+};
+
+exports.removeFile = async (file) => {
+  await unlinkAsync(file);
 };
 
 exports.getUserPhoto = (user) => {
@@ -61,7 +75,7 @@ exports.downloadUserPhoto = async (user) => {
     return null;
   }
   const photoPath = path.join(settings.userPhotoPath, user.photo_url);
-  const finalPhotoFile = `${user.id}_${Date.now()}.jpg`;
+  const finalPhotoFile = `${user.id}_${Date.now()}.png`;
   const finalPhotoPath = path.join(settings.userPhotoPath, finalPhotoFile);
   await downloadImage(user.photo_url, photoPath);
   await fixImage(photoPath, finalPhotoPath, USER_PHOTO_DIMENSION);
@@ -70,7 +84,7 @@ exports.downloadUserPhoto = async (user) => {
 };
 
 exports.fixAppIcon = async (app, iconPath) => {
-  const finalIconFile = `${app.id}_${Date.now()}.jpg`;
+  const finalIconFile = `${app.id}_${Date.now()}.png`;
   const finalIconPath = path.join(settings.appIconPath, finalIconFile);
   await fixImage(iconPath, finalIconPath, APP_ICON_DIMENSION);
   await unlinkAsync(iconPath);
@@ -78,7 +92,7 @@ exports.fixAppIcon = async (app, iconPath) => {
 };
 
 exports.fixAccountLogo = async (account, logoPath) => {
-  const finalLogoFile = `${account.id}_${Date.now()}.jpg`;
+  const finalLogoFile = `${account.id}_${Date.now()}.png`;
   const finalLogoPath = path.join(settings.accountLogoPath, finalLogoFile);
   await fixImage(logoPath, finalLogoPath, ACCOUNT_LOGO_DIMENSION);
   await unlinkAsync(logoPath);
