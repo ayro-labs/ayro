@@ -11,15 +11,13 @@ exports.decodeToken = async (req) => {
     const decodedToken = await session.decodeToken(req.token);
     if (decodedToken.account) {
       req.account = decodedToken.account;
-      logger.debug('%s %s [Account %s]', req.method, req.path, req.account.id);
+      logger.debug('%s %s [Account: %s]', req.method, req.path, req.account.id);
     }
-    if (decodedToken.user) {
+    if (decodedToken.user && decodedToken.device && decodedToken.channel) {
       req.user = decodedToken.user;
-      logger.debug('%s %s [User %s]', req.method, req.path, req.user.id);
-    }
-    if (decodedToken.device) {
       req.device = decodedToken.device;
-      logger.debug('%s %s [Device %s]', req.method, req.path, req.device.id);
+      req.channel = decodedToken.channel;
+      logger.debug('%s %s [User: %s, Device: %s, Channel: %s]', req.method, req.path, req.user.id, req.device.id, req.channel);
     }
   }
 };

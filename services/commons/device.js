@@ -4,13 +4,14 @@ const {Device} = require('../../models');
 const constants = require('../../utils/constants');
 const errors = require('../../utils/errors');
 const userQueries = require('../../utils/queries/user');
+const deviceQueries = require('../../utils/queries/device');
 const detectBrowser = require('detect-browser');
 const _ = require('lodash');
 
-const UNALLOWED_ATTRS = ['_id', 'id', 'user', 'registration_date'];
+const UNALLOWED_ATTRS = ['_id', 'id', 'app', 'user', 'registration_date'];
 
 function fixDeviceData(data) {
-  if (data.platform === constants.device.platforms.WEB.id && data.info) {
+  if (data.platform === constants.device.platforms.BROWSER.id && data.info) {
     if (data.info.user_agent) {
       const browser = detectBrowser.parseUserAgent(data.info.user_agent);
       if (browser) {
@@ -37,7 +38,10 @@ exports.createDevice = async (user, data) => {
 };
 
 exports.updateDevice = async (device, data) => {
+  const loadedDevice = await deviceQueries.getDevice(device.id);
   const finalData = _.omit(data, UNALLOWED_ATTRS);
   fixDeviceData(finalData);
-  return Device.findByIdAndUpdate(device.id, finalData, {new: true, runValidators: true}).exec();
+  await loadedDevice.update(finalData, {runValidators: true});
+  loadedDevice.set(finalData);
+  return loadedDevice;
 };

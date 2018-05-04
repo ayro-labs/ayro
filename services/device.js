@@ -1,33 +1,27 @@
 'use strict';
 
-const {Device, ChatMessage} = require('../models');
+const {Device} = require('../models');
+const userQueries = require('../utils/queries/user');
 const deviceQueries = require('../utils/queries/device');
-const userCommons = require('./commons/user');
 const deviceCommons = require('./commons/device');
 
 async function removeOldDeviceIfNeeded(user, data) {
   const device = await deviceQueries.findDevice({user: user.id, platform: data.platform}, {require: false});
   if (device && device.uid !== data.uid) {
-    await ChatMessage.remove({user: device.user});
     await Device.remove({_id: device.id});
-    await userCommons.updateUser(user, {$unset: {latest_device: ''}});
   }
 }
 
 exports.saveDevice = async (user, data) => {
+  const loadedUser = await userQueries.getUser(user.id);
   await removeOldDeviceIfNeeded(user, data);
-  const device = await deviceQueries.findDevice({user: user.id, uid: data.uid}, {require: false});
-  let updatedDevice;
+  let device = await deviceQueries.findDevice({user: loadedUser.id, uid: data.uid}, {require: false});
   if (!device) {
-    updatedDevice = await deviceCommons.createDevice(user, data);
+    device = await deviceCommons.createDevice(loadedUser, data);
   } else {
-    if (user.id !== device.user.toString()) {
-      data.user = user.id;
-    }
-    updatedDevice = await deviceCommons.updateDevice(device, data);
+    device = await deviceCommons.updateDevice(device, data);
   }
-  await userCommons.updateUser(user, {latest_device: updatedDevice.id});
-  return updatedDevice;
+  return device;
 };
 
 exports.updateDevice = async (device, data) => {

@@ -33,7 +33,7 @@ async function initIntegration(req, res, channel) {
     }
     const user = await userService.saveAnonymousUser(app, req.body.device.uid);
     const device = await deviceService.saveDevice(user, req.body.device);
-    const token = await session.createUserToken(user, device);
+    const token = await session.createUserToken(user, device, channel);
     res.json({app, integration, user, token});
   } catch (err) {
     logger.error(err);

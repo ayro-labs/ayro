@@ -1,23 +1,57 @@
 'use strict';
 
-const {ChatMessage} = require('../../models');
+const {App, ChatMessage} = require('../../models');
 const constants = require('../../utils/constants');
+const integrationQueries = require('../../utils/queries/integration');
 const userQueries = require('../../utils/queries/user');
-const push = require('../integrations/push');
+const deviceQueries = require('../../utils/queries/device');
+const webPush = require('../integrations/push/web');
+const androidPush = require('../integrations/push/android');
+const messengerPush = require('../integrations/push/messenger');
 
 const EVENT_CHAT_MESSAGE = 'chat_message';
 
+function getPlatform(channel) {
+  switch (channel) {
+    case constants.integration.channels.WEBSITE:
+    case constants.integration.channels.WORDPRESS:
+      return constants.device.platforms.BROWSER.id;
+    case constants.integration.channels.ANDROID:
+      return constants.device.platforms.ANDROID.id;
+    case constants.integration.channels.MESSENGER:
+      return constants.device.platforms.MESSENGER.id;
+    default:
+      return null;
+  }
+}
+
+async function push(configuration, user, device, event, message) {
+  switch (device.platform) {
+    case constants.device.platforms.BROWSER.id:
+      return webPush.push(configuration, user, device, event, message);
+    case constants.device.platforms.ANDROID.id:
+      return androidPush.push(configuration, user, device, event, message);
+    case constants.device.platforms.MESSENGER.id:
+      return messengerPush.push(configuration, user, device, event, message);
+    default:
+      return null;
+  }
+}
+
 exports.pushMessage = async (agent, user, text, channel) => {
-  const loadedUser = await userQueries.getUser(user.id, {populate: 'latest_device'});
+  const loadedUser = await userQueries.getUser(user.id);
+  const app = new App({id: loadedUser.app});
+  const integration = await integrationQueries.getIntegration(app, channel || loadedUser.latest_channel);
+  const device = await deviceQueries.findDevice({user: loadedUser.id, platform: getPlatform(channel)});
   const chatMessage = new ChatMessage({
     agent,
     text,
+    channel,
     app: loadedUser.app,
     user: loadedUser.id,
-    device: loadedUser.latest_device,
     direction: constants.chatMessage.directions.INCOMING,
     date: new Date(),
   });
-  await push.message(loadedUser, EVENT_CHAT_MESSAGE, chatMessage, channel);
+  await push(integration.configuration, loadedUser, device, EVENT_CHAT_MESSAGE, chatMessage);
   return chatMessage.save();
 };

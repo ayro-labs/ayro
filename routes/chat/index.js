@@ -8,7 +8,7 @@ const {logger} = require('@ayro/commons');
 
 async function listMessages(req, res) {
   try {
-    const chatMessages = await chatService.listMessages(req.user, req.device);
+    const chatMessages = await chatService.listMessages(req.user, req.channel);
     res.json(chatMessages);
   } catch (err) {
     logger.error(err);
@@ -18,7 +18,7 @@ async function listMessages(req, res) {
 
 async function postMessage(req, res) {
   try {
-    const chatMessage = await chatService.postMessage(req.user, req.device, req.params.channel, req.body);
+    const chatMessage = await chatService.postMessage(req.user, req.channel, req.body);
     // Asynchronous because it can take a long time
     pluginService.messagePosted(req.user);
     res.json(chatMessage);
@@ -30,7 +30,7 @@ async function postMessage(req, res) {
 
 module.exports = (router, app) => {
   router.get('/', userAuthenticated, listMessages);
-  router.post('/:channel', userAuthenticated, postMessage);
+  router.post('/', userAuthenticated, postMessage);
 
   app.use('/chat', router);
 };

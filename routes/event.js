@@ -9,7 +9,7 @@ const {logger} = require('@ayro/commons');
 async function trackViewChat(req, res) {
   try {
     await metricService.incrementChatViews(req.user);
-    await pluginService.chatViewed(req.user, req.body.channel);
+    await pluginService.chatViewed(req.user, req.channel);
     res.json({});
   } catch (err) {
     logger.error(err);

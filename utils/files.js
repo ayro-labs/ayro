@@ -6,11 +6,11 @@ const Promise = require('bluebird');
 const sharp = require('sharp');
 const fs = require('fs');
 const path = require('path');
+const uuid = require('uuid').v4;
 
 const ACCOUNT_LOGO_DIMENSION = 160;
 const APP_ICON_DIMENSION = 160;
-const USER_PHOTO_DIMENSION = 128
-const IMAGE_BACKGROUND = '#ffffff';
+const USER_PHOTO_DIMENSION = 128;
 
 const writeFileAsync = Promise.promisify(fs.writeFile);
 const unlinkAsync = Promise.promisify(fs.unlink);
@@ -24,8 +24,6 @@ async function downloadImage(url, outputFile) {
 async function fixImage(inputFile, outputFile, dimension) {
   return sharp(inputFile)
     .resize(dimension)
-    .background(IMAGE_BACKGROUND)
-    .flatten()
     .png()
     .toFile(outputFile);
 }
@@ -44,10 +42,10 @@ exports.createDirSync = (dir) => {
 
 exports.fileExists = async (file) => {
   try {
-    const result = await statAsync(file);
+    await statAsync(file);
     return true;
   } catch (err) {
-    if (err.code == 'ENOENT') {
+    if (err.code === 'ENOENT') {
       return false;
     }
     throw err;
@@ -70,14 +68,11 @@ exports.getAccountLogo = (account) => {
   return account.logo ? `${settings.accountLogoUrl}/${account.logo}` : null;
 };
 
-exports.downloadUserPhoto = async (user) => {
-  if (!user.photo_url) {
-    return null;
-  }
-  const photoPath = path.join(settings.userPhotoPath, user.photo_url);
+exports.downloadUserPhoto = async (user, photoUrl) => {
+  const photoPath = path.join(settings.userPhotoPath, uuid());
+  await downloadImage(photoUrl, photoPath);
   const finalPhotoFile = `${user.id}_${Date.now()}.png`;
   const finalPhotoPath = path.join(settings.userPhotoPath, finalPhotoFile);
-  await downloadImage(user.photo_url, photoPath);
   await fixImage(photoPath, finalPhotoPath, USER_PHOTO_DIMENSION);
   await unlinkAsync(photoPath);
   return finalPhotoFile;

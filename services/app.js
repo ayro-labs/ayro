@@ -7,8 +7,6 @@ const hash = require('../utils/hash');
 const files = require('../utils/files');
 const appQueries = require('../utils/queries/app');
 const path = require('path');
-const fs = require('fs');
-const Promise = require('bluebird');
 const _ = require('lodash');
 
 const ALLOWED_ATTRS = ['name'];

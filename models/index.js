@@ -97,7 +97,7 @@ Integration.index({channel: 1, 'configuration.team.id': 1});
 const Plugin = new Schema({
   app: {type: ObjectId, ref: 'App', required: true},
   type: {type: String, enum: _.values(constants.plugin.types), required: true},
-  channels: {type: [String], enum: _.values(constants.integration.channels), default: undefined},
+  channels: {type: [String], enum: constants.integration.userChannels, default: undefined},
   configuration: {type: Object, required: false},
   registration_date: {type: Date, required: true},
 });
@@ -105,18 +105,18 @@ const Plugin = new Schema({
 const User = new Schema({
   app: {type: ObjectId, ref: 'App', required: true},
   uid: {type: String, required: true},
+  identified: {type: Boolean, required: true},
   first_name: {type: String, required: false},
   last_name: {type: String, required: false},
-  email: {type: String, required: false},
-  photo_url: {type: String, required: false},
-  photo: {type: String, required: false},
-  identified: {type: Boolean, required: true},
   random_name: {type: Boolean, required: true},
+  email: {type: String, required: false},
+  photo: {type: String, required: false},
+  photo_url: {type: String, required: false},
   properties: {type: Object, required: false},
-  extra: {type: Object, required: false},
   sign_up_date: {type: Date, required: false},
-  latest_device: {type: ObjectId, ref: 'Device', required: false},
-  latest_channel: {type: String, enum: _.values(constants.integration.channels), required: false},
+  extra: {type: Object, required: false},
+  transient: {type: Boolean, required: true},
+  latest_channel: {type: String, enum: constants.integration.userChannels, required: false},
   registration_date: {type: Date, required: true},
 });
 User.index({app: 1, uid: 1}, {unique: true});
@@ -168,6 +168,7 @@ const Device = new Schema({
   registration_date: {type: Date, required: true},
 });
 Device.index({user: 1, uid: 1}, {unique: true});
+Device.index({user: 1, platform: 1}, {unique: true});
 Device.index({platfotm: 1, 'info.profile_id': 1});
 Device.methods.getPlatformName = function () {
   const platform = constants.device.platforms[_.toUpper(this.platform)];
@@ -179,8 +180,8 @@ Device.methods.isSmartphone = function () {
 Device.methods.isAndroid = function () {
   return this.platform === constants.device.platforms.ANDROID.id;
 };
-Device.methods.isWeb = function () {
-  return this.platform === constants.device.platforms.WEB.id;
+Device.methods.isBrowser = function () {
+  return this.platform === constants.device.platforms.BROWSER.id;
 };
 Device.methods.isMessenger = function () {
   return this.platform === constants.device.platforms.MESSENGER.id;
@@ -194,13 +195,14 @@ const Agent = new Schema({
 
 const ChatMessage = new Schema({
   app: {type: ObjectId, ref: 'App', required: true, index: true},
-  user: {type: ObjectId, ref: 'User', required: true, index: true},
-  device: {type: ObjectId, ref: 'Device', required: true, index: true},
+  user: {type: ObjectId, ref: 'User', required: true},
   agent: {type: Agent, required: false},
   text: {type: String, required: true},
   direction: {type: String, enum: _.values(constants.chatMessage.directions), required: true},
+  channel: {type: String, enum: constants.integration.userChannels, required: true},
   date: {type: Date, required: true},
 }, {collection: 'chat_messages'});
+ChatMessage.index({user: 1, channel: 1});
 ChatMessage.index({date: 1}, {expireAfterSeconds: 7776000});
 
 exports.Account = mongoose.model('Account', normalizeSchema(Account, (account) => {

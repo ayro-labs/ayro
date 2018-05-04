@@ -40,9 +40,10 @@ exports.createAccountToken = async (account) => {
   }
 };
 
-exports.createUserToken = async (user, device) => {
+exports.createUserToken = async (user, device, channel) => {
   try {
     const decoded = await jwtRedis.sign({
+      channel,
       scope: SCOPE_USER,
       user: user.id,
       device: device.id,
@@ -72,6 +73,7 @@ exports.decodeToken = async (token) => {
           case SCOPE_USER:
             result.user = new User({id: payload.user});
             result.device = new Device({id: payload.device});
+            result.channel = payload.channel;
             break;
           default:
             // Nothing to do...

@@ -6,7 +6,6 @@ const constants = require('../../utils/constants');
 const integrationQueries = require('../../utils/queries/integration');
 const userQueries = require('../../utils/queries/user');
 const integrationCommons = require('../commons/integration');
-const userCommons = require('../commons/user');
 const _ = require('lodash');
 
 const CHANNEL_PREFIX = 'ch';
@@ -105,7 +104,7 @@ function getDeviceInfoAttachments(user) {
         if (deviceInfo.carrier) {
           information.push(`Operadora: ${deviceInfo.carrier}`);
         }
-      } else if (device.isWeb()) {
+      } else if (device.isBrowser()) {
         if (deviceInfo.browser_name && deviceInfo.browser_version) {
           information.push(`Browser: ${_.capitalize(deviceInfo.browser_name)} ${deviceInfo.browser_version}`);
         }
@@ -223,7 +222,7 @@ async function introduceUser(slackApi, user, message, supportChannel, userChanne
 async function createChannelIntroducingUser(slackApi, user, message, supportChannel) {
   const userChannel = await createChannel(slackApi, user);
   await introduceUser(slackApi, user, message, supportChannel, userChannel);
-  await userCommons.updateUser(user, {extra: _.assign(user.extra || {}, {slack_channel: userChannel})});
+  await user.update({extra: _.assign(user.extra || {}, {slack_channel: userChannel})}, {runValidators: true});
   return userChannel;
 }
 

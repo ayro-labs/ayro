@@ -1,6 +1,6 @@
 'use strict';
 
-const {AppSecret, User, Device, ChatMessage} = require('../models');
+const {AppSecret, ChatMessage} = require('../models');
 const errors = require('../utils/errors');
 const userQueries = require('../utils/queries/user');
 const deviceQueries = require('../utils/queries/device');
@@ -11,11 +11,11 @@ const _ = require('lodash');
 
 const JWT_SCOPE_USER = 'user';
 
-async function saveUser(app, data, jwtToken) {
-  if (data.identified && !jwtToken) {
+exports.saveIdentifiedUser = async (app, data, jwtToken) => {
+  if (!jwtToken) {
     throw errors.ayroError('jwt_required', 'JWT token is required');
   }
-  if (data.uid && jwtToken) {
+  if (data.uid) {
     const decoded = jwt.decode(jwtToken, {complete: true});
     if (!decoded) {
       throw errors.ayroError('jwt_invalid', 'Invalid JWT token');
@@ -33,15 +33,12 @@ async function saveUser(app, data, jwtToken) {
     }
   }
   const user = await userQueries.findUser({app: app.id, uid: data.uid}, {require: false});
-  return !user ? userCommons.createUser(app, data) : userCommons.updateUser(user, data);
-}
-
-exports.saveIdentifiedUser = async (app, data, jwtToken) => {
-  return saveUser(app, {...data, identified: true}, jwtToken);
+  return user ? userCommons.updateUser(user, data) : userCommons.createIdentifiedUser(app, data);
 };
 
 exports.saveAnonymousUser = async (app, uid) => {
-  return saveUser(app, {uid, identified: false});
+  const user = await userQueries.findUser({app: app.id, uid}, {require: false});
+  return user || userCommons.createAnonymousUser(app, {uid});
 };
 
 exports.updateUser = async (user, data) => {
@@ -53,35 +50,32 @@ exports.getUser = async (id) => {
 };
 
 exports.mergeUsers = async (user, survivingUser) => {
-  if (user) {
-    const loadedUser = await userQueries.getUser(user.id);
-    const loadedSurvivingUser = await userQueries.getUser(survivingUser.id);
-    if (loadedUser.app.toString() !== loadedSurvivingUser.app.toString()) {
-      throw errors.internalError('Can not merge users from different apps');
-    }
-    if (!loadedUser.identified && loadedSurvivingUser.identified) {
-      const devices = await deviceQueries.findDevices({user: loadedUser.id});
-      const survivingDevices = await deviceQueries.findDevices({user: loadedSurvivingUser.id});
-      const survivingDevicesByUid = _.keyBy(survivingDevices, (device) => {
-        return device.uid;
-      });
-      const devicesIdsToRemove = [];
-      const updateChatMessagePromises = [];
-      _.each(devices, (device) => {
-        const survivingDevice = survivingDevicesByUid[device.uid];
-        if (survivingDevice) {
-          updateChatMessagePromises.push(ChatMessage.updateMany(
-            {user: loadedUser.id, device: device.id},
-            {user: loadedSurvivingUser.id, device: survivingDevice.id},
-          ));
-        } else {
-          devicesIdsToRemove.push(device.id);
-        }
-      });
-      await Promise.all(updateChatMessagePromises);
-      await ChatMessage.remove({device: {$in: devicesIdsToRemove}});
-      await Device.remove({user: loadedUser.id});
-      await User.remove({_id: loadedUser.id});
-    }
+  const loadedUser = await userQueries.getUser(user.id);
+  const loadedSurvivingUser = await userQueries.getUser(survivingUser.id);
+  if (loadedUser.app.toString() !== loadedSurvivingUser.app.toString()) {
+    throw errors.internalError('Can not merge users from different apps');
+  }
+  if (!loadedUser.identified && loadedSurvivingUser.identified) {
+    const devices = await deviceQueries.findDevices({user: loadedUser.id});
+    const survivingDevices = await deviceQueries.findDevices({user: loadedSurvivingUser.id});
+    const survivingDevicesByUid = _.keyBy(survivingDevices, (device) => {
+      return device.uid;
+    });
+    const devicesIdsToRemove = [];
+    const updateChatMessagePromises = [];
+    _.each(devices, (device) => {
+      const survivingDevice = survivingDevicesByUid[device.uid];
+      if (survivingDevice) {
+        updateChatMessagePromises.push(ChatMessage.updateMany(
+          {user: loadedUser.id},
+          {user: loadedSurvivingUser.id},
+        ));
+      } else {
+        devicesIdsToRemove.push(device.id);
+      }
+    });
+    await Promise.all(updateChatMessagePromises);
+    await ChatMessage.remove({device: {$in: devicesIdsToRemove}});
+    await loadedUser.update({transient: true}, {runValidators: true});
   }
 };

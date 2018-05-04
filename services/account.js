@@ -7,8 +7,6 @@ const files = require('../utils/files');
 const errors = require('../utils/errors');
 const accountQueries = require('../utils/queries/account');
 const path = require('path');
-const fs = require('fs');
-const Promise = require('bluebird');
 const _ = require('lodash');
 
 const ALLOWED_ATTRS = ['name', 'email'];

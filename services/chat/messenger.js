@@ -35,7 +35,7 @@ function getDeviceData(user, profile, data) {
 
 async function createDevice(integration, data) {
   const profile = await apis.facebook(integration.configuration, true).api(data.sender.id);
-  const user = await userCommons.createUser(new App({id: integration.app}), getUserData(profile));
+  const user = await userCommons.createAnonymousUser(new App({id: integration.app}), getUserData(profile));
   const device = await deviceCommons.createDevice(user, getDeviceData(user, profile, data));
   return Device.populate(device, 'user');
 }
