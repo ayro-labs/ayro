@@ -105,8 +105,11 @@ function getDeviceInfoAttachments(user) {
           information.push(`Operadora: ${deviceInfo.carrier}`);
         }
       } else if (device.isBrowser()) {
-        if (deviceInfo.browser_name && deviceInfo.browser_version) {
-          information.push(`Browser: ${_.capitalize(deviceInfo.browser_name)} ${deviceInfo.browser_version}`);
+        if (deviceInfo.browser_name) {
+          information.push(`Nome: ${_.capitalize(deviceInfo.browser_name)}`);
+        }
+        if (deviceInfo.browser_version) {
+          information.push(`Versão: ${deviceInfo.browser_version}`);
         }
         if (deviceInfo.operating_system) {
           information.push(`OS: ${deviceInfo.operating_system}`);
