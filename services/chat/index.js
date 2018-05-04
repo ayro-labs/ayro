@@ -48,11 +48,11 @@ exports.pushMessage = async (channel, data) => {
 
 exports.postMessage = async (user, channel, message) => {
   let loadedUser = await userQueries.getUser(user.id);
-  const updatedUserData = {transient: false};
+  const updatedData = {transient: false};
   if (channel !== loadedUser.latest_channel) {
-    updatedUserData.latest_channel = channel;
+    updatedData.latest_channel = channel;
   }
-  loadedUser = await userCommons.updateUser(loadedUser, updatedUserData);
+  loadedUser = await userCommons.updateUser(loadedUser, updatedData);
   await User.populate(loadedUser, 'app devices');
   const integrations = await integrationQueries.findIntegrations(loadedUser.app, constants.integration.types.BUSINESS);
   const chatMessage = new ChatMessage({
