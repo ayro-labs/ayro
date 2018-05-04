@@ -38,9 +38,9 @@ async function login(req, res) {
     const app = await appService.getAppByToken(req.body.app_token);
     const user = await userService.saveIdentifiedUser(app, _.pick(req.body.user, ALLOWED_USER_ATTRS), req.body.jwt);
     const device = await deviceService.saveDevice(user, _.pick(req.body.device, ALLOWED_DEVICE_ATTRS));
+    await userService.mergeUsers(req.user, user);
     await session.destroyToken(req.token);
     const token = await session.createUserToken(user, device, req.channel);
-    await userService.mergeUsers(req.user, user);
     res.json({user, token});
   } catch (err) {
     logger.error(err);
