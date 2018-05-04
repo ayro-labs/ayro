@@ -169,7 +169,7 @@ const Device = new Schema({
 });
 Device.index({user: 1, uid: 1}, {unique: true});
 Device.index({user: 1, platform: 1}, {unique: true});
-Device.index({platfotm: 1, 'info.profile_id': 1});
+Device.index({platform: 1, 'info.profile_id': 1});
 Device.methods.getPlatformName = function () {
   const platform = constants.device.platforms[_.toUpper(this.platform)];
   return platform ? platform.name : '';
