@@ -9,6 +9,7 @@ const detectBrowser = require('detect-browser');
 const _ = require('lodash');
 
 const UNALLOWED_ATTRS = ['_id', 'id', 'app', 'user', 'registration_date'];
+const UNALLOWED_ATTRS_UPDATE = ['uid', 'channel', ...UNALLOWED_ATTRS];
 
 function fixDeviceData(data) {
   if (data.platform === constants.device.platforms.BROWSER.id && data.info) {
@@ -39,7 +40,7 @@ exports.createDevice = async (user, data) => {
 
 exports.updateDevice = async (device, data) => {
   const loadedDevice = await deviceQueries.getDevice(device.id);
-  const attrs = _.omit(data, UNALLOWED_ATTRS);
+  const attrs = _.omit(data, UNALLOWED_ATTRS_UPDATE);
   fixDeviceData(attrs);
   await loadedDevice.update(attrs, {runValidators: true});
   loadedDevice.set(attrs);

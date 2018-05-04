@@ -8,5 +8,5 @@ const webcmClient = axios.create({
 });
 
 exports.push = async (configuration, user, device, event, message) => {
-  await webcmClient.post(`/push/${user.id}`, {event, message});
+  await webcmClient.post(`/push/${device.id}`, {event, message});
 };

@@ -29,7 +29,7 @@ exports.pushMessage = async (agent, user, text, channel) => {
   const app = new App({id: loadedUser.app});
   const userChannel = channel || loadedUser.latest_channel;
   const integration = await integrationQueries.getIntegration(app, userChannel);
-  const device = await deviceQueries.findDevice({user: loadedUser.id, channels: userChannel});
+  const device = await deviceQueries.findDevice({user: loadedUser.id, channel: userChannel});
   const chatMessage = new ChatMessage({
     agent,
     text,

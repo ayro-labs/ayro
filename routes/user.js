@@ -41,7 +41,7 @@ async function login(req, res) {
     await userService.mergeUsers(req.user, user);
     await session.destroyToken(req.token);
     const token = await session.createUserToken(user, device, req.channel);
-    res.json({user, token});
+    res.json({user, device, token});
   } catch (err) {
     logger.error(err);
     errors.respondWithError(res, err);
@@ -57,7 +57,7 @@ async function logout(req, res) {
     const device = await deviceService.saveDevice(user, req.channel, authenticatedDevice.toObject());
     await session.destroyToken(req.token);
     const token = await session.createUserToken(user, device);
-    res.json({user, token});
+    res.json({user, device, token});
   } catch (err) {
     logger.error(err);
     errors.respondWithError(res, err);

@@ -55,14 +55,14 @@ const Account = new Schema({
   name: {type: String, required: true},
   email: {type: String, required: true, unique: true},
   password: {type: String, required: true},
-  logo: {type: String, required: false},
+  logo: {type: String},
   registration_date: {type: Date, required: true},
 });
 
 const App = new Schema({
   account: {type: ObjectId, ref: 'Account', required: true, index: true},
   name: {type: String, required: true},
-  icon: {type: String, required: false},
+  icon: {type: String},
   token: {type: String, required: true},
   registration_date: {type: Date, required: true},
 });
@@ -87,7 +87,7 @@ const Integration = new Schema({
   app: {type: ObjectId, ref: 'App', required: true},
   type: {type: String, enum: _.values(constants.integration.types), required: true},
   channel: {type: String, enum: _.values(constants.integration.channels), required: true},
-  configuration: {type: Object, required: false},
+  configuration: {type: Object},
   registration_date: {type: Date, required: true},
 });
 Integration.index({app: 1, channel: 1}, {unique: true});
@@ -98,25 +98,26 @@ const Plugin = new Schema({
   app: {type: ObjectId, ref: 'App', required: true},
   type: {type: String, enum: _.values(constants.plugin.types), required: true},
   channels: {type: [String], enum: constants.integration.userChannels, default: undefined},
-  configuration: {type: Object, required: false},
+  configuration: {type: Object},
   registration_date: {type: Date, required: true},
 });
+Plugin.index({app: 1, type: 1}, {unique: true});
 
 const User = new Schema({
   app: {type: ObjectId, ref: 'App', required: true},
   uid: {type: String, required: true},
   identified: {type: Boolean, required: true},
-  first_name: {type: String, required: false},
-  last_name: {type: String, required: false},
+  first_name: {type: String},
+  last_name: {type: String},
   random_name: {type: Boolean, required: true},
-  email: {type: String, required: false},
-  photo: {type: String, required: false},
-  photo_url: {type: String, required: false},
-  properties: {type: Object, required: false},
-  sign_up_date: {type: Date, required: false},
-  extra: {type: Object, required: false},
+  email: {type: String},
+  photo: {type: String},
+  photo_url: {type: String},
+  properties: {type: Object},
+  sign_up_date: {type: Date},
+  extra: {type: Object},
   transient: {type: Boolean, required: true},
-  latest_channel: {type: String, enum: constants.integration.userChannels, required: false},
+  latest_channel: {type: String, enum: constants.integration.userChannels},
   registration_date: {type: Date, required: true},
 });
 User.index({app: 1, uid: 1}, {unique: true});
@@ -138,24 +139,24 @@ User.methods.getFullName = function () {
 
 const DeviceInfo = new Schema({
   // Android
-  app_id: {type: String, required: false},
-  app_version: {type: String, required: false},
-  manufacturer: {type: String, required: false},
-  model: {type: String, required: false},
-  carrier: {type: String, required: false},
-  // Web
-  browser_name: {type: String, required: false},
-  browser_version: {type: String, required: false},
-  location: {type: String, required: false},
+  app_id: {type: String},
+  app_version: {type: String},
+  manufacturer: {type: String},
+  model: {type: String},
+  carrier: {type: String},
+  // Browser
+  browser_name: {type: String},
+  browser_version: {type: String},
+  location: {type: String},
   // Messenger
-  profile_id: {type: String, required: false},
-  profile_name: {type: String, required: false},
-  profile_gender: {type: String, required: false},
-  profile_picture: {type: String, required: false},
-  profile_locale: {type: String, required: false},
-  profile_timezone: {type: String, required: false},
+  profile_id: {type: String},
+  profile_name: {type: String},
+  profile_gender: {type: String},
+  profile_picture: {type: String},
+  profile_locale: {type: String},
+  profile_timezone: {type: String},
   // Common
-  operating_system: {type: String, required: false},
+  operating_system: {type: String},
 });
 
 const Device = new Schema({
@@ -163,13 +164,13 @@ const Device = new Schema({
   user: {type: ObjectId, ref: 'User', required: true},
   uid: {type: String, required: true},
   platform: {type: String, required: true},
-  channels: {type: [String], enum: constants.integration.userChannels},
-  push_token: {type: String, required: false},
-  info: {type: DeviceInfo, required: false},
+  channel: {type: String, enum: constants.integration.userChannels, required: true},
+  push_token: {type: String},
+  info: {type: DeviceInfo},
   registration_date: {type: Date, required: true},
 });
 Device.index({user: 1, uid: 1}, {unique: true});
-Device.index({user: 1, channels: 1}, {unique: true});
+Device.index({user: 1, channel: 1}, {unique: true});
 Device.index({platform: 1, 'info.profile_id': 1});
 Device.methods.getPlatformName = function () {
   const platform = constants.device.platforms[_.toUpper(this.platform)];
@@ -189,15 +190,15 @@ Device.methods.isMessenger = function () {
 };
 
 const Agent = new Schema({
-  id: {type: String, required: false},
-  name: {type: String, required: false},
-  photo_url: {type: String, required: false},
+  id: {type: String},
+  name: {type: String},
+  photo_url: {type: String},
 }, {_id: false});
 
 const ChatMessage = new Schema({
   app: {type: ObjectId, ref: 'App', required: true, index: true},
   user: {type: ObjectId, ref: 'User', required: true},
-  agent: {type: Agent, required: false},
+  agent: {type: Agent},
   text: {type: String, required: true},
   direction: {type: String, enum: _.values(constants.chatMessage.directions), required: true},
   channel: {type: String, enum: constants.integration.userChannels, required: true},

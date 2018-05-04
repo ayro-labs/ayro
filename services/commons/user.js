@@ -10,12 +10,14 @@ const randomName = require('node-random-name');
 const _ = require('lodash');
 
 const UNALLOWED_ATTRS = ['_id', 'id', 'app', 'photo', 'random_name', 'registration_date'];
+const UNALLOWED_ATTRS_UPDATE = ['uid', ...UNALLOWED_ATTRS];
 
 async function createUser(app, data, identified) {
   if (identified && !data.uid) {
     throw errors.ayroError('user_uid_required', 'Uid is required');
   }
-  const user = new User(_.omit(data, UNALLOWED_ATTRS));
+  const attrs = _.omit(data, UNALLOWED_ATTRS);
+  const user = new User(attrs);
   user.app = app.id;
   user.random_name = false;
   user.identified = identified || false;
@@ -49,7 +51,7 @@ exports.createAnonymousUser = async (app, data) => {
 
 exports.updateUser = async (user, data) => {
   const loadedUser = await userQueries.getUser(user.id);
-  const attrs = _.omit(data, UNALLOWED_ATTRS);
+  const attrs = _.omit(data, UNALLOWED_ATTRS_UPDATE);
   if (attrs.first_name || attrs.last_name) {
     attrs.random_name = false;
   }
