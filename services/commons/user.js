@@ -49,19 +49,19 @@ exports.createAnonymousUser = async (app, data) => {
 
 exports.updateUser = async (user, data) => {
   const loadedUser = await userQueries.getUser(user.id);
-  const finalData = _.omit(data, UNALLOWED_ATTRS);
-  if (finalData.first_name || finalData.last_name) {
-    finalData.random_name = false;
+  const attrs = _.omit(data, UNALLOWED_ATTRS);
+  if (attrs.first_name || attrs.last_name) {
+    attrs.random_name = false;
   }
-  if (finalData.photo_url && finalData.photo_url !== loadedUser.photo_url) {
+  if (attrs.photo_url && attrs.photo_url !== loadedUser.photo_url) {
     try {
-      finalData.photo = await files.downloadUserPhoto(loadedUser, finalData.photo_url);
+      attrs.photo = await files.downloadUserPhoto(loadedUser, attrs.photo_url);
     } catch (err) {
       logger.debug('Could not download photo of user %s: %s.', loadedUser.id, err.message);
-      finalData.photo_url = null;
+      attrs.photo_url = null;
     }
   }
-  await loadedUser.update(finalData, {runValidators: true});
-  loadedUser.set(finalData);
+  await loadedUser.update(attrs, {runValidators: true});
+  loadedUser.set(attrs);
   return loadedUser;
 };

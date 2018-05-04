@@ -28,9 +28,9 @@ exports.createDevice = async (user, data) => {
     throw errors.ayroError('device_uid_required', 'Device unique id is required');
   }
   const loadedUser = await userQueries.getUser(user.id);
-  const finalData = _.omit(data, UNALLOWED_ATTRS);
-  fixDeviceData(finalData);
-  const device = new Device(finalData);
+  const attrs = _.omit(data, UNALLOWED_ATTRS);
+  fixDeviceData(attrs);
+  const device = new Device(attrs);
   device.app = loadedUser.app;
   device.user = loadedUser.id;
   device.registration_date = new Date();
@@ -39,9 +39,9 @@ exports.createDevice = async (user, data) => {
 
 exports.updateDevice = async (device, data) => {
   const loadedDevice = await deviceQueries.getDevice(device.id);
-  const finalData = _.omit(data, UNALLOWED_ATTRS);
-  fixDeviceData(finalData);
-  await loadedDevice.update(finalData, {runValidators: true});
-  loadedDevice.set(finalData);
+  const attrs = _.omit(data, UNALLOWED_ATTRS);
+  fixDeviceData(attrs);
+  await loadedDevice.update(attrs, {runValidators: true});
+  loadedDevice.set(attrs);
   return loadedDevice;
 };

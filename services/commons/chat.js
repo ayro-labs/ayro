@@ -11,20 +11,6 @@ const messengerPush = require('../integrations/push/messenger');
 
 const EVENT_CHAT_MESSAGE = 'chat_message';
 
-function getPlatform(channel) {
-  switch (channel) {
-    case constants.integration.channels.WEBSITE:
-    case constants.integration.channels.WORDPRESS:
-      return constants.device.platforms.BROWSER.id;
-    case constants.integration.channels.ANDROID:
-      return constants.device.platforms.ANDROID.id;
-    case constants.integration.channels.MESSENGER:
-      return constants.device.platforms.MESSENGER.id;
-    default:
-      return null;
-  }
-}
-
 async function push(configuration, user, device, event, message) {
   switch (device.platform) {
     case constants.device.platforms.BROWSER.id:
@@ -41,14 +27,15 @@ async function push(configuration, user, device, event, message) {
 exports.pushMessage = async (agent, user, text, channel) => {
   const loadedUser = await userQueries.getUser(user.id);
   const app = new App({id: loadedUser.app});
-  const integration = await integrationQueries.getIntegration(app, channel || loadedUser.latest_channel);
-  const device = await deviceQueries.findDevice({user: loadedUser.id, platform: getPlatform(channel)});
+  const userChannel = channel || loadedUser.latest_channel;
+  const integration = await integrationQueries.getIntegration(app, userChannel);
+  const device = await deviceQueries.findDevice({user: loadedUser.id, channels: userChannel});
   const chatMessage = new ChatMessage({
     agent,
     text,
-    channel,
     app: loadedUser.app,
     user: loadedUser.id,
+    channel: userChannel,
     direction: constants.chatMessage.directions.INCOMING,
     date: new Date(),
   });

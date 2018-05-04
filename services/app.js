@@ -71,7 +71,7 @@ exports.deleteApp = async (app) => {
   await Device.remove({app: loadedApp.id});
   await User.remove({app: loadedApp.id});
   await Integration.remove({app: loadedApp.id});
-  await App.remove({_id: loadedApp.id});
+  await loadedApp.remove();
 };
 
 exports.listAppSecrets = async (app) => {

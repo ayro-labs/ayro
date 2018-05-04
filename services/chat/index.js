@@ -9,7 +9,6 @@ const userCommons = require('../commons/user');
 const chatCommons = require('../commons/chat');
 const slack = require('../integrations/slack');
 const Promise = require('bluebird');
-const _ = require('lodash');
 
 function getBusinessChannelApi(channel) {
   switch (channel) {
@@ -21,8 +20,7 @@ function getBusinessChannelApi(channel) {
 }
 
 exports.listMessages = async (user, channel) => {
-  const chatMessages = await ChatMessage.find({user: user.id, channel}).sort({date: 'desc'}).exec();
-  return _.reverse(chatMessages);
+  return ChatMessage.find({user: user.id, channel}).sort({date: 'asc'}).exec();
 };
 
 exports.pushMessage = async (channel, data) => {

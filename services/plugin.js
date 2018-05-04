@@ -109,7 +109,7 @@ exports.updateGreetingsMessagePlugin = async (app, configuration) => {
 
 exports.removePlugin = async (app, type) => {
   const plugin = await pluginQueries.getPlugin(app, type);
-  await Plugin.remove({_id: plugin.id});
+  await plugin.remove();
 };
 
 exports.chatViewed = async (user, channel) => {

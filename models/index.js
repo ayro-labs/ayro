@@ -163,12 +163,13 @@ const Device = new Schema({
   user: {type: ObjectId, ref: 'User', required: true},
   uid: {type: String, required: true},
   platform: {type: String, required: true},
+  channels: {type: [String], enum: constants.integration.userChannels},
   push_token: {type: String, required: false},
   info: {type: DeviceInfo, required: false},
   registration_date: {type: Date, required: true},
 });
 Device.index({user: 1, uid: 1}, {unique: true});
-Device.index({user: 1, platform: 1}, {unique: true});
+Device.index({user: 1, channels: 1}, {unique: true});
 Device.index({platform: 1, 'info.profile_id': 1});
 Device.methods.getPlatformName = function () {
   const platform = constants.device.platforms[_.toUpper(this.platform)];

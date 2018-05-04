@@ -1,25 +1,35 @@
 'use strict';
 
-const {Device} = require('../models');
 const userQueries = require('../utils/queries/user');
 const deviceQueries = require('../utils/queries/device');
 const deviceCommons = require('./commons/device');
+const _ = require('lodash');
 
-async function removeOldDeviceIfNeeded(user, data) {
-  const device = await deviceQueries.findDevice({user: user.id, platform: data.platform}, {require: false});
+async function removeChannelFromOldDevice(user, channel, data) {
+  const device = await deviceQueries.findDevice({user: user.id, channels: channel}, {require: false});
   if (device && device.uid !== data.uid) {
-    await Device.remove({_id: device.id});
+    const channels = _.without(device.channels, channel);
+    if (_.isEmpty(channels)) {
+      await device.remove();
+    } else {
+      await device.update({channels}, {runValidators: true});
+    }
   }
 }
 
-exports.saveDevice = async (user, data) => {
+exports.saveDevice = async (user, channel, data) => {
+  const attrs = _.cloneDeep(data);
   const loadedUser = await userQueries.getUser(user.id);
-  await removeOldDeviceIfNeeded(user, data);
-  let device = await deviceQueries.findDevice({user: loadedUser.id, uid: data.uid}, {require: false});
+  await removeChannelFromOldDevice(user, channel, attrs);
+  let device = await deviceQueries.findDevice({user: loadedUser.id, uid: attrs.uid}, {require: false});
   if (!device) {
-    device = await deviceCommons.createDevice(loadedUser, data);
+    attrs.channels = [channel];
+    device = await deviceCommons.createDevice(loadedUser, attrs);
   } else {
-    device = await deviceCommons.updateDevice(device, data);
+    const channels = new Set(device.channels);
+    channels.add(channel);
+    attrs.channels = Array.from(channels);
+    device = await deviceCommons.updateDevice(device, attrs);
   }
   return device;
 };

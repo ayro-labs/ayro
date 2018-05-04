@@ -37,5 +37,5 @@ exports.updateIntegration = async (app, channel, configuration) => {
 
 exports.removeIntegration = async (app, channel) => {
   const integration = await integrationQueries.getIntegration(app, channel);
-  await Integration.remove({_id: integration.id});
+  await integration.remove();
 };

@@ -37,7 +37,7 @@ async function login(req, res) {
   try {
     const app = await appService.getAppByToken(req.body.app_token);
     const user = await userService.saveIdentifiedUser(app, _.pick(req.body.user, ALLOWED_USER_ATTRS), req.body.jwt);
-    const device = await deviceService.saveDevice(user, _.pick(req.body.device, ALLOWED_DEVICE_ATTRS));
+    const device = await deviceService.saveDevice(user, req.channel, _.pick(req.body.device, ALLOWED_DEVICE_ATTRS));
     await userService.mergeUsers(req.user, user);
     await session.destroyToken(req.token);
     const token = await session.createUserToken(user, device, req.channel);
@@ -54,7 +54,7 @@ async function logout(req, res) {
     const authenticatedDevice = await deviceService.getDevice(req.device.id);
     const app = new App({id: authenticatedUser.app});
     const user = await userService.saveAnonymousUser(app, authenticatedDevice.uid);
-    const device = await deviceService.saveDevice(user, authenticatedDevice.toObject());
+    const device = await deviceService.saveDevice(user, req.channel, authenticatedDevice.toObject());
     await session.destroyToken(req.token);
     const token = await session.createUserToken(user, device);
     res.json({user, token});
