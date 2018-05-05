@@ -1,6 +1,6 @@
 'use strict';
 
-const {App, Device} = require('../../models');
+const {App} = require('../../models');
 const constants = require('../../utils/constants');
 const hash = require('../../utils/hash');
 const apis = require('../../utils/apis');
