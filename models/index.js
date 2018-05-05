@@ -157,7 +157,7 @@ const DeviceInfo = new Schema({
   profile_timezone: {type: String},
   // Common
   operating_system: {type: String},
-});
+}, {_id: false});
 
 const Device = new Schema({
   app: {type: ObjectId, ref: 'App', required: true, index: true},

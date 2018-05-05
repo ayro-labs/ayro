@@ -56,26 +56,7 @@ exports.mergeUsers = async (user, survivingUser) => {
     throw errors.internalError('Can not merge users from different apps');
   }
   if (!loadedUser.identified && loadedSurvivingUser.identified) {
-    const devices = await deviceQueries.findDevices({user: loadedUser.id});
-    const survivingDevices = await deviceQueries.findDevices({user: loadedSurvivingUser.id});
-    const survivingDevicesByUid = _.keyBy(survivingDevices, (device) => {
-      return device.uid;
-    });
-    const devicesIdsToRemove = [];
-    const updateChatMessagePromises = [];
-    _.each(devices, (device) => {
-      const survivingDevice = survivingDevicesByUid[device.uid];
-      if (survivingDevice) {
-        updateChatMessagePromises.push(ChatMessage.updateMany(
-          {user: loadedUser.id},
-          {user: loadedSurvivingUser.id},
-        ));
-      } else {
-        devicesIdsToRemove.push(device.id);
-      }
-    });
-    await Promise.all(updateChatMessagePromises);
-    await ChatMessage.remove({device: {$in: devicesIdsToRemove}});
+    await ChatMessage.update({user: loadedUser.id}, {user: loadedSurvivingUser.id});
     await loadedUser.update({transient: true}, {runValidators: true});
   }
 };
