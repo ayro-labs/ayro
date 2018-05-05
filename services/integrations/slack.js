@@ -147,7 +147,7 @@ function getDeviceInfoAttachments(user) {
       color: PRIMARY_COLOR,
     });
   });
-  if (!_.isEmpty(attachments.length)) {
+  if (!_.isEmpty(attachments)) {
     attachments[0].pretext = 'Estes são os últimos dispositivos utilizados:';
   }
   return attachments;
