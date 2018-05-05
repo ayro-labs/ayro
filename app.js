@@ -31,7 +31,11 @@ app.set('env', settings.env);
 app.set('port', settings.port);
 
 app.use(compression());
-app.use(bodyParser.json());
+app.use(bodyParser.json({
+  verify: (req, res, buf) => {
+    req.rawBody = buf;
+  },
+}));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 app.use(morgan('tiny', {stream: {write: message => loggerServer.debug(message)}}));

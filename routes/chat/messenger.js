@@ -4,8 +4,15 @@ const messengerService = require('../../services/chat/messenger');
 const settings = require('../../configs/settings');
 const errors = require('../../utils/errors');
 const {logger} = require('@ayro/commons');
+const bodyParser = require('body-parser');
+const xhub = require('x-hub-signature').middleware;
 
 const SUBSCRIBE_EVENT = 'subscribe';
+
+const facebookXhub = xhub({
+  algorithm: 'sha1',
+  secret: settings.facebook.appSecret,
+});
 
 function confirmSubscription(req, res) {
   if (req.query['hub.mode'] !== SUBSCRIBE_EVENT || req.query['hub.verify_token'] !== settings.messenger.verificationToken) {
@@ -28,7 +35,7 @@ async function postMessage(req, res) {
 
 module.exports = (router, app) => {
   router.get('/', confirmSubscription);
-  router.post('/', postMessage);
+  router.post('/', facebookXhub, postMessage);
 
   app.use('/chat/messenger', router);
 };
