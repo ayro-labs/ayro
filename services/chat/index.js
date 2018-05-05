@@ -32,7 +32,7 @@ exports.pushMessage = async (channel, data) => {
   try {
     const agent = await channelApi.getAgent(integration.configuration, data);
     const user = await channelApi.getUser(data);
-    const text = await channelApi.extractText(data);
+    const text = await channelApi.getText(data);
     const chatMessage = await chatCommons.pushMessage(agent, user, text);
     await channelApi.confirmMessage(integration.configuration, data, user, chatMessage);
   } catch (err) {
