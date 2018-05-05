@@ -3,11 +3,8 @@
 const {AppSecret, ChatMessage} = require('../models');
 const errors = require('../utils/errors');
 const userQueries = require('../utils/queries/user');
-const deviceQueries = require('../utils/queries/device');
 const userCommons = require('./commons/user');
 const jwt = require('jsonwebtoken');
-const Promise = require('bluebird');
-const _ = require('lodash');
 
 const JWT_SCOPE_USER = 'user';
 
