@@ -210,7 +210,7 @@ const Agent = new Schema({
 const ChatMessage = new Schema({
   app: {type: ObjectId, ref: 'App', required: true, index: true},
   user: {type: ObjectId, ref: 'User', required: true},
-  agent: {type: Agent, required: true},
+  agent: {type: Agent},
   text: {type: String, required: true},
   direction: {type: String, enum: _.values(constants.chatMessage.directions), required: true},
   channel: {type: String, enum: constants.integration.userChannels, required: true},
