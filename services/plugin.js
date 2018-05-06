@@ -47,7 +47,7 @@ async function executeOfficeHoursPlugin(plugin, user) {
     const agent = {
       id: '0',
       name: app.name,
-      photo_url: `${settings.appIconUrl}/${app.icon}`,
+      photo_url: `${settings.publicUrl}/apps/${app.id}/icon`,
     };
     await Promise.delay(2000);
     await chatCommons.pushMessage(agent, user, plugin.configuration.reply);
@@ -60,7 +60,7 @@ async function executeGreetingsMessagePlugin(plugin, user, channel) {
   const agent = {
     id: '0',
     name: app.name,
-    photo_url: `${settings.appIconUrl}/${app.icon}`,
+    photo_url: `${settings.publicUrl}/apps/${app.id}/icon`,
   };
   await Promise.delay(2000);
   await chatCommons.pushMessage(agent, user, plugin.configuration.message, channel);

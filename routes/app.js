@@ -51,22 +51,32 @@ async function updateApp(req, res) {
   }
 }
 
-async function updateIcon(req, res) {
+async function deleteApp(req, res) {
   try {
-    let app = new App({id: req.params.app});
-    app = await appService.updateIcon(app, req.file);
-    res.json(app);
+    const app = new App({id: req.params.app});
+    await appService.deleteApp(app);
+    res.json({});
   } catch (err) {
     logger.error(err);
     errors.respondWithError(res, err);
   }
 }
 
-async function deleteApp(req, res) {
+async function getAppIcon(req, res) {
   try {
-    const app = new App({id: req.params.app});
-    await appService.deleteApp(app);
-    res.json({});
+    const app = await appService.getApp(req.params.app);
+    res.sendFile(`${settings.appIconPath}/${app.icon}`);
+  } catch (err) {
+    logger.error(err);
+    errors.respondWithError(res, err);
+  }
+}
+
+async function updateAppIcon(req, res) {
+  try {
+    let app = new App({id: req.params.app});
+    app = await appService.updateIcon(app, req.file);
+    res.json(app);
   } catch (err) {
     logger.error(err);
     errors.respondWithError(res, err);
@@ -112,7 +122,8 @@ module.exports = (router, app) => {
   router.get('/:app', [accountAuthenticated, accountOwnsApp], getApp);
   router.post('', accountAuthenticated, createApp);
   router.put('/:app', [accountAuthenticated, accountOwnsApp], updateApp);
-  router.put('/:app/icon', [[accountAuthenticated, accountOwnsApp], upload.single('icon')], updateIcon);
+  router.get('/:app/icon', getAppIcon);
+  router.put('/:app/icon', [accountAuthenticated, accountOwnsApp, upload.single('icon')], updateAppIcon);
   router.delete('/:app', [accountAuthenticated, accountOwnsApp], deleteApp);
 
   router.get('/:app/secrets', [accountAuthenticated, accountOwnsApp], listAppSecrets);
