@@ -1,8 +1,9 @@
 'use strict';
 
-const apis = require('../../utils/apis');
-const files = require('../../utils/files');
 const constants = require('../../utils/constants');
+const errors = require('../../utils/errors');
+const files = require('../../utils/files');
+const apis = require('../../utils/apis');
 const integrationQueries = require('../../utils/queries/integration');
 const userQueries = require('../../utils/queries/user');
 const integrationCommons = require('../commons/integration');
@@ -58,7 +59,7 @@ function getCommandsInfoAttachments(insideChannel) {
   ];
 }
 
-function getUserInfoAttachment(user) {
+function getUserInfoAttachments(user) {
   const information = [];
   const fields = [];
   information.push(`App: ${user.app.name}`);
@@ -91,7 +92,7 @@ function getUserInfoAttachment(user) {
 
 function getDeviceInfoAttachments(user) {
   const attachments = [];
-  user.devices.forEach((device) => {
+  _.each(user.devices, (device) => {
     const deviceInfo = device.info;
     const information = [];
     if (deviceInfo) {
@@ -168,7 +169,7 @@ async function postChannelIntro(slackApi, user, channel) {
   const attachments = [
     ...randomNameWarningAttachments(user),
     ...getCommandsInfoAttachments(true),
-    ...getUserInfoAttachment(user),
+    ...getUserInfoAttachments(user),
     ...getDeviceInfoAttachments(user),
   ];
   await slackApi.chat.postMessage({
@@ -198,7 +199,7 @@ async function postUserIntro(slackApi, user, message, supportChannel, userChanne
 
 async function postProfile(slackApi, user, channel) {
   const attachments = [
-    ...getUserInfoAttachment(user),
+    ...getUserInfoAttachments(user),
     ...getDeviceInfoAttachments(user),
   ];
   await slackApi.chat.postMessage({
@@ -279,18 +280,17 @@ exports.addIntegration = async (app, accessToken) => {
       access_token: accessToken,
     },
   };
+  let integration = await integrationQueries.findIntegration({channel: constants.integration.channels.SLACK, 'configuration.team.id': configuration.team.id}, {require: false});
+  if (integration) {
+    throw errors.ayroError('slack_workspace_already_integrated', 'Slack workspace already integrated');
+  }
   const listResult = await slackApi.channels.list({exclude_archived: true, exclude_members: true});
   _.each(listResult.channels, (channel) => {
     if (channel.is_general) {
       configuration.channel = _.pick(channel, ['id', 'name']);
     }
   });
-  let integration = await integrationQueries.getIntegration(app, constants.integration.channels.SLACK, {require: false});
-  if (!integration) {
-    integration = await integrationCommons.addIntegration(app, constants.integration.channels.SLACK, constants.integration.types.BUSINESS, configuration);
-  } else {
-    integration = await integrationCommons.updateIntegration(app, constants.integration.channels.SLACK, configuration);
-  }
+  integration = await integrationCommons.addIntegration(app, constants.integration.channels.SLACK, constants.integration.types.BUSINESS, configuration);
   await postBotIntro(slackApi, configuration.user, configuration.channel);
   return integration;
 };

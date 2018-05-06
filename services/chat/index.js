@@ -9,6 +9,7 @@ const userCommons = require('../commons/user');
 const chatCommons = require('../commons/chat');
 const slack = require('../integrations/slack');
 const Promise = require('bluebird');
+const _ = require('lodash');
 
 function getBusinessChannelApi(channel) {
   switch (channel) {
@@ -62,7 +63,7 @@ exports.postMessage = async (user, channel, message) => {
     date: new Date(),
   });
   const promises = [];
-  integrations.forEach((integration) => {
+  _.each(integrations, (integration) => {
     const channelApi = getBusinessChannelApi(integration.channel);
     if (channelApi) {
       promises.push(channelApi.postMessage(integration.configuration, loadedUser, chatMessage.text));

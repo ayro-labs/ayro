@@ -91,8 +91,14 @@ const Integration = new Schema({
   registration_date: {type: Date, required: true},
 });
 Integration.index({app: 1, channel: 1}, {unique: true});
-Integration.index({channel: 1, 'configuration.page.id': 1});
-Integration.index({channel: 1, 'configuration.team.id': 1});
+Integration.index(
+  {channel: 1, 'configuration.page.id': 1},
+  {unique: true, partialFilterExpression: {'configuration.page.id': {$exists: true}}},
+);
+Integration.index(
+  {channel: 1, 'configuration.team.id': 1},
+  {unique: true, partialFilterExpression: {'configuration.team.id': {$exists: true}}},
+);
 
 const Plugin = new Schema({
   app: {type: ObjectId, ref: 'App', required: true},
@@ -121,7 +127,10 @@ const User = new Schema({
   registration_date: {type: Date, required: true},
 });
 User.index({app: 1, uid: 1}, {unique: true});
-User.index({'extra.slack_channel.id': 1});
+User.index(
+  {'extra.slack_channel.id': 1},
+  {partialFilterExpression: {'extra.slack_channel.id': {$exists: true}}},
+);
 User.virtual('devices', {
   ref: 'Device',
   localField: '_id',
@@ -171,7 +180,10 @@ const Device = new Schema({
 });
 Device.index({user: 1, uid: 1}, {unique: true});
 Device.index({user: 1, channel: 1}, {unique: true});
-Device.index({platform: 1, 'info.profile_id': 1});
+Device.index(
+  {platform: 1, 'info.profile_id': 1},
+  {partialFilterExpression: {'info.profile_id': {$exists: true}}},
+);
 Device.methods.getPlatformName = function () {
   const platform = constants.device.platforms[_.toUpper(this.platform)];
   return platform ? platform.name : '';
@@ -198,7 +210,7 @@ const Agent = new Schema({
 const ChatMessage = new Schema({
   app: {type: ObjectId, ref: 'App', required: true, index: true},
   user: {type: ObjectId, ref: 'User', required: true},
-  agent: {type: Agent},
+  agent: {type: Agent, required: true},
   text: {type: String, required: true},
   direction: {type: String, enum: _.values(constants.chatMessage.directions), required: true},
   channel: {type: String, enum: constants.integration.userChannels, required: true},

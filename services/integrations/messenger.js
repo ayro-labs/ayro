@@ -1,6 +1,7 @@
 'use strict';
 
 const constants = require('../../utils/constants');
+const errors = require('../../utils/errors');
 const apis = require('../../utils/apis');
 const integrationQueries = require('../../utils/queries/integration');
 const integrationCommons = require('../commons/integration');
@@ -46,6 +47,10 @@ exports.updateIntegration = async (app, page) => {
       access_token: result.access_token,
     },
   };
+  const integrationWithPage = await integrationQueries.findIntegration({channel: constants.integration.channels.MESSENGER, 'configuration.page.id': configuration.page.id}, {require: false});
+  if (integrationWithPage) {
+    throw errors.ayroError('facebook_page_already_integrated', 'Facebook page already integrated');
+  }
   await unsubscribePage(oldConfiguration);
   await subscribePage(configuration);
   return integrationCommons.updateIntegration(app, constants.integration.channels.MESSENGER, configuration);
@@ -61,7 +66,7 @@ exports.listPages = async (app) => {
   const integration = await integrationQueries.getIntegration(app, constants.integration.channels.MESSENGER);
   const result = await apis.facebook(integration.configuration).api('me/accounts');
   const pages = [];
-  result.data.forEach((page) => {
+  _.each(result.data, (page) => {
     pages.push({
       id: page.id,
       name: page.name,
