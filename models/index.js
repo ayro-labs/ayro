@@ -207,13 +207,20 @@ const Agent = new Schema({
   photo_url: {type: String},
 }, {_id: false});
 
+const MessageMetadata = new Schema({
+  // Link channel
+  available_channels: {type: [String]},
+}, {_id: false});
+
 const ChatMessage = new Schema({
   app: {type: ObjectId, ref: 'App', required: true, index: true},
   user: {type: ObjectId, ref: 'User', required: true},
   agent: {type: Agent},
-  text: {type: String, required: true},
+  type: {type: String, enum: _.values(constants.chatMessage.types), required: true},
+  text: {type: String},
   direction: {type: String, enum: _.values(constants.chatMessage.directions), required: true},
   channel: {type: String, enum: constants.integration.userChannels, required: true},
+  metadata: {type: MessageMetadata},
   date: {type: Date, required: true},
 }, {collection: 'chat_messages'});
 ChatMessage.index({user: 1, channel: 1});

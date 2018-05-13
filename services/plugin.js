@@ -13,6 +13,9 @@ const Promise = require('bluebird');
 const moment = require('moment');
 const _ = require('lodash');
 
+const SEND_MESSAGE_DELAY_SMALL = 2000;
+const SEND_MESSAGE_DELAY = 4000;
+
 const CONFIG_OFFICE_HOURS = ['timezone', 'time_range', 'time_range.sunday', 'time_range.monday', 'time_range.tuesday', 'time_range.wednesday', 'time_range.thursday', 'time_range.friday', 'time_range.saturday', 'reply'];
 const CONFIG_GREETINGS_MESSAGE = ['message'];
 
@@ -21,6 +24,17 @@ function fixTimezone(timezone) {
     return 'UTC+00:00';
   }
   return timezone;
+}
+
+async function executeGreetingsMessagePlugin(plugin, user, channel) {
+  const app = await appQueries.getApp(user.app);
+  const agent = {
+    id: '0',
+    name: app.name,
+    photo_url: `${settings.publicUrl}/apps/${app.id}/icon`,
+  };
+  await Promise.delay(SEND_MESSAGE_DELAY_SMALL);
+  await chatCommons.pushMessage(agent, user, plugin.configuration.message, channel);
 }
 
 async function executeOfficeHoursPlugin(plugin, user) {
@@ -49,21 +63,18 @@ async function executeOfficeHoursPlugin(plugin, user) {
       name: app.name,
       photo_url: `${settings.publicUrl}/apps/${app.id}/icon`,
     };
-    await Promise.delay(2000);
+    await Promise.delay(SEND_MESSAGE_DELAY);
     await chatCommons.pushMessage(agent, user, plugin.configuration.reply);
   }
   await user.update({'extra.plugins.office_hours.last_check': moment().valueOf()});
 }
 
-async function executeGreetingsMessagePlugin(plugin, user, channel) {
-  const app = await appQueries.getApp(user.app);
-  const agent = {
-    id: '0',
-    name: app.name,
-    photo_url: `${settings.publicUrl}/apps/${app.id}/icon`,
-  };
-  await Promise.delay(2000);
-  await chatCommons.pushMessage(agent, user, plugin.configuration.message, channel);
+async function executeConnectChannelPlugin(user) {
+  if (_.get(user, 'extra.metrics.messages_posted') === 1) {
+    const channels = ['email'];
+    await Promise.delay(SEND_MESSAGE_DELAY_SMALL);
+    await chatCommons.pushLinkChannelMessage(user, channels);
+  }
 }
 
 async function addPlugin(app, type, configuration) {
@@ -133,8 +144,9 @@ exports.messagePosted = async (user) => {
     const app = new App({id: loadedUser.app});
     const officeHoursPlugin = await pluginQueries.getPlugin(app, constants.plugin.types.OFFICE_HOURS, {require: false});
     if (officeHoursPlugin) {
-      executeOfficeHoursPlugin(officeHoursPlugin, loadedUser);
+      await executeOfficeHoursPlugin(officeHoursPlugin, loadedUser);
     }
+    await executeConnectChannelPlugin(loadedUser);
   } catch (err) {
     logger.warn('Could not process "messagePosted" trigger', err);
   }

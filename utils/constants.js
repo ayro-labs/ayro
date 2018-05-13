@@ -44,6 +44,10 @@ module.exports = Object.freeze({
     }),
   }),
   chatMessage: Object.freeze({
+    types: Object.freeze({
+      TEXT: 'text',
+      CONNECT_CHANNELS: 'connect_channels',
+    }),
     directions: Object.freeze({
       INCOMING: 'incoming',
       OUTGOING: 'outgoing',

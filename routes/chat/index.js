@@ -1,7 +1,8 @@
 'use strict';
 
-const pluginService = require('../../services/plugin');
 const chatService = require('../../services/chat');
+const metricService = require('../../services/metric');
+const pluginService = require('../../services/plugin');
 const errors = require('../../utils/errors');
 const {userAuthenticated} = require('../../utils/middlewares');
 const {logger} = require('@ayro/commons');
@@ -19,8 +20,11 @@ async function listMessages(req, res) {
 async function postMessage(req, res) {
   try {
     const chatMessage = await chatService.postMessage(req.user, req.channel, req.body);
-    // Asynchronous because it can take a long time
-    pluginService.messagePosted(req.user);
+    // Asynchronously because it can take a long time
+    (async () => {
+      await metricService.incrementMessagesPosted(req.user);
+      await pluginService.messagePosted(req.user);
+    })();
     res.json(chatMessage);
   } catch (err) {
     logger.error(err);

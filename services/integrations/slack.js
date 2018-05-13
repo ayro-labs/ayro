@@ -181,16 +181,16 @@ async function postChannelIntro(slackApi, user, channel) {
   });
 }
 
-async function postUserIntro(slackApi, user, message, supportChannel, userChannel) {
-  const text = `*${user.getFullName()}* quer conversar com o seu time no canal <#${userChannel.id}|${userChannel.name}>`;
+async function postUserIntro(slackApi, user, chatMessage, supportChannel, userChannel) {
+  const intro = `*${user.getFullName()}* quer conversar com o seu time no canal <#${userChannel.id}|${userChannel.name}>`;
   await slackApi.chat.postMessage({
-    text,
+    text: intro,
     channel: supportChannel.id,
     username: AYRO_BOT_USERNAME,
     as_user: false,
     attachments: [{
-      fallback: getFallbackText(text),
-      text: message,
+      text: chatMessage.text,
+      fallback: getFallbackText(chatMessage.text),
       color: PRIMARY_COLOR,
     }],
   });
@@ -245,17 +245,17 @@ async function createChannel(slackApi, user, conflicts) {
   }
 }
 
-async function createChannelIntroducingUser(slackApi, user, message, supportChannel) {
+async function createChannelIntroducingUser(slackApi, user, chatMessage, supportChannel) {
   const userChannel = await createChannel(slackApi, user);
-  await postUserIntro(slackApi, user, message, supportChannel, userChannel);
+  await postUserIntro(slackApi, user, chatMessage, supportChannel, userChannel);
   await user.update({extra: _.assign(user.extra || {}, {slack_channel: userChannel})}, {runValidators: true});
   return userChannel;
 }
 
-async function unarchiveChannelIntroducingUser(slackApi, user, message, supportChannel, userChannel) {
+async function unarchiveChannelIntroducingUser(slackApi, user, chatMessage, supportChannel, userChannel) {
   try {
     await slackApi.channels.unarchive({channel: userChannel.id});
-    await postUserIntro(slackApi, user, message, supportChannel, userChannel);
+    await postUserIntro(slackApi, user, chatMessage, supportChannel, userChannel);
     return userChannel;
   } catch (err) {
     if (err.data.error === CHANNEL_NOT_ARCHIVED) {
@@ -304,22 +304,22 @@ exports.removeIntegration = async (app) => {
   return integrationCommons.removeIntegration(app, constants.integration.channels.SLACK);
 };
 
-exports.postMessage = async (configuration, user, message) => {
+exports.postMessage = async (configuration, user, chatMessage) => {
   const slackApi = apis.slack(configuration);
   let userChannel;
   if (user.extra && user.extra.slack_channel) {
     userChannel = await getChannel(slackApi, user);
     if (!userChannel) {
-      userChannel = await createChannelIntroducingUser(slackApi, user, message, configuration.channel);
+      userChannel = await createChannelIntroducingUser(slackApi, user, chatMessage, configuration.channel);
     } else if (userChannel.archived) {
-      userChannel = await unarchiveChannelIntroducingUser(slackApi, user, message, configuration.channel, userChannel);
+      userChannel = await unarchiveChannelIntroducingUser(slackApi, user, chatMessage, configuration.channel, userChannel);
     }
   } else {
-    userChannel = await createChannelIntroducingUser(slackApi, user, message, configuration.channel);
+    userChannel = await createChannelIntroducingUser(slackApi, user, chatMessage, configuration.channel);
   }
   await slackApi.chat.postMessage({
+    text: chatMessage.text,
     channel: userChannel.id,
-    text: message,
     username: user.getFullName(),
     as_user: false,
     icon_url: files.getUserPhoto(user),
@@ -407,8 +407,8 @@ exports.getText = async (data) => {
 exports.confirmMessage = async (configuration, data, user, chatMessage) => {
   const slackApi = apis.slack(configuration);
   await slackApi.chat.postMessage({
-    channel: data.channel_id,
     text: chatMessage.text,
+    channel: data.channel_id,
     username: `${chatMessage.agent.name} para ${user.getFullName()}`,
     as_user: false,
     icon_url: chatMessage.agent.photo_url,

@@ -58,6 +58,7 @@ exports.postMessage = async (user, channel, message) => {
     channel,
     app: loadedUser.app.id,
     user: loadedUser.id,
+    type: constants.chatMessage.types.TEXT,
     text: message.text,
     direction: constants.chatMessage.directions.OUTGOING,
     date: new Date(),
@@ -66,7 +67,7 @@ exports.postMessage = async (user, channel, message) => {
   _.each(integrations, (integration) => {
     const channelApi = getBusinessChannelApi(integration.channel);
     if (channelApi) {
-      promises.push(channelApi.postMessage(integration.configuration, loadedUser, chatMessage.text));
+      promises.push(channelApi.postMessage(integration.configuration, loadedUser, chatMessage));
     }
   });
   await Promise.all(promises);
@@ -99,4 +100,8 @@ exports.postHelp = async (channel, data) => {
   }
   const integration = await channelApi.getIntegration(data);
   await channelApi.postHelp(integration.configuration, data);
+};
+
+exports.postChannelConnected = async (user, channel, data) => {
+
 };

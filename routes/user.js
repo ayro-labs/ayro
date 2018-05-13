@@ -4,6 +4,7 @@ const {App} = require('../models');
 const appService = require('../services/app');
 const userService = require('../services/user');
 const deviceService = require('../services/device');
+const chatService = require('../services/chat');
 const session = require('../utils/session');
 const errors = require('../utils/errors');
 const {userAuthenticated} = require('../utils/middlewares');
@@ -27,6 +28,17 @@ async function updateDevice(req, res) {
   try {
     const device = await deviceService.updateDevice(req.device, _.pick(req.body, ALLOWED_DEVICE_ATTRS));
     res.json(device);
+  } catch (err) {
+    logger.error(err);
+    errors.respondWithError(res, err);
+  }
+}
+
+async function connectChannel(req, res) {
+  try {
+    await userService.connectChannel(req.user, req.params.channel, req.body);
+    await chatService.postChannelConnected(req.user, req.params.channel, req.body);
+    res.json({});
   } catch (err) {
     logger.error(err);
     errors.respondWithError(res, err);
@@ -67,6 +79,7 @@ async function logout(req, res) {
 module.exports = (router, app) => {
   router.put('/', userAuthenticated, updateUser);
   router.put('/devices', userAuthenticated, updateDevice);
+  router.post('/connect/:channel', userAuthenticated, connectChannel);
   router.post('/login', userAuthenticated, login);
   router.post('/logout', userAuthenticated, logout);
 
