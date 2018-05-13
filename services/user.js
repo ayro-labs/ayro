@@ -57,7 +57,3 @@ exports.mergeUsers = async (user, survivingUser) => {
     await loadedUser.update({transient: true}, {runValidators: true});
   }
 };
-
-exports.connectChannel = async (user, channel, data) => {
-
-};

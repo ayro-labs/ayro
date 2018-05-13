@@ -10,7 +10,6 @@ logger.setup(path.join(__dirname, 'ayro.log'));
 loggerServer.setup();
 
 const settings = require('./configs/settings');
-const middlewares = require('./configs/middlewares');
 const routes = require('./configs/routes');
 const express = require('express');
 const cors = require('cors');
@@ -46,7 +45,6 @@ app.use(bearerToken({
   queryKey: 'off',
 }));
 
-middlewares.configure(app);
 routes.configure(express, app);
 
 app.listen(app.get('port'), () => {

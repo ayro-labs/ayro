@@ -36,7 +36,6 @@ async function updateDevice(req, res) {
 
 async function connectChannel(req, res) {
   try {
-    await userService.connectChannel(req.user, req.params.channel, req.body);
     await chatService.postChannelConnected(req.user, req.params.channel, req.body);
     res.json({});
   } catch (err) {

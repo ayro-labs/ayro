@@ -211,9 +211,16 @@ async function postProfile(slackApi, user, channel) {
 }
 
 async function getChannel(slackApi, user) {
+  if (!user.extra || !user.extra.slack_channel) {
+    return null;
+  }
   try {
     const result = await slackApi.channels.info({channel: user.extra.slack_channel.id});
-    return {id: result.channel.id, name: result.channel.name, archived: result.channel.is_archived};
+    return {
+      id: result.channel.id,
+      name: result.channel.name,
+      archived: result.channel.is_archived,
+    };
   } catch (err) {
     if (err.data.error === CHANNEL_NOT_FOUND) {
       return null;
@@ -223,46 +230,50 @@ async function getChannel(slackApi, user) {
 }
 
 async function createChannel(slackApi, user, conflicts) {
-  let channel;
+  let name = '';
   if (!conflicts) {
-    channel = `${CHANNEL_PREFIX} ${user.getFullName()}`;
-    channel = _.truncate(channel, {length: 21, omission: ''});
+    name = `${CHANNEL_PREFIX} ${user.getFullName()}`;
+    name = _.truncate(name, {length: 21, omission: ''});
   } else {
     const charsRemaining = 21 - (CHANNEL_PREFIX.length + String(conflicts).length + 2);
-    channel = _.truncate(user.getFullName(), {length: charsRemaining, omission: ''});
-    channel = `${CHANNEL_PREFIX} ${channel} ${conflicts}`;
+    name = _.truncate(user.getFullName(), {length: charsRemaining, omission: ''});
+    name = `${CHANNEL_PREFIX} ${name} ${conflicts}`;
   }
-  channel = _.deburr(channel);
+  name = _.deburr(name);
   try {
-    const result = await slackApi.channels.create({name: channel});
-    return {id: result.channel.id, name: result.channel.name};
+    const result = await slackApi.channels.create({name});
+    const channel = {id: result.channel.id, name: result.channel.name};
+    await user.update({extra: _.assign(user.extra || {}, {slack_channel: channel})}, {runValidators: true});
+    return channel;
   } catch (err) {
-    if (err.data.error === CHANNEL_NAME_TAKEN) {
-      const conflictsInc = conflicts ? conflicts + 1 : 1;
-      return createChannel(slackApi, user, conflictsInc);
+    if (err.data.error !== CHANNEL_NAME_TAKEN) {
+      throw err;
     }
-    throw err;
+    const conflictsInc = conflicts ? conflicts + 1 : 1;
+    return createChannel(slackApi, user, conflictsInc);
+  }
+}
+
+async function unarchiveChannel(slackApi, channel) {
+  try {
+    await slackApi.channels.unarchive({channel: channel.id});
+    channel.archived = false;
+  } catch (err) {
+    if (err.data.error !== CHANNEL_NOT_ARCHIVED) {
+      throw err;
+    }
   }
 }
 
 async function createChannelIntroducingUser(slackApi, user, chatMessage, supportChannel) {
   const userChannel = await createChannel(slackApi, user);
   await postUserIntro(slackApi, user, chatMessage, supportChannel, userChannel);
-  await user.update({extra: _.assign(user.extra || {}, {slack_channel: userChannel})}, {runValidators: true});
   return userChannel;
 }
 
 async function unarchiveChannelIntroducingUser(slackApi, user, chatMessage, supportChannel, userChannel) {
-  try {
-    await slackApi.channels.unarchive({channel: userChannel.id});
-    await postUserIntro(slackApi, user, chatMessage, supportChannel, userChannel);
-    return userChannel;
-  } catch (err) {
-    if (err.data.error === CHANNEL_NOT_ARCHIVED) {
-      return userChannel;
-    }
-    throw err;
-  }
+  await unarchiveChannel(slackApi, userChannel);
+  await postUserIntro(slackApi, user, chatMessage, supportChannel, userChannel);
 }
 
 exports.addIntegration = async (app, accessToken) => {
@@ -304,84 +315,6 @@ exports.removeIntegration = async (app) => {
   return integrationCommons.removeIntegration(app, constants.integration.channels.SLACK);
 };
 
-exports.postMessage = async (configuration, user, chatMessage) => {
-  const slackApi = apis.slack(configuration);
-  let userChannel;
-  if (user.extra && user.extra.slack_channel) {
-    userChannel = await getChannel(slackApi, user);
-    if (!userChannel) {
-      userChannel = await createChannelIntroducingUser(slackApi, user, chatMessage, configuration.channel);
-    } else if (userChannel.archived) {
-      userChannel = await unarchiveChannelIntroducingUser(slackApi, user, chatMessage, configuration.channel, userChannel);
-    }
-  } else {
-    userChannel = await createChannelIntroducingUser(slackApi, user, chatMessage, configuration.channel);
-  }
-  await slackApi.chat.postMessage({
-    text: chatMessage.text,
-    channel: userChannel.id,
-    username: user.getFullName(),
-    as_user: false,
-    icon_url: files.getUserPhoto(user),
-  });
-};
-
-exports.postProfile = async (configuration, user) => {
-  const slackApi = apis.slack(configuration);
-  if (user.extra && user.extra.slack_channel) {
-    await postProfile(slackApi, user, user.extra.slack_channel);
-  }
-};
-
-exports.postHelp = async (configuration, data) => {
-  const slackApi = apis.slack(configuration);
-  const text = 'Ayro é uma ferramenta de suporte ao cliente totalmente integrado ao Slack. Converse com seus clientes em tempo real através dos canais com prefixo "ch".';
-  await slackApi.chat.postEphemeral({
-    text,
-    channel: data.channel_id,
-    user: data.user_id,
-    username: AYRO_BOT_USERNAME,
-    as_user: false,
-    attachments: getCommandsInfoAttachments(false),
-  });
-};
-
-exports.postUserNotFound = async (configuration, data) => {
-  const slackApi = apis.slack(configuration);
-  const text = 'Este canal não está associado a nenhum usuário. Lembre-se, os canais dos usuários possuem o prefixo "ch".';
-  await slackApi.chat.postEphemeral({
-    text,
-    channel: data.channel_id,
-    user: data.user_id,
-    username: AYRO_BOT_USERNAME,
-    as_user: false,
-  });
-};
-
-exports.postMessageError = async (configuration, data) => {
-  const slackApi = apis.slack(configuration);
-  const text = 'Não foi possível enviar a mensagem, por favor tente novamente em alguns instantes.';
-  await slackApi.chat.postEphemeral({
-    text,
-    channel: data.channel_id,
-    user: data.user_id,
-    username: AYRO_BOT_USERNAME,
-    as_user: false,
-  });
-};
-
-exports.postProfileError = async (configuration, data) => {
-  const slackApi = apis.slack(configuration);
-  const text = 'Não foi possível obter o perfil do usuário, por favor tente novamente em alguns instantes.';
-  await slackApi.chat.postEphemeral({
-    text,
-    channel: data.channel_id,
-    user: data.user_id,
-    username: AYRO_BOT_USERNAME,
-    as_user: false,
-  });
-};
-
 exports.getIntegration = async (data) => {
   return integrationQueries.findIntegration({channel: constants.integration.channels.SLACK, 'configuration.team.id': data.team_id});
 };
@@ -402,6 +335,94 @@ exports.getUser = async (data) => {
 
 exports.getText = async (data) => {
   return data.text;
+};
+
+exports.postMessage = async (configuration, user, chatMessage) => {
+  const slackApi = apis.slack(configuration);
+  const supportChannel = configuration.channel;
+  const userChannel = await getChannel(slackApi, user) || await createChannelIntroducingUser(slackApi, user, chatMessage, supportChannel);
+  if (userChannel.archived) {
+    await unarchiveChannelIntroducingUser(slackApi, user, chatMessage, supportChannel, userChannel);
+  }
+  await slackApi.chat.postMessage({
+    text: chatMessage.text,
+    channel: userChannel.id,
+    username: user.getFullName(),
+    as_user: false,
+    icon_url: files.getUserPhoto(user),
+  });
+};
+
+exports.postEmailConnected = async (configuration, user, email) => {
+  const text = `Este usuário gostaria de ser contactado através do email ${email}, caso não receba uma resposta imediata da sua equipe. Por favor utilize o comando /send para respondê-lo.`;
+  const slackApi = apis.slack(configuration);
+  const userChannel = await getChannel(slackApi, user) || await createChannel(slackApi, user);
+  if (userChannel.archived) {
+    await unarchiveChannel(slackApi, userChannel);
+  }
+  await slackApi.chat.postMessage({
+    text,
+    channel: userChannel.id,
+    username: AYRO_BOT_USERNAME,
+    as_user: false,
+  });
+};
+
+exports.postProfile = async (configuration, user) => {
+  const slackApi = apis.slack(configuration);
+  if (!user.extra || !user.extra.slack_channel) {
+    throw errors.ayroError(CHANNEL_NOT_FOUND, 'Channel not found');
+  }
+  await postProfile(slackApi, user, user.extra.slack_channel);
+};
+
+exports.postHelp = async (configuration, data) => {
+  const text = 'Ayro é uma ferramenta de suporte ao cliente totalmente integrado ao Slack. Converse com seus clientes em tempo real através dos canais com prefixo "ch".';
+  const slackApi = apis.slack(configuration);
+  await slackApi.chat.postEphemeral({
+    text,
+    channel: data.channel_id,
+    user: data.user_id,
+    username: AYRO_BOT_USERNAME,
+    as_user: false,
+    attachments: getCommandsInfoAttachments(false),
+  });
+};
+
+exports.postUserNotFound = async (configuration, data) => {
+  const text = 'Este canal não está associado a nenhum usuário. Lembre-se, os canais dos usuários possuem o prefixo "ch".';
+  const slackApi = apis.slack(configuration);
+  await slackApi.chat.postEphemeral({
+    text,
+    channel: data.channel_id,
+    user: data.user_id,
+    username: AYRO_BOT_USERNAME,
+    as_user: false,
+  });
+};
+
+exports.postMessageError = async (configuration, data) => {
+  const text = 'Não foi possível enviar a mensagem, por favor tente novamente em alguns instantes.';
+  const slackApi = apis.slack(configuration);
+  await slackApi.chat.postEphemeral({
+    text,
+    channel: data.channel_id,
+    user: data.user_id,
+    username: AYRO_BOT_USERNAME,
+    as_user: false,
+  });
+};
+
+exports.postProfileError = async (configuration, data) => {
+  const text = 'Não foi possível obter o perfil do usuário, por favor tente novamente em alguns instantes.';
+  const slackApi = apis.slack(configuration);
+  await slackApi.chat.postEphemeral({
+    text,
+    channel: data.channel_id,
+    user: data.user_id,
+    username: AYRO_BOT_USERNAME,
+    as_user: false,
+  });
 };
 
 exports.confirmMessage = async (configuration, data, user, chatMessage) => {
