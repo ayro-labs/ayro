@@ -50,11 +50,12 @@ async function executeOfficeHoursPlugin(plugin, user) {
   if (!timeRange) {
     return;
   }
+  await user.update({'extra.plugins.office_hours.last_check': moment().valueOf()});
   const startTime = moment().utcOffset(timezone);
-  const [startHour, startMinute] = timeRange.start.split(':');
-  startTime.set({hours: startHour, minutes: startMinute, seconds: 0});
   const endTime = moment().utcOffset(timezone);
+  const [startHour, startMinute] = timeRange.start.split(':');
   const [endHour, endMinute] = timeRange.end.split(':');
+  startTime.set({hours: startHour, minutes: startMinute, seconds: 0});
   endTime.set({hours: endHour, minutes: endMinute, seconds: 59});
   if (now.isBefore(startTime) || now.isAfter(endTime)) {
     const app = await appQueries.getApp(user.app);
@@ -66,7 +67,6 @@ async function executeOfficeHoursPlugin(plugin, user) {
     await Promise.delay(SEND_MESSAGE_DELAY);
     await chatCommons.pushMessage(agent, user, plugin.configuration.reply);
   }
-  await user.update({'extra.plugins.office_hours.last_check': moment().valueOf()});
 }
 
 async function executeConnectChannelPlugin(user) {
