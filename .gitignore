@@ -1,6 +1,6 @@
-node_modules
-public
-npm-debug.log
-ayro.log
-newrelic_agent.log
-config.properties
+/node_modules
+/public
+/npm-debug.log
+/ayro.log
+/newrelic_agent.log
+/config.properties
