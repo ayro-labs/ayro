@@ -69,7 +69,7 @@ exports.postMessage = async (user, channel, message) => {
   _.each(integrations, (integration) => {
     const businessApi = getBusinessApi(integration.channel);
     if (businessApi) {
-      // promises.push(businessApi.postMessage(integration.configuration, updatedUser, chatMessage));
+      promises.push(businessApi.postMessage(integration.configuration, updatedUser, chatMessage));
     }
   });
   await Promise.all(promises);
