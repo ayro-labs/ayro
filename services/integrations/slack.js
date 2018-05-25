@@ -164,23 +164,6 @@ async function postBotIntro(slackApi, user, channel) {
   });
 }
 
-async function postChannelIntro(slackApi, user, channel) {
-  const text = `Este é o canal exclusivo para conversar com *${user.getFullName()}*.`;
-  const attachments = [
-    ...randomNameWarningAttachments(user),
-    ...getCommandsInfoAttachments(true),
-    ...getUserInfoAttachments(user),
-    ...getDeviceInfoAttachments(user),
-  ];
-  await slackApi.chat.postMessage({
-    text,
-    attachments,
-    channel: channel.id,
-    username: AYRO_BOT_USERNAME,
-    as_user: false,
-  });
-}
-
 async function postUserIntro(slackApi, user, chatMessage, supportChannel, userChannel) {
   const intro = `*${user.getFullName()}* quer conversar com o seu time no canal <#${userChannel.id}|${userChannel.name}>`;
   await slackApi.chat.postMessage({
@@ -194,7 +177,20 @@ async function postUserIntro(slackApi, user, chatMessage, supportChannel, userCh
       color: PRIMARY_COLOR,
     }],
   });
-  await postChannelIntro(slackApi, user, userChannel);
+  const text = `Este é o canal exclusivo para conversar com *${user.getFullName()}*.`;
+  const attachments = [
+    ...randomNameWarningAttachments(user),
+    ...getCommandsInfoAttachments(true),
+    ...getUserInfoAttachments(user),
+    ...getDeviceInfoAttachments(user),
+  ];
+  await slackApi.chat.postMessage({
+    text,
+    attachments,
+    channel: userChannel.id,
+    username: AYRO_BOT_USERNAME,
+    as_user: false,
+  });
 }
 
 async function postProfile(slackApi, user, channel) {
