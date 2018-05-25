@@ -1,47 +1,48 @@
 'use strict';
 
 const files = require('../utils/files');
-const {properties, logger} = require('@ayro/commons');
-const path = require('path');
+const {configs, paths} = require('@ayro/commons');
 
-exports.env = properties.get('app.env', 'development');
-exports.port = properties.get('app.port', 3000);
-exports.debug = properties.get('app.debug', false);
+const config = configs.load(paths.root('config.properties'));
+
+exports.env = config.get('app.env', 'development');
+exports.port = config.get('app.port', 3000);
+exports.debug = config.get('app.debug', false);
 
 exports.publicUrl = this.env === 'production' ? 'https://api.ayro.io' : `http://localhost:${this.port}`;
-exports.publicPath = properties.get('app.publicPath', path.join(__dirname, '../public'));
+exports.publicPath = config.get('app.publicPath', paths.root('public'));
 
 exports.appIconUrl = `${this.publicUrl}/img/apps`;
-exports.appIconPath = path.join(this.publicPath, 'img/apps');
+exports.appIconPath = paths.join(this.publicPath, 'img/apps');
 
 exports.accountLogoUrl = `${this.publicUrl}/img/accounts`;
-exports.accountLogoPath = path.join(this.publicPath, 'img/accounts');
+exports.accountLogoPath = paths.join(this.publicPath, 'img/accounts');
 
 exports.userPhotoUrl = `${this.publicUrl}/img/users`;
-exports.userPhotoPath = path.join(this.publicPath, 'img/users');
+exports.userPhotoPath = paths.join(this.publicPath, 'img/users');
 
-exports.webcmUrl = properties.get('webcm.url', this.env === 'production' ? 'https://webcm.ayro.io:3100' : 'http://localhost:3100');
+exports.webcmUrl = config.get('webcm.url', this.env === 'production' ? 'https://webcm.ayro.io:3100' : 'http://localhost:3100');
 
 exports.session = {
   prefix: 'session:',
-  keyId: properties.get('session.keyId'),
-  secret: properties.get('session.secret'),
-  expiresIn: properties.get('session.expiresIn', '24 hours'),
+  keyId: config.get('session.keyId'),
+  secret: config.get('session.secret'),
+  expiresIn: config.get('session.expiresIn', '24 hours'),
 };
 
 exports.mongo = {
-  host: properties.get('mongo.host', 'localhost'),
-  port: properties.get('mongo.port', 27017),
-  debug: properties.get('mongo.debug', false),
-  schema: properties.get('mongo.schema', 'ayro'),
-  username: properties.get('mongo.username', 'ayro'),
-  password: properties.get('mongo.password'),
+  host: config.get('mongo.host', 'localhost'),
+  port: config.get('mongo.port', 27017),
+  debug: config.get('mongo.debug', false),
+  schema: config.get('mongo.schema', 'ayro'),
+  username: config.get('mongo.username', 'ayro'),
+  password: config.get('mongo.password'),
 };
 
 exports.redis = {
-  host: properties.get('redis.host', 'localhost'),
-  port: properties.get('redis.port', 6379),
-  password: properties.get('redis.password'),
+  host: config.get('redis.host', 'localhost'),
+  port: config.get('redis.port', 6379),
+  password: config.get('redis.password'),
 };
 
 exports.facebook = {
@@ -71,6 +72,3 @@ if (!this.session.keyId) {
 if (!this.session.secret) {
   throw new Error('Property session.secret is required');
 }
-
-logger.info('Using %s environment settings', this.env);
-logger.info('Debug mode is %s', this.debug ? 'ON' : 'OFF');
