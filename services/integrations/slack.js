@@ -155,7 +155,7 @@ function getDeviceInfoAttachments(user) {
 }
 
 async function postBotIntro(slackApi, user, channel) {
-  const text = `Olá, eu sou o Ayro Bot!\n<@${user.id}> acabou de integrar este Workspace com o <https://ayro.io|Ayro>. Agora você pode conversar com seus clientes em tempo real, direto do Slack.`;
+  const text = `Olá, eu sou o Ayro BOT! <@${user.id}> acabou de integrar este Workspace com o <https://ayro.io|Ayro>. Agora você pode conversar com seus clientes em tempo real, direto do Slack. Digite */ayro-help* para obter mais informações.`;
   await slackApi.chat.postMessage({
     text,
     channel: channel.id,
@@ -350,7 +350,7 @@ exports.postMessage = async (configuration, user, chatMessage) => {
 };
 
 exports.postEmailConnected = async (configuration, user, email) => {
-  const text = `Este usuário gostaria de ser contactado através do email ${email}, caso não receba uma resposta imediata da sua equipe. Por favor utilize o comando /send para respondê-lo.`;
+  const text = `Este usuário gostaria de ser contactado através do email ${email}, caso não receba uma resposta imediata da sua equipe. Por favor utilize o comando */send* para respondê-lo.`;
   const slackApi = apis.slack(configuration);
   const userChannel = await getChannel(slackApi, user) || await createChannel(slackApi, user);
   if (userChannel.archived) {
