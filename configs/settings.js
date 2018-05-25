@@ -3,7 +3,7 @@
 const files = require('../utils/files');
 const {configs, paths} = require('@ayro/commons');
 
-const config = configs.load(paths.root('config.properties'));
+const config = configs.load(paths.root('config.yml'));
 
 exports.env = config.get('app.env', 'development');
 exports.port = config.get('app.port', 3000);

@@ -1,0 +1,7 @@
+app:
+  debug: true
+session:
+  keyId: ayro
+  secret: abcde
+mongo:
+  debug: true
