@@ -21,7 +21,7 @@
     "eslint-plugin-import": "2.12.0"
   },
   "dependencies": {
-    "@ayro/commons": "0.0.28",
+    "@ayro/commons": "0.0.29",
     "@slack/client": "4.2.2",
     "axios": "0.18.0",
     "bcrypt": "2.0.1",
