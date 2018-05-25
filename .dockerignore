@@ -4,7 +4,7 @@ tasks
 npm-debug.log
 ayro.log
 newrelic_agent.log
-config.properties
+config.yml
 docker-compose.yml
 Dockerfile
 .dockerignore
