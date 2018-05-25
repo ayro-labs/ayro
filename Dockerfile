@@ -14,7 +14,7 @@ RUN \
   npm rebuild bcrypt --build-from-source && \
   apk del .build-deps fftw-dev && \
   rm -rf /var/cache/apk/* /tmp/* && \
-  touch config.properties
+  touch config.yml
 COPY . .
 EXPOSE 3000
 CMD ["pm2-docker", "process.json", "--only", "Ayro"]

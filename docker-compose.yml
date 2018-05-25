@@ -6,4 +6,4 @@ services:
     hostname: "ayro"
     network_mode: "host"
     volumes:
-      - "./config.properties:/usr/src/ayro/config.properties"
+      - "./config.yml:/usr/src/ayro/config.yml"
