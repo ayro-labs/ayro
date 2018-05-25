@@ -19,7 +19,7 @@ require('json.date-extensions');
 
 logger.setup({
   file: paths.root('ayro.log'),
-  level: settings.debug ? 'debug': 'info'
+  level: settings.debug ? 'debug' : 'info',
 });
 
 // Parse string to date when call JSON.parse
