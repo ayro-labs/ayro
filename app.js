@@ -2,12 +2,10 @@
 
 require('newrelic');
 
-const {logger, paths} = require('@ayro/commons');
-
-paths.setup(__dirname);
-
+const {logger} = require('@ayro/commons');
 const settings = require('./configs/settings');
 const routes = require('./configs/routes');
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const compression = require('compression');
@@ -18,7 +16,7 @@ const bearerToken = require('express-bearer-token');
 require('json.date-extensions');
 
 logger.setup({
-  file: paths.root('ayro.log'),
+  file: path.resolve('ayro.log'),
   level: settings.debug ? 'debug' : 'info',
 });
 

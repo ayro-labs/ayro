@@ -3,7 +3,7 @@
 const {commands, publish} = require('@ayro/commons');
 const path = require('path');
 
-const WORKING_DIR = path.resolve(__dirname, '../');
+const WORKING_DIR = path.resolve();
 
 async function lintProject() {
   commands.log('Linting project...');

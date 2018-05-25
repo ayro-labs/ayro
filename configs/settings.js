@@ -1,25 +1,26 @@
 'use strict';
 
 const files = require('../utils/files');
-const {configs, paths} = require('@ayro/commons');
+const {configs} = require('@ayro/commons');
+const path = require('path');
 
-const config = configs.load(paths.root('config.yml'));
+const config = configs.load(path.resolve('config.yml'));
 
 exports.env = config.get('app.env', 'development');
 exports.port = config.get('app.port', 3000);
 exports.debug = config.get('app.debug', false);
 
 exports.publicUrl = this.env === 'production' ? 'https://api.ayro.io' : `http://localhost:${this.port}`;
-exports.publicPath = config.get('app.publicPath', paths.root('public'));
+exports.publicPath = config.get('app.publicPath', path.resolve('public'));
 
 exports.appIconUrl = `${this.publicUrl}/img/apps`;
-exports.appIconPath = paths.join(this.publicPath, 'img/apps');
+exports.appIconPath = path.join(this.publicPath, 'img/apps');
 
 exports.accountLogoUrl = `${this.publicUrl}/img/accounts`;
-exports.accountLogoPath = paths.join(this.publicPath, 'img/accounts');
+exports.accountLogoPath = path.join(this.publicPath, 'img/accounts');
 
 exports.userPhotoUrl = `${this.publicUrl}/img/users`;
-exports.userPhotoPath = paths.join(this.publicPath, 'img/users');
+exports.userPhotoPath = path.join(this.publicPath, 'img/users');
 
 exports.webcmUrl = config.get('webcm.url', this.env === 'production' ? 'https://webcm.ayro.io:3100' : 'http://localhost:3100');
 
