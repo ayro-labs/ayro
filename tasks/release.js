@@ -1,5 +1,7 @@
 'use strict';
 
+require('app-module-path/register');
+
 const {commands, release} = require('@ayro/commons');
 const path = require('path');
 
