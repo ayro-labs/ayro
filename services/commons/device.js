@@ -1,10 +1,10 @@
 'use strict';
 
-const {Device} = require('../../models');
-const constants = require('../../utils/constants');
-const errors = require('../../utils/errors');
-const userQueries = require('../../utils/queries/user');
-const deviceQueries = require('../../utils/queries/device');
+const {Device} = require('models');
+const constants = require('utils/constants');
+const errors = require('utils/errors');
+const userQueries = require('utils/queries/user');
+const deviceQueries = require('utils/queries/device');
 const detectBrowser = require('detect-browser');
 const _ = require('lodash');
 

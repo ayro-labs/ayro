@@ -1,8 +1,8 @@
 'use strict';
 
-const {Plugin} = require('../../models');
-const errors = require('../errors');
-const queries = require('../queries');
+const {Plugin} = require('models');
+const errors = require('utils/errors');
+const queriesCommon = require('utils/queries/common');
 
 function throwPluginNotFoundIfNeeded(plugin, options) {
   if (!plugin && (!options || options.require)) {
@@ -16,7 +16,7 @@ exports.getPlugin = async (app, type, options) => {
 
 exports.findPlugin = async (query, options) => {
   const promise = Plugin.findOne(query);
-  queries.fillQuery(promise, options);
+  queriesCommon.fillQuery(promise, options);
   const plugin = await promise.exec();
   throwPluginNotFoundIfNeeded(plugin, options);
   return plugin;
@@ -24,6 +24,6 @@ exports.findPlugin = async (query, options) => {
 
 exports.findPlugins = async (app, type, options) => {
   const promise = Plugin.find(type ? {app: app.id, type} : {app: app.id});
-  queries.fillQuery(promise, options);
+  queriesCommon.fillQuery(promise, options);
   return promise.exec();
 };

@@ -1,13 +1,13 @@
 'use strict';
 
-const {App} = require('../models');
-const appService = require('../services/app');
-const userService = require('../services/user');
-const deviceService = require('../services/device');
-const chatService = require('../services/chat');
-const session = require('../utils/session');
-const errors = require('../utils/errors');
-const {userAuthenticated} = require('../utils/middlewares');
+const {App} = require('models');
+const appService = require('services/app');
+const userService = require('services/user');
+const deviceService = require('services/device');
+const chatService = require('services/chat');
+const session = require('utils/session');
+const errors = require('utils/errors');
+const {userAuthenticated} = require('routes/middlewares');
 const {logger} = require('@ayro/commons');
 const _ = require('lodash');
 

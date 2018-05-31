@@ -1,10 +1,10 @@
 'use strict';
 
-const {App} = require('../models');
-const pluginService = require('../services/plugin');
-const constants = require('../utils/constants');
-const errors = require('../utils/errors');
-const {accountAuthenticated, accountOwnsApp} = require('../utils/middlewares');
+const {App} = require('models');
+const pluginService = require('services/plugin');
+const constants = require('utils/constants');
+const errors = require('utils/errors');
+const {accountAuthenticated, accountOwnsApp} = require('routes/middlewares');
 const {logger} = require('@ayro/commons');
 
 async function addPlugin(req, res, type) {

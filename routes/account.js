@@ -1,10 +1,10 @@
 'use strict';
 
-const accountService = require('../services/account');
-const settings = require('../configs/settings');
-const session = require('../utils/session');
-const errors = require('../utils/errors');
-const {accountAuthenticated, decodeToken} = require('../utils/middlewares');
+const accountService = require('services/account');
+const settings = require('configs/settings');
+const session = require('utils/session');
+const errors = require('utils/errors');
+const {accountAuthenticated, decodeToken} = require('routes/middlewares');
 const {logger} = require('@ayro/commons');
 const multer = require('multer');
 

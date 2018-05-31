@@ -1,8 +1,8 @@
 'use strict';
 
-const {Device} = require('../../models');
-const errors = require('../errors');
-const queries = require('../queries');
+const {Device} = require('models');
+const errors = require('utils/errors');
+const queriesCommon = require('utils/queries/common');
 
 function throwDeviceNotFoundIfNeeded(device, options) {
   if (!device && (!options || options.require)) {
@@ -12,7 +12,7 @@ function throwDeviceNotFoundIfNeeded(device, options) {
 
 exports.getDevice = async (id, options) => {
   const promise = Device.findById(id);
-  queries.fillQuery(promise, options);
+  queriesCommon.fillQuery(promise, options);
   const device = await promise.exec();
   throwDeviceNotFoundIfNeeded(device, options);
   return device;
@@ -20,7 +20,7 @@ exports.getDevice = async (id, options) => {
 
 exports.findDevice = async (query, options) => {
   const promise = Device.findOne(query);
-  queries.fillQuery(promise, options);
+  queriesCommon.fillQuery(promise, options);
   const device = await promise.exec();
   throwDeviceNotFoundIfNeeded(device, options);
   return device;
@@ -28,6 +28,6 @@ exports.findDevice = async (query, options) => {
 
 exports.findDevices = async (query, options) => {
   const promise = Device.find(query);
-  queries.fillQuery(promise, options);
+  queriesCommon.fillQuery(promise, options);
   return promise.exec();
 };

@@ -1,13 +1,13 @@
 'use strict';
 
-const {App, Plugin} = require('../models');
-const settings = require('../configs/settings');
-const constants = require('../utils/constants');
-const errors = require('../utils/errors');
-const appQueries = require('../utils/queries/app');
-const pluginQueries = require('../utils/queries/plugin');
-const userQueries = require('../utils/queries/user');
-const chatCommons = require('./commons/chat');
+const {App, Plugin} = require('models');
+const settings = require('configs/settings');
+const constants = require('utils/constants');
+const errors = require('utils/errors');
+const appQueries = require('utils/queries/app');
+const pluginQueries = require('utils/queries/plugin');
+const userQueries = require('utils/queries/user');
+const chatCommons = require('services/commons/chat');
 const {logger} = require('@ayro/commons');
 const Promise = require('bluebird');
 const moment = require('moment');
@@ -73,7 +73,7 @@ async function executeConnectChannelPlugin(user) {
   if (_.get(user, 'extra.metrics.messages_posted') === 1) {
     const channels = ['email'];
     await Promise.delay(SEND_MESSAGE_DELAY_SMALL);
-    await chatCommons.pushLinkChannelMessage(user, channels);
+    await chatCommons.pushConnectChannelMessage(user, channels);
   }
 }
 

@@ -1,8 +1,8 @@
 'use strict';
 
-const userQueries = require('../utils/queries/user');
-const deviceQueries = require('../utils/queries/device');
-const deviceCommons = require('./commons/device');
+const userQueries = require('utils/queries/user');
+const deviceQueries = require('utils/queries/device');
+const deviceCommons = require('services/commons/device');
 const _ = require('lodash');
 
 async function removeOldDeviceIfNeeded(user, data) {

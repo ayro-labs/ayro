@@ -1,13 +1,13 @@
 'use strict';
 
-const {App, ChatMessage} = require('../../models');
-const constants = require('../../utils/constants');
-const integrationQueries = require('../../utils/queries/integration');
-const userQueries = require('../../utils/queries/user');
-const deviceQueries = require('../../utils/queries/device');
-const webPush = require('../integrations/push/web');
-const androidPush = require('../integrations/push/android');
-const messengerPush = require('../integrations/push/messenger');
+const {App, ChatMessage} = require('models');
+const constants = require('utils/constants');
+const integrationQueries = require('utils/queries/integration');
+const userQueries = require('utils/queries/user');
+const deviceQueries = require('utils/queries/device');
+const webPush = require('services/commons/chat/push/web');
+const androidPush = require('services/commons/chat/push/android');
+const messengerPush = require('services/commons/chat/push/messenger');
 
 const EVENT_CHAT_MESSAGE = 'chat_message';
 
@@ -44,7 +44,7 @@ exports.pushMessage = async (agent, user, text, channel) => {
   return chatMessage.save();
 };
 
-exports.pushLinkChannelMessage = async (user, availableChannels, channel) => {
+exports.pushConnectChannelMessage = async (user, availableChannels, channel) => {
   const loadedUser = await userQueries.getUser(user.id);
   const app = new App({id: loadedUser.app});
   const userChannel = channel || loadedUser.latest_channel;

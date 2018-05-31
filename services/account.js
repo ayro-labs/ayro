@@ -1,11 +1,11 @@
 'use strict';
 
-const {Account} = require('../models');
-const settings = require('../configs/settings');
-const hash = require('../utils/hash');
-const files = require('../utils/files');
-const errors = require('../utils/errors');
-const accountQueries = require('../utils/queries/account');
+const {Account} = require('models');
+const settings = require('configs/settings');
+const hash = require('utils/hash');
+const files = require('utils/files');
+const errors = require('utils/errors');
+const accountQueries = require('utils/queries/account');
 const path = require('path');
 const _ = require('lodash');
 

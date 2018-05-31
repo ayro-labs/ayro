@@ -1,11 +1,11 @@
 'use strict';
 
-const {App, AppSecret, Integration} = require('../models');
-const {User, Device, ChatMessage} = require('../models');
-const settings = require('../configs/settings');
-const hash = require('../utils/hash');
-const files = require('../utils/files');
-const appQueries = require('../utils/queries/app');
+const {App, AppSecret, Integration} = require('models');
+const {User, Device, ChatMessage} = require('models');
+const settings = require('configs/settings');
+const hash = require('utils/hash');
+const files = require('utils/files');
+const appQueries = require('utils/queries/app');
 const path = require('path');
 const _ = require('lodash');
 

@@ -1,6 +1,6 @@
 'use strict';
 
-const files = require('../utils/files');
+const files = require('utils/files');
 const {configs} = require('@ayro/commons');
 const path = require('path');
 

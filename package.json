@@ -23,6 +23,7 @@
   "dependencies": {
     "@ayro/commons": "0.0.29",
     "@slack/client": "4.2.2",
+    "app-module-path": "2.2.0",
     "axios": "0.18.0",
     "bcrypt": "2.0.1",
     "bluebird": "3.5.1",

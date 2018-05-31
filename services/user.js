@@ -1,9 +1,9 @@
 'use strict';
 
-const {AppSecret, ChatMessage} = require('../models');
-const errors = require('../utils/errors');
-const userQueries = require('../utils/queries/user');
-const userCommons = require('./commons/user');
+const {AppSecret, ChatMessage} = require('models');
+const errors = require('utils/errors');
+const userQueries = require('utils/queries/user');
+const userCommons = require('services/commons/user');
 const jwt = require('jsonwebtoken');
 
 const JWT_SCOPE_USER = 'user';

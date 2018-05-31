@@ -1,7 +1,7 @@
 'use strict';
 
-const settings = require('../configs/settings');
-const constants = require('../utils/constants');
+const settings = require('configs/settings');
+const constants = require('utils/constants');
 const {logger} = require('@ayro/commons');
 const mongoose = require('mongoose');
 const Promise = require('bluebird');

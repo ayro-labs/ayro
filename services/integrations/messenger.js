@@ -1,10 +1,10 @@
 'use strict';
 
-const constants = require('../../utils/constants');
-const errors = require('../../utils/errors');
-const apis = require('../../utils/apis');
-const integrationQueries = require('../../utils/queries/integration');
-const integrationCommons = require('../commons/integration');
+const constants = require('utils/constants');
+const errors = require('utils/errors');
+const apis = require('utils/apis');
+const integrationQueries = require('utils/queries/integration');
+const integrationCommons = require('services/commons/integration');
 const _ = require('lodash');
 
 async function subscribePage(configuration) {

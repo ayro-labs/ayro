@@ -1,14 +1,14 @@
 'use strict';
 
-const accountRoutes = require('../routes/account');
-const appRoutes = require('../routes/app');
-const integrationRoutes = require('../routes/integration');
-const pluginRoutes = require('../routes/plugin');
-const userRoutes = require('../routes/user');
-const slackChatRoutes = require('../routes/chat/slack');
-const messengerChatRoutes = require('../routes/chat/messenger');
-const chatRoutes = require('../routes/chat');
-const eventRoutes = require('../routes/event');
+const accountRoutes = require('routes/account');
+const appRoutes = require('routes/app');
+const integrationRoutes = require('routes/integration');
+const pluginRoutes = require('routes/plugin');
+const userRoutes = require('routes/user');
+const slackChatRoutes = require('routes/chat/slack');
+const messengerChatRoutes = require('routes/chat/messenger');
+const chatRoutes = require('routes/chat');
+const eventRoutes = require('routes/event');
 const {logger} = require('@ayro/commons');
 
 exports.configure = (express, app) => {

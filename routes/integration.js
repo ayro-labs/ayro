@@ -1,14 +1,14 @@
 'use strict';
 
-const {App} = require('../models');
-const integrationService = require('../services/integration');
-const appService = require('../services/app');
-const userService = require('../services/user');
-const deviceService = require('../services/device');
-const constants = require('../utils/constants');
-const session = require('../utils/session');
-const errors = require('../utils/errors');
-const {accountAuthenticated, accountOwnsApp} = require('../utils/middlewares');
+const {App} = require('models');
+const integrationService = require('services/integration');
+const appService = require('services/app');
+const userService = require('services/user');
+const deviceService = require('services/device');
+const constants = require('utils/constants');
+const session = require('utils/session');
+const errors = require('utils/errors');
+const {accountAuthenticated, accountOwnsApp} = require('routes/middlewares');
 const {logger} = require('@ayro/commons');
 
 async function initIntegration(req, res, channel) {

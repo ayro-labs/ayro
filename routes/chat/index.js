@@ -1,10 +1,10 @@
 'use strict';
 
-const chatService = require('../../services/chat');
-const metricService = require('../../services/metric');
-const pluginService = require('../../services/plugin');
-const errors = require('../../utils/errors');
-const {userAuthenticated} = require('../../utils/middlewares');
+const chatService = require('services/chat');
+const metricService = require('services/metric');
+const pluginService = require('services/plugin');
+const errors = require('utils/errors');
+const {userAuthenticated} = require('routes/middlewares');
 const {logger} = require('@ayro/commons');
 
 async function listMessages(req, res) {

@@ -1,10 +1,10 @@
 'use strict';
 
-const {User} = require('../../models');
-const errors = require('../../utils/errors');
-const files = require('../../utils/files');
-const hash = require('../../utils/hash');
-const userQueries = require('../../utils/queries/user');
+const {User} = require('models');
+const errors = require('utils/errors');
+const files = require('utils/files');
+const hash = require('utils/hash');
+const userQueries = require('utils/queries/user');
 const {logger} = require('@ayro/commons');
 const randomName = require('node-random-name');
 const _ = require('lodash');

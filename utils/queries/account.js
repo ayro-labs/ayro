@@ -1,8 +1,8 @@
 'use strict';
 
-const {Account} = require('../../models');
-const errors = require('../errors');
-const queries = require('../queries');
+const {Account} = require('models');
+const errors = require('utils/errors');
+const queryCommon = require('utils/queries/common');
 
 function throwAccountNotFoundIfNeeded(account, options) {
   if (!account && (!options || options.require)) {
@@ -12,7 +12,7 @@ function throwAccountNotFoundIfNeeded(account, options) {
 
 exports.getAccount = async (id, options) => {
   const promise = Account.findById(id);
-  queries.fillQuery(promise, options);
+  queryCommon.fillQuery(promise, options);
   const account = await promise.exec();
   throwAccountNotFoundIfNeeded(account, options);
   return account;
@@ -20,7 +20,7 @@ exports.getAccount = async (id, options) => {
 
 exports.findAccount = async (query, options) => {
   const promise = Account.findOne(query);
-  queries.fillQuery(promise, options);
+  queryCommon.fillQuery(promise, options);
   const account = await promise.exec();
   throwAccountNotFoundIfNeeded(account, options);
   return account;

@@ -1,8 +1,8 @@
 'use strict';
 
-const {App} = require('../../models');
-const errors = require('../errors');
-const queries = require('../queries');
+const {App} = require('models');
+const errors = require('utils/errors');
+const queryCommon = require('utils/queries/common');
 
 function throwAppNotFoundIfNeeded(app, options) {
   if (!app && (!options || options.require)) {
@@ -12,7 +12,7 @@ function throwAppNotFoundIfNeeded(app, options) {
 
 exports.getApp = async (id, options) => {
   const promise = App.findById(id);
-  queries.fillQuery(promise, options);
+  queryCommon.fillQuery(promise, options);
   const app = await promise.exec();
   throwAppNotFoundIfNeeded(app, options);
   return app;
@@ -20,7 +20,7 @@ exports.getApp = async (id, options) => {
 
 exports.findApp = async (query, options) => {
   const promise = App.findOne(query);
-  queries.fillQuery(promise, options);
+  queryCommon.fillQuery(promise, options);
   const app = await promise.exec();
   throwAppNotFoundIfNeeded(app, options);
   return app;
@@ -28,6 +28,6 @@ exports.findApp = async (query, options) => {
 
 exports.findApps = async (query, options) => {
   const promise = App.find(query);
-  queries.fillQuery(promise, options);
+  queryCommon.fillQuery(promise, options);
   return promise.exec();
 };

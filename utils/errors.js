@@ -1,6 +1,6 @@
 'use strict';
 
-const settings = require('../configs/settings');
+const settings = require('configs/settings');
 const util = require('util');
 
 function AyroError(status, code, message, cause) {

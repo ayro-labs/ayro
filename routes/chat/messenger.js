@@ -1,8 +1,8 @@
 'use strict';
 
-const messengerService = require('../../services/chat/messenger');
-const settings = require('../../configs/settings');
-const errors = require('../../utils/errors');
+const messengerService = require('services/chat/messenger');
+const settings = require('configs/settings');
+const errors = require('utils/errors');
 const {logger} = require('@ayro/commons');
 const xhub = require('x-hub-signature').middleware;
 

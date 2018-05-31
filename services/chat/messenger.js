@@ -1,14 +1,14 @@
 'use strict';
 
-const {App} = require('../../models');
-const constants = require('../../utils/constants');
-const hash = require('../../utils/hash');
-const apis = require('../../utils/apis');
-const integrationQueries = require('../../utils/queries/integration');
-const deviceQueries = require('../../utils/queries/device');
-const userCommons = require('../commons/user');
-const deviceCommons = require('../commons/device');
-const chatService = require('.');
+const {App} = require('models');
+const constants = require('utils/constants');
+const hash = require('utils/hash');
+const apis = require('utils/apis');
+const integrationQueries = require('utils/queries/integration');
+const deviceQueries = require('utils/queries/device');
+const userCommons = require('services/commons/user');
+const deviceCommons = require('services/commons/device');
+const chatService = require('services/chat');
 const _ = require('lodash');
 
 function getUserData(profile) {
@@ -35,11 +35,17 @@ function getDeviceData(user, profile, data) {
   };
 }
 
-async function createDevice(integration, data) {
-  const profile = await apis.facebook(integration.configuration, true).api(data.sender.id);
-  const user = await userCommons.createAnonymousUser(new App({id: integration.app}), getUserData(profile));
-  const device = await deviceCommons.createDevice(user, getDeviceData(user, profile, data));
-  device.user = user;
+async function getDevice(integration, data) {
+  const devices = await deviceQueries.findDevices({platform: constants.device.platforms.MESSENGER.id, 'info.profile_id': data.sender.id}, {populate: 'user'});
+  let device = _.find(devices, (currentDevice) => {
+    return currentDevice.user.app.toString() === integration.app.toString();
+  });
+  if (!device) {
+    const profile = await apis.facebook(integration.configuration, true).api(data.sender.id);
+    const user = await userCommons.createAnonymousUser(new App({id: integration.app}), getUserData(profile));
+    device = await deviceCommons.createDevice(user, getDeviceData(user, profile, data));
+    device.user = user;
+  }
   return device;
 }
 
@@ -51,12 +57,6 @@ exports.postMessage = async (data) => {
   if (!integration) {
     return;
   }
-  const devices = await deviceQueries.findDevices({platform: constants.device.platforms.MESSENGER.id, 'info.profile_id': data.sender.id}, {populate: 'user'});
-  let device = _.find(devices, (currentDevice) => {
-    return currentDevice.user.app.toString() === integration.app.toString();
-  });
-  if (!device) {
-    device = await createDevice(integration, data);
-  }
+  const device = await getDevice(integration, data);
   await chatService.postMessage(device.user, constants.integration.channels.MESSENGER, {text: data.message.text});
 };

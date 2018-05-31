@@ -1,8 +1,8 @@
 'use strict';
 
-const {Account, User, Device} = require('../models');
-const settings = require('../configs/settings');
-const errors = require('../utils/errors');
+const {Account, User, Device} = require('models');
+const settings = require('configs/settings');
+const errors = require('utils/errors');
 const {logger} = require('@ayro/commons');
 const redis = require('redis');
 const JwtRedis = require('jsonwebtoken-redis');

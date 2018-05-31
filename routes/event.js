@@ -1,9 +1,9 @@
 'use strict';
 
-const pluginService = require('../services/plugin');
-const metricService = require('../services/metric');
-const errors = require('../utils/errors');
-const {userAuthenticated} = require('../utils/middlewares');
+const pluginService = require('services/plugin');
+const metricService = require('services/metric');
+const errors = require('utils/errors');
+const {userAuthenticated} = require('routes/middlewares');
 const {logger} = require('@ayro/commons');
 
 async function trackViewChat(req, res) {

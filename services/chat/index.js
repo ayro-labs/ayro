@@ -1,13 +1,13 @@
 'use strict';
 
-const {App, User, ChatMessage} = require('../../models');
-const constants = require('../../utils/constants');
-const errors = require('../../utils/errors');
-const integrationQueries = require('../../utils/queries/integration');
-const userQueries = require('../../utils/queries/user');
-const userCommons = require('../commons/user');
-const chatCommons = require('../commons/chat');
-const slack = require('../integrations/slack');
+const {App, User, ChatMessage} = require('models');
+const constants = require('utils/constants');
+const errors = require('utils/errors');
+const integrationQueries = require('utils/queries/integration');
+const userQueries = require('utils/queries/user');
+const userCommons = require('services/commons/user');
+const chatCommons = require('services/commons/chat');
+const slack = require('services/integrations/slack');
 const Promise = require('bluebird');
 const _ = require('lodash');
 
@@ -32,17 +32,18 @@ exports.pushMessage = async (channel, data) => {
     throw errors.ayroError('channel_not_supported', 'Channel not supported');
   }
   const integration = await businessApi.getIntegration(data);
+  const {configuration} = integration;
   try {
-    const agent = await businessApi.getAgent(integration.configuration, data);
-    const user = await businessApi.getUser(data);
-    const text = await businessApi.getText(data);
+    const agent = await businessApi.getAgent(configuration, data);
+    const user = await businessApi.getUser(configuration, data);
+    const text = await businessApi.getText(configuration, data);
     const chatMessage = await chatCommons.pushMessage(agent, user, text);
-    await businessApi.confirmMessage(integration.configuration, data, user, chatMessage);
+    await businessApi.confirmMessage(configuration, data, user, chatMessage);
   } catch (err) {
     if (err.code === 'user_not_found') {
-      await businessApi.postUserNotFound(integration.configuration, data);
+      await businessApi.postUserNotFound(configuration, data);
     } else {
-      await businessApi.postMessageError(integration.configuration, data);
+      await businessApi.postMessageError(configuration, data);
     }
   }
 };
@@ -98,15 +99,16 @@ exports.postProfile = async (channel, data) => {
     throw errors.ayroError('integration_not_supported', 'Integration not supported');
   }
   const integration = await businessApi.getIntegration(data);
+  const {configuration} = integration;
   try {
-    const user = await businessApi.getUser(data);
+    const user = await businessApi.getUser(configuration, data);
     await User.populate(user, 'app devices');
-    await businessApi.postProfile(integration.configuration, user);
+    await businessApi.postProfile(configuration, user);
   } catch (err) {
     if (['user_not_found', 'channel_not_found'].includes(err.code)) {
-      await businessApi.postUserNotFound(integration.configuration, data);
+      await businessApi.postUserNotFound(configuration, data);
     } else {
-      await businessApi.postProfileError(integration.configuration, data);
+      await businessApi.postProfileError(configuration, data);
     }
   }
 };

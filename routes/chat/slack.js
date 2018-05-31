@@ -1,8 +1,8 @@
 'use strict';
 
-const chatService = require('../../services/chat');
-const errors = require('../../utils/errors');
-const constants = require('../../utils/constants');
+const chatService = require('services/chat');
+const errors = require('utils/errors');
+const constants = require('utils/constants');
 const {logger} = require('@ayro/commons');
 
 async function postMessage(req, res) {

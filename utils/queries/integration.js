@@ -1,8 +1,8 @@
 'use strict';
 
-const {Integration} = require('../../models');
-const errors = require('../errors');
-const queries = require('../queries');
+const {Integration} = require('models');
+const errors = require('utils/errors');
+const queriesCommon = require('utils/queries/common');
 
 function throwIntegrationNotFoundIfNeeded(integration, options) {
   if (!integration && (!options || options.require)) {
@@ -16,7 +16,7 @@ exports.getIntegration = async (app, channel, options) => {
 
 exports.findIntegration = async (query, options) => {
   const promise = Integration.findOne(query);
-  queries.fillQuery(promise, options);
+  queriesCommon.fillQuery(promise, options);
   const integration = await promise.exec();
   throwIntegrationNotFoundIfNeeded(integration, options);
   return integration;
@@ -24,6 +24,6 @@ exports.findIntegration = async (query, options) => {
 
 exports.findIntegrations = async (app, type, options) => {
   const promise = Integration.find(type ? {app: app.id, type} : {app: app.id});
-  queries.fillQuery(promise, options);
+  queriesCommon.fillQuery(promise, options);
   return promise.exec();
 };

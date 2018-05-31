@@ -1,6 +1,6 @@
 'use strict';
 
-const settings = require('../../../configs/settings');
+const settings = require('configs/settings');
 const axios = require('axios');
 
 const webcmClient = axios.create({

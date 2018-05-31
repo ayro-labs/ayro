@@ -1,8 +1,8 @@
 'use strict';
 
-const appService = require('../services/app');
-const session = require('../utils/session');
-const errors = require('../utils/errors');
+const appService = require('services/app');
+const session = require('utils/session');
+const errors = require('utils/errors');
 const {logger} = require('@ayro/commons');
 
 exports.decodeToken = async (req) => {

@@ -1,6 +1,6 @@
 'use strict';
 
-const apis = require('../../../utils/apis');
+const apis = require('utils/apis');
 
 exports.push = async (configuration, user, device, event, message) => {
   if (!device.info || !device.info.profile_id || !configuration.page) {

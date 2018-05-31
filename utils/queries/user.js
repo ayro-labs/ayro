@@ -1,8 +1,8 @@
 'use strict';
 
-const {User} = require('../../models');
-const errors = require('../errors');
-const queries = require('../queries');
+const {User} = require('models');
+const errors = require('utils/errors');
+const queriesCommon = require('utils/queries/common');
 
 function throwUserNotFoundIfNeeded(user, options) {
   if (!user && (!options || options.require)) {
@@ -12,7 +12,7 @@ function throwUserNotFoundIfNeeded(user, options) {
 
 exports.getUser = async (id, options) => {
   const promise = User.findById(id);
-  queries.fillQuery(promise, options);
+  queriesCommon.fillQuery(promise, options);
   const user = await promise.exec();
   throwUserNotFoundIfNeeded(user, options);
   return user;
@@ -20,7 +20,7 @@ exports.getUser = async (id, options) => {
 
 exports.findUser = async (query, options) => {
   const promise = User.findOne(query);
-  queries.fillQuery(promise, options);
+  queriesCommon.fillQuery(promise, options);
   const user = await promise.exec();
   throwUserNotFoundIfNeeded(user, options);
   return user;
