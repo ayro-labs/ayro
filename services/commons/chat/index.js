@@ -44,17 +44,17 @@ exports.pushMessage = async (agent, user, text, channel) => {
   return chatMessage.save();
 };
 
-exports.pushConnectChannelMessage = async (user, availableChannels, channel) => {
+exports.pushConnectChannelMessage = async (agent, user, availableChannels) => {
   const loadedUser = await userQueries.getUser(user.id);
   const app = new App({id: loadedUser.app});
-  const userChannel = channel || loadedUser.latest_channel;
-  const integration = await integrationQueries.getIntegration(app, userChannel);
-  const device = await deviceQueries.findDevice({user: loadedUser.id, channel: userChannel});
+  const integration = await integrationQueries.getIntegration(app, loadedUser.latest_channel);
+  const device = await deviceQueries.findDevice({user: loadedUser.id, channel: loadedUser.latest_channel});
   const chatMessage = new ChatMessage({
+    agent,
     app: loadedUser.app,
     user: loadedUser.id,
     type: constants.chatMessage.types.CONNECT_CHANNELS,
-    channel: userChannel,
+    channel: loadedUser.latest_channel,
     direction: constants.chatMessage.directions.INCOMING,
     metadata: {
       available_channels: availableChannels,
@@ -62,4 +62,5 @@ exports.pushConnectChannelMessage = async (user, availableChannels, channel) => 
     date: new Date(),
   });
   await push(integration.configuration, loadedUser, device, EVENT_CHAT_MESSAGE, chatMessage);
+  return chatMessage.save();
 };

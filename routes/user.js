@@ -5,6 +5,7 @@ const appService = require('services/app');
 const userService = require('services/user');
 const deviceService = require('services/device');
 const chatService = require('services/chat');
+const constants = require('utils/constants');
 const session = require('utils/session');
 const errors = require('utils/errors');
 const {userAuthenticated} = require('routes/middlewares');
@@ -24,6 +25,16 @@ async function updateUser(req, res) {
   }
 }
 
+async function listDevices(req, res) {
+  try {
+    const devices = await deviceService.listDevices(req.user);
+    res.json(devices);
+  } catch (err) {
+    logger.error(err);
+    errors.respondWithError(res, err);
+  }
+}
+
 async function updateDevice(req, res) {
   try {
     const device = await deviceService.updateDevice(req.device, _.pick(req.body, ALLOWED_DEVICE_ATTRS));
@@ -34,10 +45,18 @@ async function updateDevice(req, res) {
   }
 }
 
-async function connectChannel(req, res) {
+async function connectEmail(req, res) {
   try {
-    await chatService.postChannelConnected(req.user, req.params.channel, req.body);
-    res.json({});
+    const data = {
+      platform: constants.device.platforms.EMAIL.id,
+      info: {
+        email: req.body.email,
+      },
+    };
+    const channel = constants.integration.channels.EMAIL;
+    const device = await deviceService.saveDevice(req.user, channel, data);
+    await chatService.postDeviceConnected(req.user, device);
+    res.json(device);
   } catch (err) {
     logger.error(err);
     errors.respondWithError(res, err);
@@ -77,8 +96,9 @@ async function logout(req, res) {
 
 module.exports = (router, app) => {
   router.put('/', userAuthenticated, updateUser);
+  router.get('/devices', userAuthenticated, listDevices);
   router.put('/devices', userAuthenticated, updateDevice);
-  router.post('/connect/:channel', userAuthenticated, connectChannel);
+  router.post('/connect/email', userAuthenticated, connectEmail);
   router.post('/login', userAuthenticated, login);
   router.post('/logout', userAuthenticated, logout);
 

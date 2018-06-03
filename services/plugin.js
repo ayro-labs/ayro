@@ -13,11 +13,21 @@ const Promise = require('bluebird');
 const moment = require('moment');
 const _ = require('lodash');
 
-const SEND_MESSAGE_DELAY_SMALL = 2000;
-const SEND_MESSAGE_DELAY = 4000;
-
 const CONFIG_OFFICE_HOURS = ['timezone', 'time_range', 'time_range.sunday', 'time_range.monday', 'time_range.tuesday', 'time_range.wednesday', 'time_range.thursday', 'time_range.friday', 'time_range.saturday', 'reply'];
 const CONFIG_GREETINGS_MESSAGE = ['message'];
+
+const SEND_MESSAGE_DELAY_SMALL = 2000;
+const SEND_MESSAGE_DELAY = 4000;
+const REPLY_SOON_MESSAGE = 'Obrigado pelo seu contato, nosso time irá respondê-lo o mais breve possível.';
+const CONNECT_CHANNEL_MESSAGE =  'Para não perder nenhuma mensagem, nos deixe um meio alternativo para contato.';
+
+function getAppAgent(app) {
+  return {
+    id: '0',
+    name: app.name,
+    photo_url: `${settings.publicUrl}/apps/${app.id}/icon`,
+  };
+}
 
 function fixTimezone(timezone) {
   if (timezone === 'UTC') {
@@ -28,11 +38,7 @@ function fixTimezone(timezone) {
 
 async function executeGreetingsMessagePlugin(plugin, user, channel) {
   const app = await appQueries.getApp(user.app);
-  const agent = {
-    id: '0',
-    name: app.name,
-    photo_url: `${settings.publicUrl}/apps/${app.id}/icon`,
-  };
+  const agent = getAppAgent(app);
   await Promise.delay(SEND_MESSAGE_DELAY_SMALL);
   await chatCommons.pushMessage(agent, user, plugin.configuration.message, channel);
 }
@@ -59,22 +65,23 @@ async function executeOfficeHoursPlugin(plugin, user) {
   endTime.set({hours: endHour, minutes: endMinute, seconds: 59});
   if (now.isBefore(startTime) || now.isAfter(endTime)) {
     const app = await appQueries.getApp(user.app);
-    const agent = {
-      id: '0',
-      name: app.name,
-      photo_url: `${settings.publicUrl}/apps/${app.id}/icon`,
-    };
+    const agent = getAppAgent(app);
     await Promise.delay(SEND_MESSAGE_DELAY);
     await chatCommons.pushMessage(agent, user, plugin.configuration.reply);
   }
 }
 
-async function executeConnectChannelPlugin(user) {
-  if (_.get(user, 'extra.metrics.messages_posted') === 1) {
-    const channels = ['email'];
-    await Promise.delay(SEND_MESSAGE_DELAY_SMALL);
-    await chatCommons.pushConnectChannelMessage(user, channels);
-  }
+async function sendReplySoonMessage(app, user) {
+  const agent = getAppAgent(app);
+  await Promise.delay(SEND_MESSAGE_DELAY_SMALL);
+  await chatCommons.pushMessage(agent, user, REPLY_SOON_MESSAGE);
+}
+
+async function sendConnectChannelMessage(app, user) {
+  const agent = getAppAgent(app);
+  await Promise.delay(SEND_MESSAGE_DELAY_SMALL);
+  await chatCommons.pushMessage(agent, user, CONNECT_CHANNEL_MESSAGE);
+  await chatCommons.pushConnectChannelMessage(agent, user, ['email']);
 }
 
 async function addPlugin(app, type, configuration) {
@@ -141,12 +148,15 @@ exports.chatViewed = async (user, channel) => {
 exports.messagePosted = async (user) => {
   try {
     const loadedUser = await userQueries.getUser(user.id);
-    const app = new App({id: loadedUser.app});
+    const app = await appQueries.getApp(loadedUser.app);
     const officeHoursPlugin = await pluginQueries.getPlugin(app, constants.plugin.types.OFFICE_HOURS, {require: false});
     if (officeHoursPlugin) {
       await executeOfficeHoursPlugin(officeHoursPlugin, loadedUser);
     }
-    await executeConnectChannelPlugin(loadedUser);
+    if (_.get(loadedUser, 'extra.metrics.messages_posted') === 1) {
+      await sendReplySoonMessage(app, loadedUser);
+      await sendConnectChannelMessage(app, loadedUser);
+    }
   } catch (err) {
     logger.warn('Could not process "messagePosted" trigger', err);
   }

@@ -17,7 +17,7 @@ exports.saveDevice = async (user, channel, data) => {
   const attrs = _.cloneDeep(data);
   attrs.channel = channel;
   await removeOldDeviceIfNeeded(user, attrs);
-  let device = await deviceQueries.findDevice({user: loadedUser.id, uid: attrs.uid}, {require: false});
+  let device = attrs.uid ? await deviceQueries.findDevice({user: loadedUser.id, uid: attrs.uid}, {require: false}) : null;
   if (!device) {
     device = await deviceCommons.createDevice(loadedUser, attrs);
   } else {
@@ -32,4 +32,8 @@ exports.updateDevice = async (device, data) => {
 
 exports.getDevice = async (id) => {
   return deviceQueries.getDevice(id);
+};
+
+exports.listDevices = async (user) => {
+  return deviceQueries.findDevices({user: user.id});
 };

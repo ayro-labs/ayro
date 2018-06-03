@@ -95,20 +95,7 @@ function getDeviceInfoAttachments(user) {
     const deviceInfo = device.info;
     const information = [];
     if (deviceInfo) {
-      if (device.isSmartphone()) {
-        if (deviceInfo.app_id && deviceInfo.app_version) {
-          information.push(`Versão do app: ${deviceInfo.app_version} (${deviceInfo.app_id})`);
-        }
-        if (deviceInfo.operating_system) {
-          information.push(`OS: ${deviceInfo.operating_system}`);
-        }
-        if (deviceInfo.manufacturer && deviceInfo.model) {
-          information.push(`Smartphone: ${_.capitalize(deviceInfo.manufacturer)} ${deviceInfo.model}`);
-        }
-        if (deviceInfo.carrier) {
-          information.push(`Operadora: ${deviceInfo.carrier}`);
-        }
-      } else if (device.isBrowser()) {
+      if (device.isBrowser()) {
         if (deviceInfo.browser_name) {
           information.push(`Nome: ${_.capitalize(deviceInfo.browser_name)}`);
         }
@@ -120,6 +107,19 @@ function getDeviceInfoAttachments(user) {
         }
         if (deviceInfo.location) {
           information.push(`Location: ${deviceInfo.location}`);
+        }
+      } else if (device.isSmartphone()) {
+        if (deviceInfo.app_id && deviceInfo.app_version) {
+          information.push(`Versão do app: ${deviceInfo.app_version} (${deviceInfo.app_id})`);
+        }
+        if (deviceInfo.operating_system) {
+          information.push(`OS: ${deviceInfo.operating_system}`);
+        }
+        if (deviceInfo.manufacturer && deviceInfo.model) {
+          information.push(`Smartphone: ${_.capitalize(deviceInfo.manufacturer)} ${deviceInfo.model}`);
+        }
+        if (deviceInfo.carrier) {
+          information.push(`Operadora: ${deviceInfo.carrier}`);
         }
       } else if (device.isMessenger()) {
         if (deviceInfo.profile_name) {
@@ -136,6 +136,10 @@ function getDeviceInfoAttachments(user) {
         }
         if (deviceInfo.profile_timezone) {
           information.push(`Fuso horário: ${deviceInfo.profile_timezone}`);
+        }
+      } else if (device.isEmail()) {
+        if (deviceInfo.email) {
+          information.push(`Email: ${deviceInfo.email}`);
         }
       }
     }

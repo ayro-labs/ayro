@@ -5,13 +5,14 @@ const types = Object.freeze({
   BUSINESS: 'business',
 });
 const channels = Object.freeze({
+  EMAIL: 'email',
   WEBSITE: 'website',
   WORDPRESS: 'wordpress',
   ANDROID: 'android',
   MESSENGER: 'messenger',
   SLACK: 'slack',
 });
-const userChannels = [channels.WEBSITE, channels.WORDPRESS, channels.ANDROID, channels.MESSENGER];
+const userChannels = [channels.EMAIL, channels.WEBSITE, channels.WORDPRESS, channels.ANDROID, channels.MESSENGER];
 const businessChannels = [channels.SLACK];
 
 module.exports = Object.freeze({
@@ -29,6 +30,10 @@ module.exports = Object.freeze({
   }),
   device: Object.freeze({
     platforms: Object.freeze({
+      EMAIL: Object.freeze({
+        id: 'email',
+        name: 'Email',
+      }),
       BROWSER: Object.freeze({
         id: 'browser',
         name: 'Browser',

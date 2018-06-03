@@ -147,16 +147,18 @@ User.methods.getFullName = function () {
 };
 
 const DeviceInfo = new Schema({
+  // Email
+  email: {type: String},
+  // Browser
+  browser_name: {type: String},
+  browser_version: {type: String},
+  location: {type: String},
   // Android
   app_id: {type: String},
   app_version: {type: String},
   manufacturer: {type: String},
   model: {type: String},
   carrier: {type: String},
-  // Browser
-  browser_name: {type: String},
-  browser_version: {type: String},
-  location: {type: String},
   // Messenger
   profile_id: {type: String},
   profile_name: {type: String},
@@ -188,14 +190,17 @@ Device.methods.getPlatformName = function () {
   const platform = constants.device.platforms[_.toUpper(this.platform)];
   return platform ? platform.name : '';
 };
+Device.methods.isEmail = function () {
+  return this.platform === constants.device.platforms.EMAIL.id;
+};
+Device.methods.isBrowser = function () {
+  return this.platform === constants.device.platforms.BROWSER.id;
+};
 Device.methods.isSmartphone = function () {
   return _.includes([constants.device.platforms.ANDROID.id], this.platform);
 };
 Device.methods.isAndroid = function () {
   return this.platform === constants.device.platforms.ANDROID.id;
-};
-Device.methods.isBrowser = function () {
-  return this.platform === constants.device.platforms.BROWSER.id;
 };
 Device.methods.isMessenger = function () {
   return this.platform === constants.device.platforms.MESSENGER.id;
