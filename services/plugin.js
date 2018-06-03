@@ -19,7 +19,7 @@ const CONFIG_GREETINGS_MESSAGE = ['message'];
 const SEND_MESSAGE_DELAY_SMALL = 2000;
 const SEND_MESSAGE_DELAY = 4000;
 const REPLY_SOON_MESSAGE = 'Obrigado pelo seu contato, nosso time irá respondê-lo o mais breve possível.';
-const CONNECT_CHANNEL_MESSAGE =  'Para não perder nenhuma mensagem, nos deixe um meio alternativo para contato.';
+const CONNECT_CHANNEL_MESSAGE = 'Para não perder nenhuma mensagem, nos deixe um meio alternativo para contato.';
 
 function getAppAgent(app) {
   return {

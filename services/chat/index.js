@@ -11,8 +11,6 @@ const slackChat = require('services/chat/slack');
 const Promise = require('bluebird');
 const _ = require('lodash');
 
-const CHANNEL_EMAIL = 'email';
-
 function getBusinessChat(channel) {
   switch (channel) {
     case constants.integration.channels.SLACK:

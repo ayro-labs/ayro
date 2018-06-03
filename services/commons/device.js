@@ -2,7 +2,6 @@
 
 const {Device} = require('models');
 const constants = require('utils/constants');
-const errors = require('utils/errors');
 const hash = require('utils/hash');
 const userQueries = require('utils/queries/user');
 const deviceQueries = require('utils/queries/device');
@@ -26,7 +25,7 @@ function fixDeviceData(data) {
 }
 
 exports.createDevice = async (user, data) => {
- const loadedUser = await userQueries.getUser(user.id);
+  const loadedUser = await userQueries.getUser(user.id);
   const attrs = _.omit(data, UNALLOWED_ATTRS);
   fixDeviceData(attrs);
   const device = new Device(attrs);
