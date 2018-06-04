@@ -1,8 +1,7 @@
 'use strict';
 
 const chatService = require('services/chat');
-const metricService = require('services/metric');
-const pluginService = require('services/plugin');
+const eventService = require('services/event');
 const errors = require('utils/errors');
 const {userAuthenticated} = require('routes/middlewares');
 const {logger} = require('@ayro/commons');
@@ -22,8 +21,7 @@ async function postMessage(req, res) {
     const chatMessage = await chatService.postMessage(req.user, req.channel, req.body);
     // Asynchronously because it can take a long time
     (async () => {
-      await metricService.incrementMessagesPosted(req.user);
-      await pluginService.messagePosted(req.user);
+      await eventService.trackMessagesPosted(req.user);
     })();
     res.json(chatMessage);
   } catch (err) {

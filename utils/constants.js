@@ -62,4 +62,8 @@ module.exports = Object.freeze({
     MALE: 'Masculino',
     FEMALE: 'Feminino',
   }),
+  pubSub: Object.freeze({
+    MESSAGES_POSTED: 'messages_posted',
+    CHAT_VIEWS: 'chat_views',
+  }),
 });

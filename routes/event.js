@@ -1,15 +1,13 @@
 'use strict';
 
-const pluginService = require('services/plugin');
-const metricService = require('services/metric');
+const eventService = require('services/event');
 const errors = require('utils/errors');
 const {userAuthenticated} = require('routes/middlewares');
 const {logger} = require('@ayro/commons');
 
 async function trackViewChat(req, res) {
   try {
-    await metricService.incrementChatViews(req.user);
-    await pluginService.chatViewed(req.user, req.channel);
+    await eventService.trackChatViews(req.user, req.channel);
     res.json({});
   } catch (err) {
     logger.error(err);
