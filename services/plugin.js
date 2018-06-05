@@ -19,7 +19,7 @@ const CONFIG_GREETINGS_MESSAGE = ['message'];
 
 const SEND_MESSAGE_DELAY_SMALL = 2000;
 const SEND_MESSAGE_DELAY = 4000;
-const REPLY_SOON_MESSAGE = 'Obrigado pelo seu contato, nosso time irá respondê-lo o mais breve possível.';
+const REPLY_SOON_MESSAGE = 'Obrigado pelo seu contato! Nosso time irá respondê-lo o mais breve possível.';
 const CONNECT_CHANNEL_MESSAGE = 'Para não perder nenhuma mensagem, nos deixe um meio alternativo para contato.';
 
 function getAppAgent(app) {
@@ -37,25 +37,25 @@ function fixTimezone(timezone) {
   return timezone;
 }
 
-async function executeGreetingsMessagePlugin(plugin, user, channel) {
+async function sendGreetingsMessageIfNeeded(plugin, user, channel) {
   const app = await appQueries.getApp(user.app);
   const agent = getAppAgent(app);
   await Promise.delay(SEND_MESSAGE_DELAY_SMALL);
   await chatCommons.pushMessage(agent, user, plugin.configuration.message, channel);
 }
 
-async function executeOfficeHoursPlugin(plugin, user) {
+async function sendOfficeHoursMessageIfNeeded(plugin, user) {
   const now = moment();
   const lastCheck = _.get(user, 'extra.plugins.office_hours.last_check');
   if (lastCheck && moment(lastCheck).dayOfYear() === now.dayOfYear()) {
-    return;
+    return false;
   }
   const timezone = fixTimezone(plugin.configuration.timezone);
   now.utcOffset(timezone);
   const day = _.lowerCase(now.format('dddd'));
   const timeRange = plugin.configuration.time_range[day];
   if (!timeRange) {
-    return;
+    return false;
   }
   await user.update({'extra.plugins.office_hours.last_check': moment().valueOf()});
   const startTime = moment().utcOffset(timezone);
@@ -64,12 +64,15 @@ async function executeOfficeHoursPlugin(plugin, user) {
   const [endHour, endMinute] = timeRange.end.split(':');
   startTime.set({hours: startHour, minutes: startMinute, seconds: 0});
   endTime.set({hours: endHour, minutes: endMinute, seconds: 59});
+  let messageDisplayed = false;
   if (now.isBefore(startTime) || now.isAfter(endTime)) {
     const app = await appQueries.getApp(user.app);
     const agent = getAppAgent(app);
     await Promise.delay(SEND_MESSAGE_DELAY);
     await chatCommons.pushMessage(agent, user, plugin.configuration.reply);
+    messageDisplayed = true;
   }
+  return messageDisplayed;
 }
 
 async function sendReplySoonMessage(app, user) {
@@ -113,11 +116,11 @@ pubSub.subscribe(constants.pubSub.CHAT_VIEWS, async (data) => {
       const app = new App({id: user.app});
       const greetingsMessagePlugin = await pluginQueries.getPlugin(app, constants.plugin.types.GREETINGS_MESSAGE, {require: false});
       if (greetingsMessagePlugin) {
-        await executeGreetingsMessagePlugin(greetingsMessagePlugin, user, data.channel);
+        await sendGreetingsMessageIfNeeded(greetingsMessagePlugin, user, data.channel);
       }
     }
   } catch (err) {
-    logger.warn('Could not process "chatViewed" trigger', err);
+    logger.warn('Could not process "chat_views" event', err);
   }
 });
 
@@ -126,15 +129,15 @@ pubSub.subscribe(constants.pubSub.MESSAGES_POSTED, async (data) => {
     const user = await userQueries.getUser(data.user.id);
     const app = await appQueries.getApp(user.app);
     const officeHoursPlugin = await pluginQueries.getPlugin(app, constants.plugin.types.OFFICE_HOURS, {require: false});
-    if (officeHoursPlugin) {
-      await executeOfficeHoursPlugin(officeHoursPlugin, user);
-    }
+    const officeHoursMessageDisplayed = officeHoursPlugin ? await sendOfficeHoursMessageIfNeeded(officeHoursPlugin, user) : false;
     if (_.get(user, 'extra.metrics.messages_posted') === 1) {
-      await sendReplySoonMessage(app, user);
+      if (!officeHoursMessageDisplayed) {
+        await sendReplySoonMessage(app, user);
+      }
       await sendConnectChannelMessage(app, user);
     }
   } catch (err) {
-    logger.warn('Could not process "messagePosted" trigger', err);
+    logger.warn('Could not process "messages_posted" event', err);
   }
 });
 
