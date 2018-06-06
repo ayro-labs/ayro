@@ -55,12 +55,11 @@ exports.postMessage = async (user, channel, message) => {
   const updatedUser = await userCommons.updateUser(loadedUser, updatedData);
   await User.populate(updatedUser, 'app devices');
   const integrations = await integrationQueries.findIntegrations(updatedUser.app, constants.integration.types.BUSINESS);
-  const chatMessage = new ChatMessage({
+  const chatMessage = new ChatMessage(message);
+  chatMessage.set({
     channel,
     app: updatedUser.app.id,
     user: updatedUser.id,
-    type: constants.chatMessage.types.TEXT,
-    text: message.text,
     direction: constants.chatMessage.directions.OUTGOING,
     date: new Date(),
   });
