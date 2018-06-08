@@ -1,8 +1,0 @@
-app:
-  env: production
-  debug: true
-session:
-  keyId: ayro
-  secret: ayro
-mongo:
-  debug: true
