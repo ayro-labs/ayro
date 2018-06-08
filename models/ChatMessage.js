@@ -18,7 +18,7 @@ const QuickReply = new Schema({
   title: {type: String, required: true},
   postback: {type: String},
   icon_url: {type: String},
-});
+}, {_id: false});
 
 const Button = new Schema({
   type: {type: String, required: true},
@@ -26,17 +26,17 @@ const Button = new Schema({
   postback: {type: String},
   icon_url: {type: String},
   url: {type: String},
-});
+}, {_id: false});
 
 const Location = new Schema({
   latitude: {type: Number, required: true},
   longitude: {type: Number, required: true},
-});
+}, {_id: false});
 
 const Media = new Schema({
   url: {type: String, required: true},
   type: {type: String},
-});
+}, {_id: false});
 
 const ChatMessage = new Schema({
   app: {type: ObjectId, ref: 'App', required: true, index: true},

@@ -3,6 +3,7 @@
 const {App, User, ChatMessage} = require('models');
 const constants = require('utils/constants');
 const errors = require('utils/errors');
+const files = require('utils/files');
 const integrationQueries = require('utils/queries/integration');
 const userQueries = require('utils/queries/user');
 const userCommons = require('services/commons/user');
@@ -72,6 +73,25 @@ exports.postMessage = async (user, channel, message) => {
   });
   await Promise.all(promises);
   return chatMessage.save();
+};
+
+exports.postFile = async (user, channel, file) => {
+  const url = await files.uploadUserFile(user, file);
+  return this.postMessage(user, channel, {
+    type: constants.chatMessage.types.FILE,
+    media: {
+      url,
+      type: file.mimetype,
+    },
+  });
+};
+
+exports.postImage = async (user, channel, image) => {
+  const url = await files.uploadUserFile(user, image);
+  return this.postMessage(user, channel, {
+    type: constants.chatMessage.types.IMAGE,
+    media: {url},
+  });
 };
 
 exports.postDeviceConnected = async (user, device) => {

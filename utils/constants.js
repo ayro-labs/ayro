@@ -16,6 +16,10 @@ const userChannels = [channels.EMAIL, channels.WEBSITE, channels.WORDPRESS, chan
 const businessChannels = [channels.SLACK];
 
 module.exports = Object.freeze({
+  environments: Object.freeze({
+    DEVELOPMENT: 'development',
+    PRODUCTION: 'production',
+  }),
   integration: Object.freeze({
     types,
     channels,
@@ -51,6 +55,8 @@ module.exports = Object.freeze({
   chatMessage: Object.freeze({
     types: Object.freeze({
       TEXT: 'text',
+      IMAGE: 'image',
+      FILE: 'file',
       CONNECT_CHANNELS: 'connect_channels',
     }),
     directions: Object.freeze({

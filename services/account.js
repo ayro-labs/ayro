@@ -40,12 +40,12 @@ exports.updateAccount = async (account, data) => {
 
 exports.updateLogo = async (account, logoFile) => {
   const loadedAccount = await accountQueries.getAccount(account.id);
-  const oldLogoPath = loadedAccount.logo ? path.join(settings.accountLogoPath, loadedAccount.logo) : null;
-  const logo = await files.fixAccountLogo(loadedAccount, logoFile.path);
+  const oldLogo = loadedAccount.logo;
+  const logo = await files.uploadAccountLogo(loadedAccount, logoFile.path);
   await loadedAccount.update({logo}, {runValidators: true});
   loadedAccount.logo = logo;
-  if (oldLogoPath && (await files.fileExists(oldLogoPath))) {
-    await files.removeFile(oldLogoPath);
+  if (oldLogo) {
+    await files.removeMedia(oldLogo);
   }
   return loadedAccount;
 };

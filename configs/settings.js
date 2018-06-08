@@ -1,28 +1,30 @@
 'use strict';
 
+const constants = require('utils/constants');
 const files = require('utils/files');
 const {configs} = require('@ayro/commons');
 const path = require('path');
+const mkdirp = require('mkdirp');
 
 const config = configs.load(path.resolve('config.yml'));
 
-exports.env = config.get('app.env', 'development');
+exports.env = config.get('app.env', constants.environments.DEVELOPMENT);
 exports.port = config.get('app.port', 3000);
 exports.debug = config.get('app.debug', false);
 
-exports.publicUrl = this.env === 'production' ? 'https://api.ayro.io' : `http://localhost:${this.port}`;
+exports.publicUrl = this.env === constants.environments.PRODUCTION ? 'https://api.ayro.io' : `http://localhost:${this.port}`;
 exports.publicPath = config.get('app.publicPath', path.resolve('public'));
 
-exports.appIconUrl = `${this.publicUrl}/img/apps`;
-exports.appIconPath = path.join(this.publicPath, 'img/apps');
+exports.uploadsUrl = `${this.publicUrl}/uploads`;
+exports.uploadsPath = path.join(this.publicPath, 'uploads');
 
-exports.accountLogoUrl = `${this.publicUrl}/img/accounts`;
-exports.accountLogoPath = path.join(this.publicPath, 'img/accounts');
+exports.mediaUrl = `${this.publicUrl}/media`;
+exports.mediaPath = path.join(this.publicPath, 'media');
 
-exports.userPhotoUrl = `${this.publicUrl}/img/users`;
-exports.userPhotoPath = path.join(this.publicPath, 'img/users');
+exports.mediaS3Bucket = 'ayro-media';
+exports.mediaCDNUrl = 'https://media.ayro.io';
 
-exports.webcmUrl = config.get('webcm.url', this.env === 'production' ? 'https://webcm.ayro.io:3100' : 'http://localhost:3100');
+exports.webcmUrl = config.get('webcm.url', this.env === constants.environments.PRODUCTION ? 'https://webcm.ayro.io:3100' : 'http://localhost:3100');
 
 exports.session = {
   prefix: 'session:',
@@ -62,10 +64,9 @@ exports.slack = {
   verificationToken: 'BVUOTnQlEn5vBZQG6AaACegL',
 };
 
-files.createDirSync(this.publicPath);
-files.createDirSync(this.appIconPath);
-files.createDirSync(this.accountLogoPath);
-files.createDirSync(this.userPhotoPath);
+mkdirp.sync(this.publicPath);
+mkdirp.sync(this.uploadsPath);
+mkdirp.sync(this.mediaPath);
 
 if (!this.session.keyId) {
   throw new Error('Property session.keyId is required');

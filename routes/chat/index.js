@@ -2,9 +2,13 @@
 
 const chatService = require('services/chat');
 const eventService = require('services/event');
+const settings = require('configs/settings');
 const errors = require('utils/errors');
 const {userAuthenticated} = require('routes/middlewares');
 const {logger} = require('@ayro/commons');
+const multer = require('multer');
+
+const upload = multer({dest: settings.uploadsPath});
 
 async function listMessages(req, res) {
   try {
@@ -30,9 +34,24 @@ async function postMessage(req, res) {
   }
 }
 
+async function postFile(req, res) {
+  try {
+    const chatMessage = await chatService.postFile(req.user, req.channel, req.file);
+    // Asynchronously because it can take a long time
+    (async () => {
+      await eventService.trackMessagesPosted(req.user);
+    })();
+    res.json(chatMessage);
+  } catch (err) {
+    logger.error(err);
+    errors.respondWithError(res, err);
+  }
+}
+
 module.exports = (router, app) => {
   router.get('/', userAuthenticated, listMessages);
   router.post('/', userAuthenticated, postMessage);
+  router.post('/files', [userAuthenticated, upload.single('file')], postFile);
 
   app.use('/chat', router);
 };

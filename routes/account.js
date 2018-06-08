@@ -8,7 +8,7 @@ const {accountAuthenticated, decodeToken} = require('routes/middlewares');
 const {logger} = require('@ayro/commons');
 const multer = require('multer');
 
-const upload = multer({dest: settings.accountLogoPath});
+const upload = multer({dest: settings.uploadsPath});
 
 async function createAccount(req, res) {
   try {

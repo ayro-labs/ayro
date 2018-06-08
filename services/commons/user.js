@@ -32,7 +32,7 @@ async function createUser(app, data, identified) {
   }
   if (data.photo_url) {
     try {
-      user.photo = await files.downloadUserPhoto(user, data.photo_url);
+      user.photo = await files.uploadUserPhoto(user, data.photo_url);
     } catch (err) {
       logger.debug('Could not download photo of user %s: %s.', user.id, err.message);
       user.photo_url = null;
@@ -57,7 +57,7 @@ exports.updateUser = async (user, data) => {
   }
   if (attrs.photo_url && attrs.photo_url !== loadedUser.photo_url) {
     try {
-      attrs.photo = await files.downloadUserPhoto(loadedUser, attrs.photo_url);
+      attrs.photo = await files.uploadUserPhoto(loadedUser, attrs.photo_url);
     } catch (err) {
       logger.debug('Could not download photo of user %s: %s.', loadedUser.id, err.message);
       attrs.photo_url = null;

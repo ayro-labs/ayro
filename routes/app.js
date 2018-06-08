@@ -8,7 +8,7 @@ const {accountAuthenticated, accountOwnsApp} = require('routes/middlewares');
 const {logger} = require('@ayro/commons');
 const multer = require('multer');
 
-const upload = multer({dest: settings.appIconPath});
+const upload = multer({dest: settings.uploadsPath});
 
 async function listApps(req, res) {
   try {
@@ -64,8 +64,8 @@ async function deleteApp(req, res) {
 
 async function getAppIcon(req, res) {
   try {
-    const app = await appService.getApp(req.params.app);
-    res.sendFile(`${settings.appIconPath}/${app.icon}`);
+    const icon = await appService.getAppIcon(req.params.app);
+    res.redirect(icon);
   } catch (err) {
     logger.error(err);
     errors.respondWithError(res, err);
