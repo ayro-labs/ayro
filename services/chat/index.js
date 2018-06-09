@@ -76,29 +76,18 @@ exports.postMessage = async (user, channel, message) => {
 };
 
 exports.postFile = async (user, channel, file) => {
-  const url = await files.uploadUserFile(user, {
-    path: file.path,
-    name: file.originalname,
-    mimeType: file.mimetype,
-  });
+  const uploadedFile = await files.uploadUserFile(user, file);
   return this.postMessage(user, channel, {
     type: constants.chatMessage.types.FILE,
-    media: {
-      url,
-      type: file.mimetype,
-    },
+    media: {url: uploadedFile.url, type: uploadedFile.mimeType},
   });
 };
 
 exports.postImage = async (user, channel, image) => {
-  const url = await files.uploadUserFile(user, {
-    path: file.path,
-    name: file.originalname,
-    mimeType: file.mimetype,
-  });
+  const uploadedImage = await files.uploadUserFile(user, image);
   return this.postMessage(user, channel, {
     type: constants.chatMessage.types.IMAGE,
-    media: {url},
+    media: {url: uploadedImage.url, type: uploadedImage.mimeType},
   });
 };
 

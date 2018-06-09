@@ -36,7 +36,12 @@ async function postMessage(req, res) {
 
 async function postFile(req, res) {
   try {
-    const chatMessage = await chatService.postFile(req.user, req.channel, req.file);
+    const {file} = req;
+    const chatMessage = await chatService.postFile(req.user, req.channel, {
+      path: file.path,
+      name: file.originalname,
+      mimeType: file.mimetype,
+    });
     // Asynchronously because it can take a long time
     (async () => {
       await eventService.trackMessagesPosted(req.user);

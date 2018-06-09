@@ -73,7 +73,11 @@ async function uploadMedia(sourcePath, file, options) {
     fileUrl = `${settings.mediaUrl}/${relativePath}`;
     await fs.unlinkAsync(sourcePath);
   }
-  return fileUrl;
+  return {
+    url: fileUrl,
+    name: file.name,
+    mimeType: file.mimeType,
+  };
 }
 
 exports.uploadUserPhoto = async (user, photoUrl) => {
