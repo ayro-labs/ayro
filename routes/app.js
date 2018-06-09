@@ -62,16 +62,6 @@ async function deleteApp(req, res) {
   }
 }
 
-async function getAppIcon(req, res) {
-  try {
-    const icon = await appService.getAppIcon(req.params.app);
-    res.redirect(icon);
-  } catch (err) {
-    logger.error(err);
-    errors.respondWithError(res, err);
-  }
-}
-
 async function updateAppIcon(req, res) {
   try {
     let app = new App({id: req.params.app});
@@ -122,7 +112,6 @@ module.exports = (router, app) => {
   router.get('/:app', [accountAuthenticated, accountOwnsApp], getApp);
   router.post('', accountAuthenticated, createApp);
   router.put('/:app', [accountAuthenticated, accountOwnsApp], updateApp);
-  router.get('/:app/icon', getAppIcon);
   router.put('/:app/icon', [accountAuthenticated, accountOwnsApp, upload.single('icon')], updateAppIcon);
   router.delete('/:app', [accountAuthenticated, accountOwnsApp], deleteApp);
 

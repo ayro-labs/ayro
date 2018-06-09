@@ -76,7 +76,11 @@ exports.postMessage = async (user, channel, message) => {
 };
 
 exports.postFile = async (user, channel, file) => {
-  const url = await files.uploadUserFile(user, file);
+  const url = await files.uploadUserFile(user, {
+    path: file.path,
+    name: file.originalname,
+    mimeType: file.mimetype,
+  });
   return this.postMessage(user, channel, {
     type: constants.chatMessage.types.FILE,
     media: {
@@ -87,7 +91,11 @@ exports.postFile = async (user, channel, file) => {
 };
 
 exports.postImage = async (user, channel, image) => {
-  const url = await files.uploadUserFile(user, image);
+  const url = await files.uploadUserFile(user, {
+    path: file.path,
+    name: file.originalname,
+    mimeType: file.mimetype,
+  });
   return this.postMessage(user, channel, {
     type: constants.chatMessage.types.IMAGE,
     media: {url},

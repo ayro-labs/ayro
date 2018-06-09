@@ -10,21 +10,21 @@ const {ObjectId} = Schema.Types;
 const Agent = new Schema({
   id: {type: String},
   name: {type: String},
-  photo_url: {type: String},
+  photo: {type: String},
 }, {_id: false});
 
 const QuickReply = new Schema({
   type: {type: String, required: true},
   title: {type: String, required: true},
   postback: {type: String},
-  icon_url: {type: String},
+  icon: {type: String},
 }, {_id: false});
 
 const Button = new Schema({
   type: {type: String, required: true},
   title: {type: String, required: true},
   postback: {type: String},
-  icon_url: {type: String},
+  icon: {type: String},
   url: {type: String},
 }, {_id: false});
 

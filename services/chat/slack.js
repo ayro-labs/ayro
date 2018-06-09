@@ -2,7 +2,6 @@
 
 const constants = require('utils/constants');
 const errors = require('utils/errors');
-const files = require('utils/files');
 const apis = require('utils/apis');
 const integrationQueries = require('utils/queries/integration');
 const userQueries = require('utils/queries/user');
@@ -275,7 +274,7 @@ exports.getAgent = async (configuration, data) => {
   return {
     id: data.user_id,
     name: result.user.profile.real_name,
-    photo_url: result.user.profile.image_192,
+    photo: result.user.profile.image_192,
   };
 };
 
@@ -299,7 +298,7 @@ exports.postMessage = async (configuration, user, chatMessage) => {
     channel: userChannel.id,
     username: user.getFullName(),
     as_user: false,
-    icon_url: files.getUserPhoto(user),
+    icon_url: user.photo,
   });
 };
 
@@ -382,7 +381,7 @@ exports.confirmMessage = async (configuration, data, user, chatMessage) => {
     channel: data.channel_id,
     username: `${chatMessage.agent.name} para ${user.getFullName()}`,
     as_user: false,
-    icon_url: chatMessage.agent.photo_url,
+    icon_url: chatMessage.agent.photo,
   });
 };
 

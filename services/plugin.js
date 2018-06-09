@@ -1,7 +1,6 @@
 'use strict';
 
 const {App, Plugin} = require('models');
-const settings = require('configs/settings');
 const constants = require('utils/constants');
 const errors = require('utils/errors');
 const pubSub = require('utils/pubSub');
@@ -26,7 +25,7 @@ function getAppAgent(app) {
   return {
     id: '0',
     name: app.name,
-    photo_url: `${settings.publicUrl}/apps/${app.id}/icon`,
+    photo: app.icon,
   };
 }
 

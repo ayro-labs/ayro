@@ -2,15 +2,12 @@
 
 const {App, AppSecret, Integration} = require('models');
 const {User, Device, ChatMessage} = require('models');
-const settings = require('configs/settings');
 const hash = require('utils/hash');
 const files = require('utils/files');
 const appQueries = require('utils/queries/app');
-const path = require('path');
 const _ = require('lodash');
 
 const ALLOWED_ATTRS = ['name'];
-const DEFAULT_ICON_URL = 'https://cdn.ayro.io/images/app_default_icon.png';
 
 function getAppPopulateOption(withIntegrations, withPlugins) {
   const populate = [];
@@ -30,11 +27,6 @@ exports.listApps = async (account, withIntegrations, withPlugins) => {
 exports.getApp = async (id, withIntegrations, withPlugins) => {
   return appQueries.getApp(id, {populate: getAppPopulateOption(withIntegrations, withPlugins)});
 };
-
-exports.getAppIcon = async (id) => {
-  const app = await this.getApp(id);
-  return app.icon || DEFAULT_ICON_URL;
-}
 
 exports.appExists = async (query) => {
   const count = await App.count({query});
@@ -61,13 +53,9 @@ exports.updateApp = async (app, data) => {
 
 exports.updateIcon = async (app, iconFile) => {
   const loadedApp = await appQueries.getApp(app.id);
-  const oldIcon = loadedApp.icon;
   const icon = await files.uploadAppIcon(loadedApp, iconFile.path);
   await loadedApp.update({icon}, {runValidators: true});
   loadedApp.icon = icon;
-  if (oldIcon) {
-    await files.removeMedia(oldIcon);
-  }
   return loadedApp;
 };
 

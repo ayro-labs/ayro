@@ -2,7 +2,6 @@
 
 const settings = require('configs/settings');
 const constants = require('utils/constants');
-const {URL} = require('url');
 const axios = require('axios');
 const Promise = require('bluebird');
 const sharp = require('sharp');
@@ -12,14 +11,14 @@ const mkdirp = require('mkdirp');
 const uuid = require('uuid').v4;
 const AWS = require('aws-sdk');
 
-var s3 = new AWS.S3();
+Promise.promisifyAll(mkdirp);
+Promise.promisifyAll(fs);
 
 const ACCOUNT_LOGO_DIMENSION = 160;
 const APP_ICON_DIMENSION = 160;
 const USER_PHOTO_DIMENSION = 128;
 
-Promise.promisifyAll(mkdirp);
-Promise.promisifyAll(fs);
+const s3 = new AWS.S3();
 
 async function isImage(file) {
   return file.mimeType.startsWith('image');
@@ -45,7 +44,7 @@ async function processImage(inputFile, outputFile, options) {
 
 async function uploadMedia(sourcePath, file, options) {
   let fileUrl = null;
-  const relativePath = path.join(file.path, file.name);
+  const relativePath = path.join(file.relativeDir, file.name);
   if (settings.env === constants.environments.PRODUCTION) {
     const sourceDir = path.dirname(sourcePath);
     const sourceFileName = path.basename(sourcePath);
@@ -57,13 +56,13 @@ async function uploadMedia(sourcePath, file, options) {
       Bucket: settings.mediaS3Bucket,
       Key: relativePath,
       Body: await fs.readFileAsync(finalPath),
-      ContentType: file.mimeType
+      ContentType: file.mimeType,
     }).promise();
     fileUrl = `${settings.mediaCDNUrl}/${relativePath}`;
     await fs.unlinkAsync(sourcePath);
     await fs.unlinkAsync(finalPath);
   } else {
-    const finalDir = path.join(settings.mediaPath, file.path);
+    const finalDir = path.join(settings.mediaPath, file.relativeDir);
     const finalPath = path.join(settings.mediaPath, relativePath);
     if (isImage(file)) {
       await mkdirp.mkdirpAsync(finalDir);
@@ -75,34 +74,14 @@ async function uploadMedia(sourcePath, file, options) {
     await fs.unlinkAsync(sourcePath);
   }
   return fileUrl;
-};
-
-async function removeFile(file) {
-  try {
-    await fs.unlinkAsync(file);
-  } catch (err) {
-    // Nothing to do...
-  }
-};
-
-exports.getUserPhoto = (user) => {
-  return user.photo ? `${settings.userPhotoUrl}/${user.photo}` : null;
-};
-
-exports.getAppIcon = (app) => {
-  return app.icon ? `${settings.appIconUrl}/${app.icon}` : null;
-};
-
-exports.getAccountLogo = (account) => {
-  return account.logo ? `${settings.accountLogoUrl}/${account.logo}` : null;
-};
+}
 
 exports.uploadUserPhoto = async (user, photoUrl) => {
   const photoPath = path.join(settings.uploadsPath, uuid());
   await downloadImage(photoUrl, photoPath);
   const file = {
-    path: path.join('users', user.id),
-    name: `${Date.now()}.png`,
+    name: `photo_${Date.now()}.png`,
+    relativeDir: path.join('users', user.id),
     mimeType: 'image/png',
   };
   const options = {
@@ -114,8 +93,8 @@ exports.uploadUserPhoto = async (user, photoUrl) => {
 
 exports.uploadAppIcon = async (app, iconPath) => {
   const file = {
-    path: path.join('apps', app.id),
-    name: `${Date.now()}.png`,
+    name: `icon_${Date.now()}.png`,
+    relativeDir: path.join('apps', app.id),
     mimeType: 'image/png',
   };
   const options = {
@@ -127,8 +106,8 @@ exports.uploadAppIcon = async (app, iconPath) => {
 
 exports.uploadAccountLogo = async (account, logoPath) => {
   const file = {
-    path: path.join('accounts', account.id),
-    name: `${Date.now()}.png`,
+    name: `logo_${Date.now()}.png`,
+    relativeDir: path.join('accounts', account.id),
     mimeType: 'image/png',
   };
   const options = {
@@ -138,29 +117,11 @@ exports.uploadAccountLogo = async (account, logoPath) => {
   return uploadMedia(logoPath, file, options);
 };
 
-exports.uploadUserFile = async (user, file) => {
-  const fileOptions = {
-    path: path.join('users', user.id, 'uploads'),
-    name: Date.now() + path.extname(file.originalname),
-    mimeType: file.mimetype,
+exports.uploadUserFile = async (user, userFile) => {
+  const file = {
+    name: `upload_${Date.now()}${path.extname(userFile.name)}`,
+    relativeDir: path.join('users', user.id, 'uploads'),
+    mimeType: userFile.mimeType,
   };
-  return uploadMedia(file.path, fileOptions);
-};
-
-exports.removeMedia = async (mediaUrl) => {
-  const parsedUrl = new URL(mediaUrl);
-  if (settings.env === constants.environments.PRODUCTION) {
-    const fileKey = parsedUrl.pathname.replace('/', '');
-    if (mediaUrl.startsWith(settings.mediaCDNUrl)) {
-      await s3.deleteObject({
-        Bucket: settings.mediaS3Bucket,
-        Key: fileKey,
-      }).promise();
-    }
-  } else {
-    if (mediaUrl.startsWith(settings.mediaUrl)) {
-      const filePath = path.join(settings.publicPath, parsedUrl.pathname);
-      await removeFile(filePath);
-    }
-  }
+  return uploadMedia(userFile.path, file);
 };

@@ -1,12 +1,10 @@
 'use strict';
 
 const {Account} = require('models');
-const settings = require('configs/settings');
 const hash = require('utils/hash');
 const files = require('utils/files');
 const errors = require('utils/errors');
 const accountQueries = require('utils/queries/account');
-const path = require('path');
 const _ = require('lodash');
 
 const ALLOWED_ATTRS = ['name', 'email'];
@@ -40,13 +38,9 @@ exports.updateAccount = async (account, data) => {
 
 exports.updateLogo = async (account, logoFile) => {
   const loadedAccount = await accountQueries.getAccount(account.id);
-  const oldLogo = loadedAccount.logo;
   const logo = await files.uploadAccountLogo(loadedAccount, logoFile.path);
   await loadedAccount.update({logo}, {runValidators: true});
   loadedAccount.logo = logo;
-  if (oldLogo) {
-    await files.removeMedia(oldLogo);
-  }
   return loadedAccount;
 };
 
