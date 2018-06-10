@@ -54,7 +54,7 @@ exports.postMessage = async (user, channel, message) => {
   }
   await loadedUser.update(updatedData, {runValidators: true});
   loadedUser.set(updatedData);
-  await loadedUser.populate('app devices');
+  await loadedUser.populate('app devices').execPopulate();
   const integrations = await integrationQueries.findIntegrations(loadedUser.app, constants.integration.types.BUSINESS);
   const chatMessage = new ChatMessage(message);
   chatMessage.set({

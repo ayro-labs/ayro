@@ -84,6 +84,7 @@ async function sendConnectChannelMessage(app, user) {
   const agent = getAppAgent(app);
   await Promise.delay(SEND_MESSAGE_DELAY_SMALL);
   await chatCommons.pushMessage(agent, user, CONNECT_CHANNEL_MESSAGE);
+  await Promise.delay(SEND_MESSAGE_DELAY_SMALL);
   await chatCommons.pushConnectChannelMessage(agent, user, ['email']);
 }
 
