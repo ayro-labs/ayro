@@ -6,18 +6,14 @@ const userService = require('services/user');
 const deviceService = require('services/device');
 const chatService = require('services/chat');
 const constants = require('utils/constants');
-const session = require('utils/session');
+const session = require('database/session');
 const errors = require('utils/errors');
 const {userAuthenticated} = require('routes/middlewares');
 const {logger} = require('@ayro/commons');
-const _ = require('lodash');
-
-const ALLOWED_USER_ATTRS = ['uid', 'first_name', 'last_name', 'email', 'photo_url', 'properties', 'sign_up_date'];
-const ALLOWED_DEVICE_ATTRS = ['uid', 'platform', 'push_token', 'info'];
 
 async function updateUser(req, res) {
   try {
-    const user = await userService.updateUser(req.user, _.pick(req.body, ALLOWED_USER_ATTRS));
+    const user = await userService.updateUser(req.user, req.body);
     res.json(user);
   } catch (err) {
     logger.error(err);
@@ -37,7 +33,7 @@ async function listDevices(req, res) {
 
 async function updateDevice(req, res) {
   try {
-    const device = await deviceService.updateDevice(req.device, _.pick(req.body, ALLOWED_DEVICE_ATTRS));
+    const device = await deviceService.updateDevice(req.device, req.body);
     res.json(device);
   } catch (err) {
     logger.error(err);
@@ -66,8 +62,8 @@ async function connectEmail(req, res) {
 async function login(req, res) {
   try {
     const app = await appService.getAppByToken(req.body.app_token);
-    const user = await userService.saveIdentifiedUser(app, _.pick(req.body.user, ALLOWED_USER_ATTRS), req.body.jwt);
-    const device = await deviceService.saveDevice(user, req.channel, _.pick(req.body.device, ALLOWED_DEVICE_ATTRS));
+    const user = await userService.saveIdentifiedUser(app, req.body.user, req.body.jwt);
+    const device = await deviceService.saveDevice(user, req.channel, req.body.device);
     await userService.mergeUsers(req.user, user);
     await session.destroyToken(req.token);
     const token = await session.createUserToken(user, device, req.channel);

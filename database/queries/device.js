@@ -2,7 +2,7 @@
 
 const {Device} = require('models');
 const errors = require('utils/errors');
-const queriesCommon = require('utils/queries/common');
+const queriesCommon = require('database/queries/common');
 
 function throwDeviceNotFoundIfNeeded(device, options) {
   if (!device && (!options || options.require)) {

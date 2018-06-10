@@ -2,7 +2,7 @@
 
 const accountService = require('services/account');
 const settings = require('configs/settings');
-const session = require('utils/session');
+const session = require('database/session');
 const errors = require('utils/errors');
 const {accountAuthenticated, decodeToken} = require('routes/middlewares');
 const {logger} = require('@ayro/commons');

@@ -80,11 +80,11 @@ async function uploadMedia(sourcePath, file, options) {
   };
 }
 
-exports.uploadUserPhoto = async (user, photoUrl) => {
+exports.uploadUserAvatar = async (user, photoUrl) => {
   const photoPath = path.join(settings.uploadsPath, uuid());
   await downloadImage(photoUrl, photoPath);
   const file = {
-    name: `photo_${Date.now()}.png`,
+    name: `avatar_${Date.now()}.png`,
     relativeDir: path.join('users', user.id),
     mimeType: 'image/png',
   };

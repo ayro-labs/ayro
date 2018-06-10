@@ -1,8 +1,8 @@
 'use strict';
 
-const {Integration} = require('models');
 const errors = require('utils/errors');
-const integrationQueries = require('utils/queries/integration');
+const integrationQueries = require('database/queries/integration');
+const {Integration} = require('models');
 const _ = require('lodash');
 
 exports.addIntegration = async (app, channel, type, configuration) => {

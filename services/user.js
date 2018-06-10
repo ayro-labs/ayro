@@ -1,18 +1,21 @@
 'use strict';
 
-const {AppSecret, ChatMessage} = require('models');
 const errors = require('utils/errors');
-const userQueries = require('utils/queries/user');
+const userQueries = require('database/queries/user');
 const userCommons = require('services/commons/user');
+const {AppSecret, ChatMessage} = require('models');
 const jwt = require('jsonwebtoken');
+const _ = require('lodash');
 
+const ALLOWED_ATTRS = ['uid', 'first_name', 'last_name', 'email', 'photo_url', 'properties', 'sign_up_date'];
 const JWT_SCOPE_USER = 'user';
 
 exports.saveIdentifiedUser = async (app, data, jwtToken) => {
+  const attrs = _.pick(data, ALLOWED_ATTRS);
   if (!jwtToken) {
     throw errors.ayroError('jwt_required', 'JWT token is required');
   }
-  if (data.uid) {
+  if (attrs.uid) {
     const decoded = jwt.decode(jwtToken, {complete: true});
     if (!decoded) {
       throw errors.ayroError('jwt_invalid', 'Invalid JWT token');
@@ -25,12 +28,12 @@ exports.saveIdentifiedUser = async (app, data, jwtToken) => {
       throw errors.ayroError('jwt_invalid', 'App secret not found');
     }
     const payload = jwt.verify(jwtToken, appSecret.secret);
-    if (payload.scope !== JWT_SCOPE_USER || payload.userId !== data.uid) {
+    if (payload.scope !== JWT_SCOPE_USER || payload.userId !== attrs.uid) {
       throw errors.ayroError('jwt_invalid', 'User\'s uid not match');
     }
   }
-  const user = await userQueries.findUser({app: app.id, uid: data.uid}, {require: false});
-  return user ? userCommons.updateUser(user, data) : userCommons.createIdentifiedUser(app, data);
+  const user = await userQueries.findUser({app: app.id, uid: attrs.uid}, {require: false});
+  return user ? this.updateUser(user, attrs) : userCommons.createIdentifiedUser(app, attrs);
 };
 
 exports.saveAnonymousUser = async (app, uid) => {
@@ -39,7 +42,8 @@ exports.saveAnonymousUser = async (app, uid) => {
 };
 
 exports.updateUser = async (user, data) => {
-  return userCommons.updateUser(user, data);
+  const attrs = _.pick(data, ALLOWED_ATTRS);
+  return userCommons.updateUser(user, attrs);
 };
 
 exports.getUser = async (id) => {

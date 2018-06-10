@@ -8,23 +8,23 @@ const {Schema} = mongoose;
 const {ObjectId} = Schema.Types;
 
 const Agent = new Schema({
-  id: {type: String},
-  name: {type: String},
-  photo: {type: String},
+  id: {type: String, required: true},
+  name: {type: String, required: true},
+  photo_url: {type: String, required: true},
 }, {_id: false});
 
 const QuickReply = new Schema({
   type: {type: String, required: true},
   title: {type: String, required: true},
   postback: {type: String},
-  icon: {type: String},
+  icon_url: {type: String},
 }, {_id: false});
 
 const Button = new Schema({
   type: {type: String, required: true},
   title: {type: String, required: true},
   postback: {type: String},
-  icon: {type: String},
+  icon_url: {type: String},
   url: {type: String},
 }, {_id: false});
 

@@ -1,13 +1,13 @@
 'use strict';
 
-const {App, AppSecret, Integration} = require('models');
-const {User, Device, ChatMessage} = require('models');
 const hash = require('utils/hash');
 const files = require('utils/files');
-const appQueries = require('utils/queries/app');
+const appQueries = require('database/queries/app');
+const {App, AppSecret, Integration, User, Device, ChatMessage} = require('models');
 const _ = require('lodash');
 
 const ALLOWED_ATTRS = ['name'];
+const DEFAULT_ICON_URL = 'https://cdn.ayro.io/images/app_default_icon.png';
 
 function getAppPopulateOption(withIntegrations, withPlugins) {
   const populate = [];
@@ -39,7 +39,13 @@ exports.getAppByToken = async (token, withIntegrations, withPlugins) => {
 
 exports.createApp = async (account, name) => {
   const token = await hash.token();
-  const app = new App({name, token, account: account.id, registration_date: new Date()});
+  const app = new App({
+    name,
+    token,
+    icon_url: DEFAULT_ICON_URL,
+    account: account.id,
+    registration_date: new Date(),
+  });
   return app.save();
 };
 
@@ -54,8 +60,8 @@ exports.updateApp = async (app, data) => {
 exports.updateIcon = async (app, iconFile) => {
   const loadedApp = await appQueries.getApp(app.id);
   const icon = await files.uploadAppIcon(loadedApp, iconFile.path);
-  await loadedApp.update({icon: icon.url}, {runValidators: true});
-  loadedApp.icon = icon.url;
+  await loadedApp.update({icon_url: icon.url}, {runValidators: true});
+  loadedApp.icon_url = icon.url;
   return loadedApp;
 };
 

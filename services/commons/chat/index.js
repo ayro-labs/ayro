@@ -1,13 +1,13 @@
 'use strict';
 
-const {App, ChatMessage} = require('models');
 const constants = require('utils/constants');
-const integrationQueries = require('utils/queries/integration');
-const userQueries = require('utils/queries/user');
-const deviceQueries = require('utils/queries/device');
+const integrationQueries = require('database/queries/integration');
+const userQueries = require('database/queries/user');
+const deviceQueries = require('database/queries/device');
 const webPush = require('services/commons/chat/push/web');
 const androidPush = require('services/commons/chat/push/android');
 const messengerPush = require('services/commons/chat/push/messenger');
+const {App, ChatMessage} = require('models');
 
 const EVENT_CHAT_MESSAGE = 'chat_message';
 

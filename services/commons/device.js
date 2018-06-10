@@ -1,15 +1,12 @@
 'use strict';
 
-const {Device} = require('models');
 const constants = require('utils/constants');
 const hash = require('utils/hash');
-const userQueries = require('utils/queries/user');
-const deviceQueries = require('utils/queries/device');
+const userQueries = require('database/queries/user');
+const deviceQueries = require('database/queries/device');
+const {Device} = require('models');
 const detectBrowser = require('detect-browser');
 const _ = require('lodash');
-
-const UNALLOWED_ATTRS = ['_id', 'id', 'app', 'user', 'registration_date'];
-const UNALLOWED_ATTRS_UPDATE = ['uid', 'channel', ...UNALLOWED_ATTRS];
 
 function fixDeviceData(data) {
   if (data.platform === constants.device.platforms.BROWSER.id && data.info) {
@@ -26,7 +23,7 @@ function fixDeviceData(data) {
 
 exports.createDevice = async (user, data) => {
   const loadedUser = await userQueries.getUser(user.id);
-  const attrs = _.omit(data, UNALLOWED_ATTRS);
+  const attrs = _.cloneDeep(data);
   fixDeviceData(attrs);
   const device = new Device(attrs);
   device.app = loadedUser.app;
@@ -38,9 +35,10 @@ exports.createDevice = async (user, data) => {
   return device.save();
 };
 
+
 exports.updateDevice = async (device, data) => {
   const loadedDevice = await deviceQueries.getDevice(device.id);
-  const attrs = _.omit(data, UNALLOWED_ATTRS_UPDATE);
+  const attrs = _.cloneDeep(data);
   fixDeviceData(attrs);
   await loadedDevice.update(attrs, {runValidators: true});
   loadedDevice.set(attrs);

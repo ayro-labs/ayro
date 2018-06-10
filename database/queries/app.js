@@ -2,7 +2,7 @@
 
 const {App} = require('models');
 const errors = require('utils/errors');
-const queryCommon = require('utils/queries/common');
+const queryCommon = require('database/queries/common');
 
 function throwAppNotFoundIfNeeded(app, options) {
   if (!app && (!options || options.require)) {

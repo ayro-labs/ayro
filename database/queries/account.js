@@ -2,7 +2,7 @@
 
 const {Account} = require('models');
 const errors = require('utils/errors');
-const queryCommon = require('utils/queries/common');
+const queryCommon = require('database/queries/common');
 
 function throwAccountNotFoundIfNeeded(account, options) {
   if (!account && (!options || options.require)) {

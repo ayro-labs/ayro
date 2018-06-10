@@ -1,14 +1,13 @@
 'use strict';
 
-const {App, User, ChatMessage} = require('models');
 const constants = require('utils/constants');
 const errors = require('utils/errors');
 const files = require('utils/files');
-const integrationQueries = require('utils/queries/integration');
-const userQueries = require('utils/queries/user');
-const userCommons = require('services/commons/user');
+const integrationQueries = require('database/queries/integration');
+const userQueries = require('database/queries/user');
 const chatCommons = require('services/commons/chat');
 const slackChat = require('services/chat/slack');
+const {App, ChatMessage} = require('models');
 const Promise = require('bluebird');
 const _ = require('lodash');
 
@@ -53,14 +52,15 @@ exports.postMessage = async (user, channel, message) => {
   if (channel !== loadedUser.latest_channel) {
     updatedData.latest_channel = channel;
   }
-  const updatedUser = await userCommons.updateUser(loadedUser, updatedData);
-  await User.populate(updatedUser, 'app devices');
-  const integrations = await integrationQueries.findIntegrations(updatedUser.app, constants.integration.types.BUSINESS);
+  await loadedUser.update(updatedData, {runValidators: true});
+  loadedUser.set(updatedData);
+  await loadedUser.populate('app devices');
+  const integrations = await integrationQueries.findIntegrations(loadedUser.app, constants.integration.types.BUSINESS);
   const chatMessage = new ChatMessage(message);
   chatMessage.set({
     channel,
-    app: updatedUser.app.id,
-    user: updatedUser.id,
+    app: loadedUser.app.id,
+    user: loadedUser.id,
     direction: constants.chatMessage.directions.OUTGOING,
     date: new Date(),
   });
@@ -68,7 +68,7 @@ exports.postMessage = async (user, channel, message) => {
   _.each(integrations, (integration) => {
     const businessChat = getBusinessChat(integration.channel);
     if (businessChat) {
-      promises.push(businessChat.postMessage(integration.configuration, updatedUser, chatMessage));
+      promises.push(businessChat.postMessage(integration.configuration, loadedUser, chatMessage));
     }
   });
   await Promise.all(promises);
@@ -116,7 +116,7 @@ exports.postProfile = async (channel, data) => {
   const {configuration} = integration;
   try {
     const user = await businessChat.getUser(configuration, data);
-    await User.populate(user, 'app devices');
+    await user.populate('app devices');
     await businessChat.postProfile(configuration, user);
   } catch (err) {
     if (['user_not_found', 'channel_not_found'].includes(err.code)) {

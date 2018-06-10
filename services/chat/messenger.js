@@ -1,14 +1,14 @@
 'use strict';
 
-const {App} = require('models');
 const constants = require('utils/constants');
 const hash = require('utils/hash');
 const apis = require('utils/apis');
-const integrationQueries = require('utils/queries/integration');
-const deviceQueries = require('utils/queries/device');
+const integrationQueries = require('database/queries/integration');
+const deviceQueries = require('database/queries/device');
 const userCommons = require('services/commons/user');
 const deviceCommons = require('services/commons/device');
 const chatService = require('services/chat');
+const {App} = require('models');
 const _ = require('lodash');
 
 function getUserData(profile) {

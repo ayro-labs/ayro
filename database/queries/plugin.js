@@ -2,7 +2,7 @@
 
 const {Plugin} = require('models');
 const errors = require('utils/errors');
-const queriesCommon = require('utils/queries/common');
+const queriesCommon = require('database/queries/common');
 
 function throwPluginNotFoundIfNeeded(plugin, options) {
   if (!plugin && (!options || options.require)) {

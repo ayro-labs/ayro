@@ -2,7 +2,7 @@
 
 const {User} = require('models');
 const errors = require('utils/errors');
-const queriesCommon = require('utils/queries/common');
+const queriesCommon = require('database/queries/common');
 
 function throwUserNotFoundIfNeeded(user, options) {
   if (!user && (!options || options.require)) {

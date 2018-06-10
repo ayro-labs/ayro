@@ -2,7 +2,7 @@
 
 const {Integration} = require('models');
 const errors = require('utils/errors');
-const queriesCommon = require('utils/queries/common');
+const queriesCommon = require('database/queries/common');
 
 function throwIntegrationNotFoundIfNeeded(integration, options) {
   if (!integration && (!options || options.require)) {

@@ -57,14 +57,14 @@ const Account = new Schema({
   name: {type: String, required: true},
   email: {type: String, required: true, unique: true},
   password: {type: String, required: true},
-  logo: {type: String},
+  logo_url: {type: String},
   registration_date: {type: Date, required: true},
 });
 
 const App = new Schema({
   account: {type: ObjectId, ref: 'Account', required: true, index: true},
   name: {type: String, required: true},
-  icon: {type: String},
+  icon_url: {type: String},
   token: {type: String, required: true},
   registration_date: {type: Date, required: true},
 });
@@ -115,14 +115,14 @@ const User = new Schema({
   app: {type: ObjectId, ref: 'App', required: true},
   uid: {type: String, required: true},
   identified: {type: Boolean, required: true},
+  random_name: {type: Boolean, required: true},
   first_name: {type: String},
   last_name: {type: String},
-  random_name: {type: Boolean, required: true},
   email: {type: String},
-  photo: {type: String},
   photo_url: {type: String},
   properties: {type: Object},
   sign_up_date: {type: Date},
+  avatar_url: {type: String},
   extra: {type: Object},
   transient: {type: Boolean, required: true},
   latest_channel: {type: String, enum: constants.integration.userChannels},

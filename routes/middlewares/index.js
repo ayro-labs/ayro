@@ -1,7 +1,7 @@
 'use strict';
 
 const appService = require('services/app');
-const session = require('utils/session');
+const session = require('database/session');
 const errors = require('utils/errors');
 const {logger} = require('@ayro/commons');
 

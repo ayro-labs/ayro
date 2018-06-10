@@ -1,13 +1,13 @@
 'use strict';
 
-const {App, Plugin} = require('models');
 const constants = require('utils/constants');
 const errors = require('utils/errors');
 const pubSub = require('utils/pubSub');
-const appQueries = require('utils/queries/app');
-const pluginQueries = require('utils/queries/plugin');
-const userQueries = require('utils/queries/user');
+const appQueries = require('database/queries/app');
+const pluginQueries = require('database/queries/plugin');
+const userQueries = require('database/queries/user');
 const chatCommons = require('services/commons/chat');
+const {App, Plugin} = require('models');
 const {logger} = require('@ayro/commons');
 const Promise = require('bluebird');
 const moment = require('moment');
@@ -25,7 +25,7 @@ function getAppAgent(app) {
   return {
     id: '0',
     name: app.name,
-    photo: app.icon,
+    photo_url: app.icon_url,
   };
 }
 

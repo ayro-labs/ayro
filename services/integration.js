@@ -1,7 +1,7 @@
 'use strict';
 
 const constants = require('utils/constants');
-const integrationQueries = require('utils/queries/integration');
+const integrationQueries = require('database/queries/integration');
 const integrationCommons = require('services/commons/integration');
 const messengerIntegration = require('services/integrations/messenger');
 const slackIntegration = require('services/integrations/slack');

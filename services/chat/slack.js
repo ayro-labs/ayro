@@ -3,8 +3,8 @@
 const constants = require('utils/constants');
 const errors = require('utils/errors');
 const apis = require('utils/apis');
-const integrationQueries = require('utils/queries/integration');
-const userQueries = require('utils/queries/user');
+const integrationQueries = require('database/queries/integration');
+const userQueries = require('database/queries/user');
 const _ = require('lodash');
 
 const CHANNEL_PREFIX = 'ch';
@@ -274,7 +274,7 @@ exports.getAgent = async (configuration, data) => {
   return {
     id: data.user_id,
     name: result.user.profile.real_name,
-    photo: result.user.profile.image_192,
+    photo_url: result.user.profile.image_192,
   };
 };
 
@@ -298,7 +298,7 @@ exports.postMessage = async (configuration, user, chatMessage) => {
     channel: userChannel.id,
     username: user.getFullName(),
     as_user: false,
-    icon_url: user.photo,
+    icon_url: user.avatar_url,
   });
 };
 
@@ -381,7 +381,7 @@ exports.confirmMessage = async (configuration, data, user, chatMessage) => {
     channel: data.channel_id,
     username: `${chatMessage.agent.name} para ${user.getFullName()}`,
     as_user: false,
-    icon_url: chatMessage.agent.photo,
+    icon_url: chatMessage.agent.photo_url,
   });
 };
 

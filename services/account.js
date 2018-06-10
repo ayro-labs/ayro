@@ -1,13 +1,14 @@
 'use strict';
 
-const {Account} = require('models');
 const hash = require('utils/hash');
 const files = require('utils/files');
 const errors = require('utils/errors');
-const accountQueries = require('utils/queries/account');
+const accountQueries = require('database/queries/account');
+const {Account} = require('models');
 const _ = require('lodash');
 
 const ALLOWED_ATTRS = ['name', 'email'];
+const DEFAULT_LOGO_URL = 'https://cdn.ayro.io/images/account_default_logo.png';
 
 exports.getAccount = async (id) => {
   return accountQueries.getAccount(id);
@@ -22,6 +23,7 @@ exports.createAccount = async (name, email, password) => {
   const account = new Account({
     name,
     email,
+    logo_url: DEFAULT_LOGO_URL,
     password: passHash,
     registration_date: new Date(),
   });
@@ -39,8 +41,8 @@ exports.updateAccount = async (account, data) => {
 exports.updateLogo = async (account, logoFile) => {
   const loadedAccount = await accountQueries.getAccount(account.id);
   const logo = await files.uploadAccountLogo(loadedAccount, logoFile.path);
-  await loadedAccount.update({logo: logo.url}, {runValidators: true});
-  loadedAccount.logo = logo.url;
+  await loadedAccount.update({logo_url: logo.url}, {runValidators: true});
+  loadedAccount.logo_url = logo.url;
   return loadedAccount;
 };
 
