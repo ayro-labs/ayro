@@ -25,6 +25,11 @@ exports.mediaCDNUrl = 'https://media.ayro.io';
 
 exports.webcmUrl = config.get('webcm.url', this.env === constants.environments.PRODUCTION ? 'https://webcm.ayro.io:3100' : 'http://localhost:3100');
 
+exports.aws = {
+  keyId: config.get('aws.keyId'),
+  secret: config.get('aws.secret'),
+}
+
 exports.session = {
   prefix: 'session:',
   keyId: config.get('session.keyId'),
@@ -67,6 +72,16 @@ mkdirp.sync(this.publicPath);
 mkdirp.sync(this.uploadsPath);
 mkdirp.sync(this.mediaPath);
 
+if (this.env === constants.environments.PRODUCTION) {
+  if (!this.aws.keyId) {
+    throw new Error('Property aws.keyId is required');
+  }
+  if (!this.aws.secret) {
+    throw new Error('Property aws.secret is required');
+  }
+  process.env.AWS_ACCESS_KEY_ID = this.aws.keyId;
+  process.env.AWS_SECRET_ACCESS_KEY = this.aws.secret;
+}
 if (!this.session.keyId) {
   throw new Error('Property session.keyId is required');
 }
