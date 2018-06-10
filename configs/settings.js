@@ -25,11 +25,6 @@ exports.mediaCDNUrl = 'https://media.ayro.io';
 
 exports.webcmUrl = config.get('webcm.url', this.env === constants.environments.PRODUCTION ? 'https://webcm.ayro.io:3100' : 'http://localhost:3100');
 
-exports.aws = {
-  keyId: config.get('aws.keyId'),
-  secret: config.get('aws.secret'),
-}
-
 exports.session = {
   prefix: 'session:',
   keyId: config.get('session.keyId'),
@@ -50,6 +45,11 @@ exports.redis = {
   host: config.get('redis.host', 'localhost'),
   port: config.get('redis.port', 6379),
   password: config.get('redis.password'),
+};
+
+exports.aws = {
+  keyId: config.get('aws.keyId'),
+  secret: config.get('aws.secret'),
 };
 
 exports.facebook = {
