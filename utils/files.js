@@ -49,7 +49,7 @@ async function uploadMedia(sourcePath, file, options) {
     const sourceDir = path.dirname(sourcePath);
     const sourceFileName = path.basename(sourcePath);
     const finalPath = path.join(sourceDir, `${sourceFileName}_${Date.now()}`);
-    if (isImage(file)) {
+    if (await isImage(file)) {
       await processImage(sourcePath, finalPath, options);
     }
     await s3.putObject({
@@ -64,20 +64,16 @@ async function uploadMedia(sourcePath, file, options) {
   } else {
     const finalDir = path.join(settings.mediaPath, file.relativeDir);
     const finalPath = path.join(settings.mediaPath, relativePath);
-    if (isImage(file)) {
+    if (await isImage(file)) {
       await mkdirp.mkdirpAsync(finalDir);
       await processImage(sourcePath, finalPath, options);
+      await fs.unlinkAsync(sourcePath);
     } else {
       await fs.renameAsync(sourcePath, finalPath);
     }
     fileUrl = `${settings.mediaUrl}/${relativePath}`;
-    await fs.unlinkAsync(sourcePath);
   }
-  return {
-    url: fileUrl,
-    name: file.name,
-    mimeType: file.mimeType,
-  };
+  return fileUrl;
 }
 
 exports.uploadUserAvatar = async (user, photoUrl) => {

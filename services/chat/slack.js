@@ -158,19 +158,23 @@ function getDeviceInfoAttachments(user) {
 
 async function postUserIntro(slackApi, user, chatMessage, supportChannel, userChannel) {
   const intro = `*${user.getFullName()}* quer conversar com o seu time no canal <#${userChannel.id}|${userChannel.name}>`;
+  let attachments = [];
+  if (chatMessage.text) {
+    attachments.push({
+      text: chatMessage.text,
+      fallback: getFallbackText(chatMessage.text),
+      color: PRIMARY_COLOR,
+    });
+  }
   await slackApi.chat.postMessage({
+    attachments,
     text: intro,
     channel: supportChannel.id,
     username: AYRO_BOT_USERNAME,
     as_user: false,
-    attachments: [{
-      text: chatMessage.text,
-      fallback: getFallbackText(chatMessage.text),
-      color: PRIMARY_COLOR,
-    }],
   });
   const text = `Este é o canal exclusivo para conversar com *${user.getFullName()}*.`;
-  const attachments = [
+  attachments = [
     ...randomNameWarningAttachments(user),
     ...getCommandsInfoAttachments(true),
     ...getUserInfoAttachments(user),
@@ -302,6 +306,28 @@ exports.postMessage = async (configuration, user, chatMessage) => {
   });
 };
 
+exports.postFile = async (configuration, user, chatMessage) => {
+  const slackApi = apis.slack(configuration);
+  const supportChannel = configuration.channel;
+  const userChannel = await getChannel(slackApi, user) || await createChannelIntroducingUser(slackApi, user, chatMessage, supportChannel);
+  if (userChannel.archived) {
+    await unarchiveChannelIntroducingUser(slackApi, user, chatMessage, supportChannel, userChannel);
+  }
+  await slackApi.chat.postMessage({
+    attachments: [{
+      fallback: chatMessage.media.name,
+      title: chatMessage.media.name,
+      title_link: chatMessage.media.url,
+      image_url: chatMessage.media.url,
+      color: PRIMARY_COLOR,
+    }],
+    channel: userChannel.id,
+    username: user.getFullName(),
+    as_user: false,
+    icon_url: user.avatar_url,
+  });
+};
+
 exports.postEmailConnected = async (configuration, user, email) => {
   const text = `Este usuário gostaria de ser contactado através do email ${email}, caso não receba uma resposta imediata da sua equipe. Por favor utilize o comando */send* para respondê-lo.`;
   const slackApi = apis.slack(configuration);
@@ -330,11 +356,11 @@ exports.postHelp = async (configuration, data) => {
   const slackApi = apis.slack(configuration);
   await slackApi.chat.postEphemeral({
     text,
+    attachments: getCommandsInfoAttachments(false),
     channel: data.channel_id,
     user: data.user_id,
     username: AYRO_BOT_USERNAME,
     as_user: false,
-    attachments: getCommandsInfoAttachments(false),
   });
 };
 

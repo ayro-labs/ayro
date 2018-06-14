@@ -59,9 +59,9 @@ exports.updateApp = async (app, data) => {
 
 exports.updateIcon = async (app, iconFile) => {
   const loadedApp = await appQueries.getApp(app.id);
-  const icon = await files.uploadAppIcon(loadedApp, iconFile.path);
-  await loadedApp.update({icon_url: icon.url}, {runValidators: true});
-  loadedApp.icon_url = icon.url;
+  const iconUrl = await files.uploadAppIcon(loadedApp, iconFile.path);
+  await loadedApp.update({icon_url: iconUrl}, {runValidators: true});
+  loadedApp.icon_url = iconUrl;
   return loadedApp;
 };
 

@@ -34,8 +34,10 @@ const Location = new Schema({
 }, {_id: false});
 
 const Media = new Schema({
+  name: {type: String, required: true},
+  type: {type: String, required: true},
+  size: {type: Number, required: true},
   url: {type: String, required: true},
-  type: {type: String},
 }, {_id: false});
 
 const ChatMessage = new Schema({

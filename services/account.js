@@ -40,9 +40,9 @@ exports.updateAccount = async (account, data) => {
 
 exports.updateLogo = async (account, logoFile) => {
   const loadedAccount = await accountQueries.getAccount(account.id);
-  const logo = await files.uploadAccountLogo(loadedAccount, logoFile.path);
-  await loadedAccount.update({logo_url: logo.url}, {runValidators: true});
-  loadedAccount.logo_url = logo.url;
+  const logoUrl = await files.uploadAccountLogo(loadedAccount, logoFile.path);
+  await loadedAccount.update({logo_url: logoUrl}, {runValidators: true});
+  loadedAccount.logo_url = logoUrl;
   return loadedAccount;
 };
 

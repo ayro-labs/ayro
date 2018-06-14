@@ -11,6 +11,8 @@ const {App, ChatMessage} = require('models');
 const Promise = require('bluebird');
 const _ = require('lodash');
 
+const MAX_FILE_SIZE = 5 * 1000 * 1000;
+
 function getBusinessChat(channel) {
   switch (channel) {
     case constants.integration.channels.SLACK:
@@ -68,7 +70,21 @@ exports.postMessage = async (user, channel, message) => {
   _.each(integrations, (integration) => {
     const businessChat = getBusinessChat(integration.channel);
     if (businessChat) {
-      promises.push(businessChat.postMessage(integration.configuration, loadedUser, chatMessage));
+      let promise = null;
+      switch (chatMessage.type) {
+        case constants.chatMessage.types.TEXT:
+          promise = businessChat.postMessage(integration.configuration, loadedUser, chatMessage);
+          break;
+        case constants.chatMessage.types.FILE:
+          promise = businessChat.postFile(integration.configuration, loadedUser, chatMessage);
+          break;
+        default:
+          // Nothing to do...
+          break;
+      }
+      if (promise) {
+        promises.push(promise);
+      }
     }
   });
   await Promise.all(promises);
@@ -76,18 +92,18 @@ exports.postMessage = async (user, channel, message) => {
 };
 
 exports.postFile = async (user, channel, file) => {
-  const uploadedFile = await files.uploadUserFile(user, file);
+  if (file.size > MAX_FILE_SIZE) {
+    throw errors.ayroError('file_size_limit_exceeded', 'File size limit exceeded');
+  }
+  const fileUrl = await files.uploadUserFile(user, file);
   return this.postMessage(user, channel, {
     type: constants.chatMessage.types.FILE,
-    media: {url: uploadedFile.url, type: uploadedFile.mimeType},
-  });
-};
-
-exports.postImage = async (user, channel, image) => {
-  const uploadedImage = await files.uploadUserFile(user, image);
-  return this.postMessage(user, channel, {
-    type: constants.chatMessage.types.IMAGE,
-    media: {url: uploadedImage.url, type: uploadedImage.mimeType},
+    media: {
+      name: file.name,
+      type: file.mimeType,
+      size: file.size,
+      url: fileUrl,
+    },
   });
 };
 

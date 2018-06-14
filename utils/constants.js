@@ -55,7 +55,6 @@ module.exports = Object.freeze({
   chatMessage: Object.freeze({
     types: Object.freeze({
       TEXT: 'text',
-      IMAGE: 'image',
       FILE: 'file',
       CONNECT_CHANNELS: 'connect_channels',
     }),

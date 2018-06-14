@@ -41,6 +41,7 @@ async function postFile(req, res) {
       path: file.path,
       name: file.originalname,
       mimeType: file.mimetype,
+      size: file.size,
     });
     // Asynchronously because it can take a long time
     (async () => {
