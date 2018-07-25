@@ -22,7 +22,7 @@
     "release-n-publish": "0.0.6"
   },
   "dependencies": {
-    "@ayro/commons": "0.0.29",
+    "@ayro/commons": "0.0.30",
     "@slack/client": "4.3.1",
     "app-module-path": "2.2.0",
     "aws-sdk": "2.254.1",
