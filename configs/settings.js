@@ -63,9 +63,9 @@ exports.messenger = {
 };
 
 exports.slack = {
-  clientId: '277516112707.277074206417',
-  clientSecret: '62026310b3b8841342854eb14f65ae70',
-  verificationToken: 'BVUOTnQlEn5vBZQG6AaACegL',
+  clientId: '277516112707.402709234464',
+  clientSecret: 'af45a55b278fd6fdf58f68d60d076125',
+  verificationToken: 'iwJhfSuiChENyYaiJY2LDDTs',
 };
 
 mkdirp.sync(this.publicPath);
