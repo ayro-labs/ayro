@@ -19,6 +19,9 @@ exports.createAccount = async (name, email, password) => {
   if (accountWithEmail) {
     throw errors.ayroError('account_already_exists', 'Account already exists');
   }
+  if (password.length < 4) {
+    throw errors.ayroError('invalid_password', 'Invalid password');
+  }
   const passHash = await hash.hash(password);
   const account = new Account({
     name,
